@@ -28,10 +28,16 @@ async def cmd_mp3(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     url = next((arg for arg in args if is_youtube_url(arg)), None)
     
     if not url:
-        await update.message.reply_text("Please provide a valid YouTube link. Example:\n/mp3 https://youtube.com/watch?v=...")
+        context.user_data["waiting_for_mp3_link"] = True
+        await update.message.reply_text("Please paste your YouTube link below:")
         return
 
+    await process_mp3_download(update, context, url)
+
+
+async def process_mp3_download(update: Update, context: ContextTypes.DEFAULT_TYPE, url: str) -> None:
     chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
     work_dir = Path(config.DOWNLOAD_DIR) / "mp3" / f"{chat_id}_{user_id}_{uuid.uuid4().hex[:10]}"
     work_dir.mkdir(parents=True, exist_ok=True)
     

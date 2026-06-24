@@ -1,8 +1,8 @@
 FROM python:3.11-slim
 
-# Install ffmpeg, Khmer fonts, SSL certs, and build tools (gcc needed for kfa/ctc-forced-aligner).
+# Install ffmpeg, Khmer fonts, SSL certs, and build tools.
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg git fontconfig fonts-noto-core build-essential ca-certificates && \
+    apt-get install -y --no-install-recommends ffmpeg git fontconfig fonts-noto-core ca-certificates && \
     update-ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
@@ -11,8 +11,8 @@ WORKDIR /app
 
 # Copy requirements first for better Docker cache
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
 # Copy project files
 COPY . .

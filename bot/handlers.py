@@ -7,6 +7,7 @@ import html
 import asyncio
 import os
 import json
+import re
 from pathlib import Path
 from telegram import Update
 from telegram.ext import (
@@ -99,13 +100,12 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(welcome, parse_mode=ParseMode.HTML)
     await update.message.reply_text(
-        "<b>SRT subtitles:</b>\n"
-        "/srt - Generate song.srt and song.lrc from a YouTube song link and Khmer lyrics.\n"
-        "/srt 00:10 - Force the first lyric to start at 10 seconds.\n"
-        "/srt video - Also create an MP4 lyric video with a background image.\n"
-        "/cancel - Cancel the current /srt flow.\n\n"
-        "<b>MP3 Download:</b>\n"
-        "/mp3 - Download a high-quality MP3 from a YouTube link.\n\n"
+        "<b>Manual Tools:</b>\n"
+        "/manual - Generate an SRT and LRC directly from your timed text.\n"
+        "\n"
+        "<b>MP3 Audio:</b>\n"
+        "/mp3 [youtube_url] - Download high-quality MP3 from YouTube.\n"
+        "\n"
         "Only process songs you own or have permission to use.",
         parse_mode=ParseMode.HTML,
     )
@@ -142,15 +142,13 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(help_text, parse_mode=ParseMode.HTML)
     await update.message.reply_text(
-        "<b>SRT workflow</b>\n"
-        "1. Send /srt\n"
-        "   Or send /srt 00:10 when the first sung lyric starts at 10 seconds.\n"
-        "2. Send a YouTube song link\n"
-        "3. Send Khmer lyrics text, one subtitle line per line\n"
-        "4. The bot returns song.srt and song.lrc\n\n"
-        "Use /srt video if you also want an MP4 lyric video with a background image.\n\n"
-        "<b>MP3 Download</b>\n"
-        "Send /mp3 [youtube link] to instantly download the song as a high-quality MP3 file.",
+        "<b>Manual Tools:</b>\n"
+        "/manual - Generate an SRT and LRC directly from your timed text.\n"
+        "\n"
+        "<b>MP3 Audio:</b>\n"
+        "/mp3 [youtube_url] - Download high-quality MP3 from YouTube.\n"
+        "\n"
+        "Only process songs you own or have permission to use.",
         parse_mode=ParseMode.HTML,
     )
 
@@ -231,7 +229,30 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await _handle_tiktok_oauth_redirect(update, context, text)
             return
 
+    # Check for MP3 download state
+    if context.user_data.get("waiting_for_mp3_link"):
+        from bot.mp3_handlers import process_mp3_download
+        from lyrics_srt.youtube_audio import is_youtube_url
+        if is_youtube_url(text):
+            context.user_data["waiting_for_mp3_link"] = False
+            await process_mp3_download(update, context, text)
+            return
+        else:
+            await update.message.reply_text("That doesn't look like a valid YouTube link. Please try again or type /cancel.")
+            return
+
     # Extract supported links from the message
+    urls = re.findall(r"https?://[^\s]+", text)
+    
+    # Check for YouTube links first
+    from lyrics_srt.youtube_audio import is_youtube_url
+    youtube_urls = [u for u in urls if is_youtube_url(u)]
+    if youtube_urls:
+        from bot.mp3_handlers import process_mp3_download
+        context.user_data["waiting_for_mp3_link"] = False
+        await process_mp3_download(update, context, youtube_urls[0])
+        return
+
     links = extract_links(text)
 
     if not links:
