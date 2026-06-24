@@ -1,0 +1,43 @@
+# Environment
+.env
+*.env
+
+# OAuth credentials (NEVER commit these)
+client_secrets.json
+client_secret_*.json
+token.json
+credentials/
+
+# Databases/State
+uploaded_videos.json
+
+# Downloads
+downloads/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

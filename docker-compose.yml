@@ -1,0 +1,17 @@
+services:
+  auto-post-bot:
+    build: .
+    container_name: auto-post-bot
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./downloads:/app/downloads
+      - ./credentials:/app/credentials
+      - ./uploaded_videos.json:/app/uploaded_videos.json
+    env_file:
+      - .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
