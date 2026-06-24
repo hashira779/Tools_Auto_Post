@@ -25,7 +25,11 @@ def parse_time_to_seconds(value: str) -> float | None:
             if len(parts) == 2:
                 return max(0.0, float(parts[0]) * 60 + float(parts[1]))
             
-        if ":" not in value:
+        if ":" not in value and "." not in value:
+            if len(value) >= 3:
+                s = float(value[-2:])
+                m = float(value[:-2])
+                return m * 60 + s
             return max(0.0, float(value))
             
         parts = [float(part) for part in value.split(":")]
@@ -42,10 +46,10 @@ def extract_inline_timestamps(lyric_lines: list[str]) -> tuple[list[str], dict[i
     clean_lines = []
     forced_times = {}
     
-    # Matches patterns like 0:10, 0:10-0:13, 0.13, 1.02, [00:10.00] at the end of the line
+    # Matches patterns like 0:10, 0:10-0:13, 0.13, 1.02, 1.0, 051 at the end of the line
     pattern = re.compile(
-        r'(?:\[)?\b(\d{1,2}[:.]\d{2}(?::\d{2})?(?:\.\d+)?)(?:\])?'
-        r'(?:\s*-\s*(?:\[)?\b(\d{1,2}[:.]\d{2}(?::\d{2})?(?:\.\d+)?)(?:\])?)?\s*$'
+        r'(?:\[)?(\d{1,2}[:.]\d{1,2}(?::\d{2})?(?:\.\d+)?|\d{3,4})(?:\])?'
+        r'(?:\s*-\s*(?:\[)?(\d{1,2}[:.]\d{1,2}(?::\d{2})?(?:\.\d+)?|\d{3,4})(?:\])?)?\s*$'
     )
     
     for idx, line in enumerate(lyric_lines):
