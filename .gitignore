@@ -1,6 +1,12 @@
 # Environment
 .env
 *.env
+cookies.txt
+
+# Deploy scripts (contain server credentials)
+update.py
+deploy.py
+deploy_docker.bat
 
 # OAuth credentials (NEVER commit these)
 client_secrets.json
