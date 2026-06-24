@@ -30,12 +30,14 @@ from lyrics_srt.errors import (
     SrtBotError,
     SrtGenerationFailed,
 )
-from lyrics_srt.exporters import save_lyrics_text, write_lrc, write_srt
+from lyrics_srt.exporters import save_lyrics_text, write_lrc, write_srt, TimedLyricLine
 from lyrics_srt.forced_alignment import align_lyrics_with_ctc
 from lyrics_srt.timing import (
     detect_audio_segments,
     match_lyrics_to_timestamps,
     split_lyrics,
+    extract_inline_timestamps,
+    enforce_monotonic_timing,
 )
 from lyrics_srt.video import create_lyric_video
 from lyrics_srt.youtube_audio import download_youtube_audio, is_youtube_url
@@ -47,6 +49,7 @@ logger = get_logger("bot.srt_handlers")
 FLOW_KEY = "srt_flow"
 MODE_SRT = "srt"
 MODE_VIDEO = "video"
+MODE_MANUAL = "manual"
 STEP_AWAIT_URL = "await_url"
 STEP_AWAIT_LYRICS = "await_lyrics"
 STEP_AWAIT_IMAGE = "await_image"
@@ -67,6 +70,7 @@ def setup_srt_handlers(
 
     application.add_handler(CommandHandler("srt", cmd_srt))
     application.add_handler(CommandHandler("srtmp4", cmd_srt_video))
+    application.add_handler(CommandHandler("manual", cmd_manual))
     application.add_handler(CommandHandler("cancel", cmd_cancel))
 
     application.add_handler(
@@ -100,6 +104,41 @@ async def cmd_srt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         mode=mode,
         initial_url=_find_url(args),
         forced_start_seconds=start_seconds,
+    )
+
+
+async def cmd_manual(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Start instant manual SRT generation without YouTube."""
+    if not await _check_authorized(update):
+        return
+
+    old_flow = context.user_data.pop(FLOW_KEY, None)
+    if old_flow and old_flow.get("work_dir") and not old_flow.get("task"):
+        shutil.rmtree(old_flow["work_dir"], ignore_errors=True)
+
+    work_dir = _make_work_dir(
+        chat_id=update.effective_chat.id,
+        user_id=update.effective_user.id,
+    )
+    work_dir.mkdir(parents=True, exist_ok=True)
+
+    flow = {
+        "mode": MODE_MANUAL,
+        "step": STEP_AWAIT_LYRICS,
+        "chat_id": update.effective_chat.id,
+        "user_id": update.effective_user.id,
+        "work_dir": str(work_dir),
+    }
+    context.user_data[FLOW_KEY] = flow
+
+    await update.message.reply_text(
+        "⚡ *Instant Manual Mode*\n\n"
+        "Send your lyrics with manual timestamps on every line.\n"
+        "Example:\n"
+        "Line one 0:10 - 0:13\n"
+        "Line two 0:14\n\n"
+        "Use /cancel to stop.",
+        parse_mode=ParseMode.MARKDOWN
     )
 
 
@@ -224,7 +263,6 @@ async def _start_flow(
     await update.message.reply_text(
         f"{mode_hint}\n\n"
         "Send a YouTube song link.\n\n"
-        "Tip: use /srt 00:10 if the first sung lyric starts at 10 seconds.\n\n"
         "Only process songs you own or have permission to use.\n"
         "Use /cancel to stop."
     )
@@ -289,6 +327,10 @@ async def _receive_lyrics(
         )
         return
 
+    if flow.get("mode") == MODE_MANUAL:
+        await _run_manual_srt(update, context, flow, text)
+        return
+
     await _queue_job(update, context, flow)
 
 
@@ -341,11 +383,18 @@ async def _run_srt_job(
             await bot.edit_message_text("Processing audio", **status_kwargs)
             lyrics = Path(flow["lyrics_path"]).read_text(encoding="utf-8")
             lyric_lines = split_lyrics(lyrics)
+            
+            clean_lines, forced_times = extract_inline_timestamps(lyric_lines)
+            forced_start = flow.get("forced_start_seconds")
+            if forced_start is None and 0 in forced_times:
+                forced_start = forced_times[0][0]
+                
             timed_lines = await _build_timed_lyrics(
                 audio_path=audio.audio_path,
                 audio_duration=audio.duration,
-                lyric_lines=lyric_lines,
-                forced_start_seconds=flow.get("forced_start_seconds"),
+                lyric_lines=clean_lines,
+                forced_start_seconds=forced_start,
+                forced_times=forced_times,
                 status_callback=lambda message: bot.edit_message_text(message, **status_kwargs),
             )
 
@@ -402,11 +451,56 @@ async def _run_srt_job(
         shutil.rmtree(work_dir, ignore_errors=True)
 
 
+async def _run_manual_srt(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    flow: dict,
+    text: str,
+) -> None:
+    work_dir = Path(flow["work_dir"])
+    chat_id = flow["chat_id"]
+    bot = context.bot
+    
+    try:
+        lyric_lines = split_lyrics(text)
+        clean_lines, forced_times = extract_inline_timestamps(lyric_lines)
+        
+        timed_lines = []
+        for idx, line in enumerate(clean_lines):
+            start = forced_times.get(idx, (0.0, None))[0]
+            end = forced_times.get(idx, (0.0, None))[1]
+            if end is None:
+                end = start + 2.0
+            
+            timed_lines.append(TimedLyricLine(index=idx + 1, start=start, end=end, text=line))
+            
+        timed_lines = enforce_monotonic_timing(timed_lines, forced_times)
+        
+        srt_path = work_dir / "song.srt"
+        lrc_path = work_dir / "song.lrc"
+        write_srt(timed_lines, srt_path)
+        write_lrc(timed_lines, lrc_path)
+
+        await _send_output_file(bot, chat_id, srt_path, "song.srt")
+        await _send_output_file(bot, chat_id, lrc_path, "song.lrc")
+        await update.message.reply_text("⚡ Done!")
+        
+    except Exception as exc:
+        logger.error("Manual SRT failed: %s", exc, exc_info=True)
+        await update.message.reply_text("Failed to generate manual SRT. Make sure your timestamps are formatted like 0:10.")
+    finally:
+        active_flow = context.user_data.get(FLOW_KEY)
+        if active_flow is flow:
+            context.user_data.pop(FLOW_KEY, None)
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+
 async def _build_timed_lyrics(
     audio_path: Path,
     audio_duration: float,
     lyric_lines: list[str],
     forced_start_seconds: float | None,
+    forced_times: dict[int, tuple[float, float | None]],
     status_callback,
 ) -> list:
     engine = config.SRT_ALIGNMENT_ENGINE
@@ -429,10 +523,11 @@ async def _build_timed_lyrics(
             alignment_audio = audio_path
 
     # --- Step 2: Forced alignment ---
+    timed_lines = None
     if engine in {"auto", "ctc"}:
         try:
             await status_callback("Matching lyrics")
-            return await align_lyrics_with_ctc(
+            timed_lines = await align_lyrics_with_ctc(
                 audio_path=alignment_audio,
                 lyric_lines=lyric_lines,
                 language=config.SRT_CTC_LANGUAGE,
@@ -444,24 +539,28 @@ async def _build_timed_lyrics(
             logger.warning("CTC forced alignment failed; falling back to Whisper timing: %s", exc)
 
     # --- Step 3: Whisper fallback ---
-    await status_callback("Processing audio")
-    segments = await detect_audio_segments(
-        audio_path=alignment_audio,
-        model_name=config.SRT_WHISPER_MODEL,
-        language=config.SRT_WHISPER_LANGUAGE,
-    )
-    await status_callback("Matching lyrics")
-    return match_lyrics_to_timestamps(
-        lyric_lines=lyric_lines,
-        detected_segments=segments,
-        audio_duration=audio_duration,
-        fallback_start_seconds=(
-            forced_start_seconds
-            if forced_start_seconds is not None
-            else config.SRT_FALLBACK_START_SECONDS
-        ),
-        late_start_threshold_seconds=config.SRT_LATE_WHISPER_START_SECONDS,
-    )
+    if not timed_lines:
+        await status_callback("Processing audio")
+        segments = await detect_audio_segments(
+            audio_path=alignment_audio,
+            model_name=config.SRT_WHISPER_MODEL,
+            language=config.SRT_WHISPER_LANGUAGE,
+        )
+        await status_callback("Matching lyrics")
+        timed_lines = match_lyrics_to_timestamps(
+            lyric_lines=lyric_lines,
+            detected_segments=segments,
+            audio_duration=audio_duration,
+            fallback_start_seconds=(
+                forced_start_seconds
+                if forced_start_seconds is not None
+                else config.SRT_FALLBACK_START_SECONDS
+            ),
+            late_start_threshold_seconds=config.SRT_LATE_WHISPER_START_SECONDS,
+        )
+
+    # --- Step 4: Apply forced times and enforce monotonicity ---
+    return enforce_monotonic_timing(timed_lines, forced_times)
 
 
 async def _send_output_file(bot, chat_id: int, path: Path, filename: str) -> None:

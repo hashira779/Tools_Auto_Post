@@ -48,6 +48,7 @@ async def download_youtube_audio(
     url: str,
     work_dir: Path,
     max_duration_seconds: int,
+    quality: str = "192",
 ) -> AudioDownloadResult:
     """Download a YouTube URL to `audio.mp3` in a worker thread."""
 
@@ -58,6 +59,7 @@ async def download_youtube_audio(
         url,
         work_dir,
         max_duration_seconds,
+        quality,
     )
 
 
@@ -65,6 +67,7 @@ def _download_youtube_audio_sync(
     url: str,
     work_dir: Path,
     max_duration_seconds: int,
+    quality: str = "192",
 ) -> AudioDownloadResult:
     if not is_youtube_url(url):
         raise InvalidYouTubeLink()
@@ -104,7 +107,7 @@ def _download_youtube_audio_sync(
             {
                 "key": "FFmpegExtractAudio",
                 "preferredcodec": "mp3",
-                "preferredquality": "192",
+                "preferredquality": quality,
             }
         ],
     }

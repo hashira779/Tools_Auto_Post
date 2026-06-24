@@ -37,6 +37,7 @@ from bot.keyboards import (
     video_link_keyboard,
 )
 from bot.srt_handlers import setup_srt_handlers
+from bot.mp3_handlers import setup_mp3_handlers
 
 logger = get_logger("bot.handlers")
 
@@ -103,6 +104,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/srt 00:10 - Force the first lyric to start at 10 seconds.\n"
         "/srt video - Also create an MP4 lyric video with a background image.\n"
         "/cancel - Cancel the current /srt flow.\n\n"
+        "<b>MP3 Download:</b>\n"
+        "/mp3 - Download a high-quality MP3 from a YouTube link.\n\n"
         "Only process songs you own or have permission to use.",
         parse_mode=ParseMode.HTML,
     )
@@ -145,7 +148,9 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "2. Send a YouTube song link\n"
         "3. Send Khmer lyrics text, one subtitle line per line\n"
         "4. The bot returns song.srt and song.lrc\n\n"
-        "Use /srt video if you also want an MP4 lyric video with a background image.",
+        "Use /srt video if you also want an MP4 lyric video with a background image.\n\n"
+        "<b>MP3 Download</b>\n"
+        "Send /mp3 [youtube link] to instantly download the song as a high-quality MP3 file.",
         parse_mode=ParseMode.HTML,
     )
 
@@ -812,6 +817,7 @@ def setup_handlers(
     load_processed_urls()
 
     setup_srt_handlers(application, _is_authorized)
+    setup_mp3_handlers(application)
 
     # Command handlers
     application.add_handler(CommandHandler("start", cmd_start))
