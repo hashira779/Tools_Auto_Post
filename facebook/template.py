@@ -46,14 +46,35 @@ def apply_watermark(
         elif watermark_text:
             return _apply_text_watermark(input_path, output_path, watermark_text, position, opacity)
         else:
-            logger.warning("No watermark specified, copying input to output unchanged")
-            # Just copy the file
-            import shutil
-            shutil.copy2(input_path, output_path)
-            return True
+            return _ensure_high_quality(input_path, output_path)
 
     except Exception as e:
-        logger.exception(f"Failed to apply watermark: {e}")
+        logger.exception(f"Failed to apply watermark or process video: {e}")
+        return False
+
+def _ensure_high_quality(input_path: str, output_path: str) -> bool:
+    """Ensure video is at least 720p and high quality H.264."""
+    logger.info(f"🎨 Processing video quality (minimum 720p): {input_path}")
+    
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", input_path,
+        "-vf", "scale=-2:'max(ih,720)'",
+        "-c:a", "copy",
+        "-c:v", "libx264",
+        "-preset", "fast",
+        "-crf", "18",
+        output_path,
+    ]
+
+    logger.debug(f"FFmpeg command: {' '.join(cmd)}")
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+
+    if result.returncode == 0:
+        logger.info(f"✅ Video processed successfully: {output_path}")
+        return True
+    else:
+        logger.error(f"❌ FFmpeg error: {result.stderr[-500:]}")
         return False
 
 
@@ -83,13 +104,15 @@ def _apply_image_watermark(
     pos = _get_position_overlay(position)
 
     # Build FFmpeg filter:
-    # 1. Scale watermark relative to video width
-    # 2. Set opacity
-    # 3. Overlay at specified position
+    # 1. Scale video to minimum 720p
+    # 2. Scale watermark relative to video width
+    # 3. Set opacity
+    # 4. Overlay at specified position
     filter_complex = (
+        f"[0:v]scale=-2:'max(ih,720)'[scaled_vid];"
         f"[1:v]scale=iw*{scale}:-1,format=rgba,"
         f"colorchannelmixer=aa={opacity}[watermark];"
-        f"[0:v][watermark]overlay={pos}"
+        f"[scaled_vid][watermark]overlay={pos}"
     )
 
     cmd = [
@@ -100,7 +123,7 @@ def _apply_image_watermark(
         "-c:a", "copy",
         "-c:v", "libx264",
         "-preset", "fast",
-        "-crf", "23",
+        "-crf", "18",  # High quality visually lossless
         output_path,
     ]
 
@@ -139,6 +162,7 @@ def _apply_text_watermark(
     escaped_text = text.replace("'", "'\\''").replace(":", "\\:")
 
     filter_str = (
+        f"scale=-2:'max(ih,720)',"
         f"drawtext=text='{escaped_text}':"
         f"fontsize=36:fontcolor=white@{opacity}:"
         f"borderw=2:bordercolor=black@{opacity * 0.5}:"
@@ -152,7 +176,7 @@ def _apply_text_watermark(
         "-c:a", "copy",
         "-c:v", "libx264",
         "-preset", "fast",
-        "-crf", "23",
+        "-crf", "18",  # High quality visually lossless
         output_path,
     ]
 
@@ -164,4 +188,35 @@ def _apply_text_watermark(
         return True
     else:
         logger.error(f"❌ FFmpeg error: {result.stderr[-500:]}")
+        return False
+
+def replace_audio(
+    video_path: str,
+    audio_path: str,
+    output_path: str,
+) -> bool:
+    """Replace a video's audio with a new audio file using FFmpeg."""
+    logger.info(f"🎵 Replacing audio in {video_path} with {audio_path}")
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", video_path,
+        "-stream_loop", "-1",
+        "-i", audio_path,
+        "-c:v", "copy",
+        "-c:a", "aac",
+        "-map", "0:v:0",
+        "-map", "1:a:0",
+        "-shortest",
+        output_path,
+    ]
+
+    logger.debug(f"FFmpeg command: {' '.join(cmd)}")
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+
+    if result.returncode == 0:
+        logger.info(f"✅ Audio replaced successfully: {output_path}")
+        return True
+    else:
+        logger.error(f"❌ FFmpeg error replacing audio: {result.stderr[-500:]}")
         return False

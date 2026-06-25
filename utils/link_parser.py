@@ -80,6 +80,11 @@ def detect_platform(url: str) -> Platform:
         if re.match(pattern, url_lower):
             return Platform.DOUYIN
 
+    # Check YouTube
+    for pattern in YOUTUBE_PATTERNS:
+        if re.match(pattern, url_lower):
+            return Platform.YOUTUBE
+
     # Fallback: check domain keywords
     if "tiktok.com" in url_lower:
         return Platform.TIKTOK
@@ -87,6 +92,8 @@ def detect_platform(url: str) -> Platform:
         return Platform.REDNOTE
     if "douyin.com" in url_lower:
         return Platform.DOUYIN
+    if any(domain in url_lower for domain in ["youtube.com", "youtu.be"]):
+        return Platform.YOUTUBE
 
     return Platform.UNKNOWN
 
