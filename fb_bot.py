@@ -26,6 +26,7 @@ WAITING_CAPTION = 1
 WAITING_EDIT_VIDEO = 2
 WAITING_EDIT_AUDIO = 3
 WAITING_EDIT_CAPTION = 4
+WAITING_TOKEN = 5
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -37,6 +38,7 @@ from downloader.metadata import extract_metadata
 from utils.logger import get_logger, setup_logger
 from facebook.uploader import upload_video_to_facebook, check_page_access
 from facebook.template import apply_watermark, replace_audio
+from get_permanent_token import generate_permanent_token, update_env_token
 
 logger = get_logger("fb_bot")
 
@@ -75,7 +77,8 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "<b>Commands:</b>\n"
         "/start — Welcome message\n"
         "/help — This help message\n"
-        "/fbstatus — Check Facebook Page connection\n",
+        "/fbstatus — Check Facebook Page connection\n"
+        "/updatetk — Update Facebook Page access token\n",
         parse_mode=ParseMode.HTML,
     )
 
@@ -107,9 +110,57 @@ async def cmd_fbstatus(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await status_msg.edit_text(
             "❌ <b>Facebook connection failed!</b>\n\n"
-            "Please check your FB_PAGE_ACCESS_TOKEN in .env",
+            "Please check your FB_PAGE_ACCESS_TOKEN in .env or use /updatetk to set a new one.",
             parse_mode=ParseMode.HTML,
         )
+
+async def cmd_updatetk(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Start the token update process."""
+    await update.message.reply_text(
+        "🔑 <b>Update Facebook Token</b>\n\n"
+        "Please send your <b>short-lived token</b> generated from the Facebook Graph API Explorer.\n\n"
+        "1. Go to https://developers.facebook.com/tools/explorer/\n"
+        "2. Select your app and click 'Generate Access Token'\n"
+        "3. Ensure you have pages_manage_posts, pages_read_engagement, pages_show_list permissions\n"
+        "4. Copy and paste the token here.\n\n"
+        "<i>(Type /cancel to abort)</i>",
+        parse_mode=ParseMode.HTML,
+        disable_web_page_preview=True
+    )
+    return WAITING_TOKEN
+
+async def handle_token(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Process the short-lived token and generate a permanent one."""
+    if not update.message or not update.message.text:
+        return WAITING_TOKEN
+        
+    short_token = update.message.text.strip()
+    status_msg = await update.message.reply_text("⏳ Exchanging for a permanent page token...")
+    
+    result = generate_permanent_token(short_token)
+    
+    if not result["success"]:
+        await status_msg.edit_text(
+            f"❌ <b>Token Update Failed</b>\n\n"
+            f"Error: <code>{html.escape(result.get('error', 'Unknown'))}</code>\n\n"
+            "Please check your short-lived token and try again.",
+            parse_mode=ParseMode.HTML
+        )
+        return ConversationHandler.END
+        
+    # Update env and current process env
+    update_env_token(result["token"])
+    
+    expires_text = "never expires 🎉" if result["expires"] == 0 else f"expires at {result['expires']}"
+    
+    await status_msg.edit_text(
+        f"✅ <b>Token Updated Successfully!</b>\n\n"
+        f"📘 <b>Page:</b> {html.escape(result['page_name'])}\n"
+        f"⏱️ <b>Status:</b> Token {expires_text}\n\n"
+        "The bot is now ready to upload to Facebook automatically! You don't need to restart.",
+        parse_mode=ParseMode.HTML
+    )
+    return ConversationHandler.END
 
 
 # ============================
@@ -573,13 +624,15 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_link),
-            CommandHandler("edit", cmd_edit)
+            CommandHandler("edit", cmd_edit),
+            CommandHandler("updatetk", cmd_updatetk),
         ],
         states={
             WAITING_CAPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_caption)],
             WAITING_EDIT_VIDEO: [MessageHandler(~filters.COMMAND, handle_edit_video)],
             WAITING_EDIT_AUDIO: [MessageHandler(~filters.COMMAND, handle_edit_audio)],
             WAITING_EDIT_CAPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_edit_caption)],
+            WAITING_TOKEN: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_token)],
         },
         fallbacks=[CommandHandler("cancel", cmd_cancel)],
     )
