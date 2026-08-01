@@ -10,11 +10,19 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Deploy to Ubuntu Server
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install paramiko
+
+      - name: Deploy to Server
         run: |
-          echo "Starting deployment..."
-          cd ~/CamTech
-          git fetch origin main
-          git reset --hard origin/main
+          echo "Starting deployment via update.py..."
           python scripts/update.py
           echo "Deployment complete!"
