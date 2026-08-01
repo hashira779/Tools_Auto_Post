@@ -67,8 +67,12 @@ export function useDownloader() {
         }
       )
 
-      // Trigger native browser download manager
-      window.location.assign(downloadUrl)
+      // Trigger native browser download manager safely using an anchor tag
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
 
       setDownloadSuccess(true)
       setTimeout(() => setDownloadSuccess(false), 3000)
