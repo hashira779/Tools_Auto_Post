@@ -13,16 +13,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: pip install paramiko
-
       - name: Deploy to Server
         run: |
-          echo "Starting deployment via update.py..."
-          python scripts/update.py
+          echo "Syncing files to CamTech directory..."
+          rsync -a --exclude '.git' ./ /home/ubuntu-server/CamTech/
+          
+          echo "Rebuilding and restarting Docker..."
+          cd /home/ubuntu-server/CamTech
+          echo "pTT!CT01" | sudo -S docker compose up -d --build
           echo "Deployment complete!"
