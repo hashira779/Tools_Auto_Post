@@ -81,7 +81,7 @@ async def api_download_status(task_id: str):
     if task.state == 'PENDING':
         return {"status": "PENDING"}
     elif task.state == 'PROGRESS':
-        return {"status": "PROGRESS"}
+        return {"status": "PROGRESS", "meta": task.info}
     elif task.state == 'SUCCESS':
         return {"status": "SUCCESS"}
     elif task.state == 'FAILURE':
