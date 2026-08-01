@@ -1,17 +1,138 @@
+# ══════════════════════════════════════════════════════════════════
+#  CamTech — Unified Docker Compose
+# ══════════════════════════════════════════════════════════════════
+#  All services in the monorepo. Run with:
+#    docker compose up --build
+#
+#  Or run individual services:
+#    docker compose up savemedia-frontend savemedia-api
+#    docker compose up auto-post-bot
+# ══════════════════════════════════════════════════════════════════
+
 services:
-  auto-post-bot:
-    build: .
-    container_name: auto-post-bot
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Redis (For Queue & Rate Limiting)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  redis:
+    image: redis:7-alpine
+    container_name: camtech-redis
     restart: unless-stopped
-    network_mode: "host"
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  SaveMedia Web — Video/Audio Downloader
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  savemedia-frontend:
+    build:
+      context: ./services/savemedia-web/frontend
+      dockerfile: Dockerfile
+    container_name: camtech-savemedia-frontend
+    ports:
+      - "${SAVEMEDIA_PORT:-80}:80"
+    depends_on:
+      savemedia-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  SaveMedia API (FastAPI) & Celery Worker
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  savemedia-api:
+    build:
+      context: ./services/savemedia-web/media-api
+      dockerfile: Dockerfile
+    container_name: camtech-savemedia-api
+    environment:
+      - DOWNLOAD_DIR=/tmp/savemedia_downloads
+      - COOKIES_FILE=${COOKIES_FILE:-}
+      - REDIS_URL=redis://redis:6379/0
     volumes:
-      - ./downloads:/app/downloads
-      - ./credentials:/app/credentials
-      - ./uploaded_videos.json:/app/uploaded_videos.json
+      - savemedia-downloads:/tmp/savemedia_downloads
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - camtech-net
+
+  savemedia-worker:
+    build:
+      context: ./services/savemedia-web/media-api
+      dockerfile: Dockerfile
+    container_name: camtech-savemedia-worker
+    command: celery -A app.celery_worker.celery_app worker --loglevel=info
+    environment:
+      - DOWNLOAD_DIR=/tmp/savemedia_downloads
+      - COOKIES_FILE=${COOKIES_FILE:-}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - savemedia-downloads:/tmp/savemedia_downloads
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Auto Post Bot — Telegram Bot
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  auto-post-bot:
+    build:
+      context: .
+      dockerfile: ./services/auto-post-bot/Dockerfile
+    container_name: camtech-auto-post-bot
     env_file:
       - .env
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    volumes:
+      - ./credentials:/app/credentials:ro
+      - ./cookies.txt:/app/cookies.txt:ro
+      - bot-downloads:/app/downloads
+    restart: unless-stopped
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Cloudflare Tunnel (Secure Public Access)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: camtech-tunnel
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Future Services
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # auth-api:
+  #   build:
+  #     context: ./services/auth-api
+  #   container_name: camtech-auth-api
+  #   expose:
+  #     - "8001"
+  #   networks:
+  #     - camtech-net
+
+networks:
+  camtech-net:
+    driver: bridge
+
+volumes:
+  savemedia-downloads:
+  bot-downloads:

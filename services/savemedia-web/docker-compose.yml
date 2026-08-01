@@ -1,0 +1,50 @@
+# ══════════════════════════════════════════════════════════════════
+#  SaveMedia Web — Docker Compose (standalone)
+# ══════════════════════════════════════════════════════════════════
+#  Use this to run SaveMedia independently, or use the root
+#  docker-compose.yml to run all CamTech services together.
+# ══════════════════════════════════════════════════════════════════
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: savemedia-frontend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      media-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - savemedia-net
+
+  media-api:
+    build:
+      context: ./media-api
+      dockerfile: Dockerfile
+    container_name: savemedia-media-api
+    environment:
+      - DOWNLOAD_DIR=/tmp/savemedia_downloads
+      - COOKIES_FILE=${COOKIES_FILE:-}
+    volumes:
+      - media-downloads:/tmp/savemedia_downloads
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - savemedia-net
+
+networks:
+  savemedia-net:
+    driver: bridge
+
+volumes:
+  media-downloads:

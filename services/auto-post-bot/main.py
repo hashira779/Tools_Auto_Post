@@ -13,8 +13,9 @@ from pathlib import Path
 
 from telegram.ext import ApplicationBuilder
 
-# Add project root to Python path.
+# Add project root and shared libs to Python path.
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "shared"))
 
 from bot.handlers import setup_handlers
 from config import config

@@ -8,12 +8,12 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env file from project root
+# Load .env file from project root if it exists
 _env_path = Path(__file__).parent / ".env"
 if _env_path.exists():
     load_dotenv(_env_path)
-else:
-    print("⚠️  No .env file found! Copy .env.example to .env and fill in your values.")
+elif not os.getenv("TELEGRAM_BOT_TOKEN"):
+    print("⚠️  No .env file found and TELEGRAM_BOT_TOKEN not set!")
     print(f"   Expected location: {_env_path}")
     sys.exit(1)
 
