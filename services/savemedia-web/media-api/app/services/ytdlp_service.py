@@ -119,7 +119,7 @@ def fetch_info(url: str) -> Optional[dict]:
         return ydl.extract_info(url, download=False)
 
 
-def download_file(url: str, format_type: str, quality: str) -> tuple[Optional[Path], Optional[dict]]:
+def download_file(url: str, format_type: str, quality: str, progress_hook=None) -> tuple[Optional[Path], Optional[dict]]:
     """
     Download media and return (filepath, info_dict).
     Creates a unique session directory for each download.
@@ -130,6 +130,8 @@ def download_file(url: str, format_type: str, quality: str) -> tuple[Optional[Pa
 
     opts = _base_opts()
     opts["outtmpl"] = str(session_dir / "%(id)s.%(ext)s")
+    if progress_hook:
+        opts["progress_hooks"] = [progress_hook]
 
     if format_type == "audio":
         opts["format"] = "bestaudio/best"

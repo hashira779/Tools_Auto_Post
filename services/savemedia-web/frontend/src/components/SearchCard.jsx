@@ -11,9 +11,7 @@ export default function SearchCard({ url, onUrlChange, onFetch, loading, error }
   const handlePaste = (e) => {
     const pastedText = e.clipboardData.getData('text')
     if (pastedText && pastedText.trim().startsWith('http')) {
-      // Update input text immediately and fetch
       onUrlChange(pastedText)
-      setTimeout(() => onFetch(pastedText), 50)
     }
   }
 

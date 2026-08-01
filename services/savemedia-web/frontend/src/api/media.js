@@ -45,7 +45,7 @@ export async function downloadMedia(url, formatType, quality, onProgress) {
     }
 
     if (onProgress) {
-      onProgress(statusData.status)
+      onProgress(statusData.status, statusData.meta)
     }
 
     if (statusData.status === 'SUCCESS') {

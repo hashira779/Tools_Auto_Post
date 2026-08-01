@@ -31,13 +31,19 @@ def download_media_task(self, url: str, format_type: str, quality: str):
     """
     self.update_state(state="PROGRESS", meta={"status": "Starting download..."})
     
+    def yt_progress_hook(d):
+        if d['status'] == 'downloading':
+            percent = d.get('_percent_str', '0%').strip()
+            speed = d.get('_speed_str', '0MiB/s').strip()
+            self.update_state(state="PROGRESS", meta={"status": f"Downloading {percent} ({speed})"})
+
     # We must run the async download_file inside an event loop
     loop = asyncio.get_event_loop()
     try:
         # Since download_file is a synchronous function that we usually run in a thread,
         # wait, let me check if download_file is async or sync.
         # In media.py it was called with run_in_executor, so it's a SYNC function!
-        filepath, info = download_file(url, format_type, quality)
+        filepath, info = download_file(url, format_type, quality, progress_hook=yt_progress_hook)
         
         if not filepath or not info:
             raise Exception("Download failed: No file produced")

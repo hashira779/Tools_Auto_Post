@@ -61,9 +61,9 @@ export function useDownloader() {
         url.trim(), 
         formatTab, 
         selectedQuality,
-        (status) => {
+        (status, meta) => {
           if (status === 'PENDING') setDownloadStatus('In Queue...')
-          else if (status === 'PROGRESS') setDownloadStatus('Downloading...')
+          else if (status === 'PROGRESS') setDownloadStatus(meta?.status || 'Downloading...')
         }
       )
 
