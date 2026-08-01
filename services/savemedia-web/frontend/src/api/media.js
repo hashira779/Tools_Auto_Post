@@ -56,21 +56,6 @@ export async function downloadMedia(url, formatType, quality, onProgress) {
     // else keep polling for PENDING or PROGRESS
   }
 
-  // 3. Download the actual file
-  const fileRes = await fetch(`${API_BASE}/download/file/${taskId}`)
-  if (!fileRes.ok) {
-    const errorData = await fileRes.json()
-    throw new Error(errorData.detail || 'Failed to retrieve file')
-  }
-
-  // Extract filename
-  const contentDisposition = fileRes.headers.get('content-disposition')
-  let filename = `download.${formatType === 'video' ? 'mp4' : 'mp3'}`
-  if (contentDisposition) {
-    const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?["']?([^"';\n]+)/)
-    if (match) filename = decodeURIComponent(match[1])
-  }
-
-  const blob = await fileRes.blob()
-  return { blob, filename }
+  // 3. Trigger native browser download
+  return { downloadUrl: `${API_BASE}/download/file/${taskId}` }
 }

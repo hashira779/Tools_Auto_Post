@@ -57,7 +57,7 @@ export function useDownloader() {
     setError('')
 
     try {
-      const { blob, filename } = await downloadMedia(
+      const { downloadUrl } = await downloadMedia(
         url.trim(), 
         formatTab, 
         selectedQuality,
@@ -67,15 +67,8 @@ export function useDownloader() {
         }
       )
 
-      // Trigger browser download
-      const downloadUrl = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = downloadUrl
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(downloadUrl)
+      // Trigger native browser download manager
+      window.location.assign(downloadUrl)
 
       setDownloadSuccess(true)
       setTimeout(() => setDownloadSuccess(false), 3000)
