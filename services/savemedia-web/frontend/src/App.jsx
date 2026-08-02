@@ -3,8 +3,8 @@ import { useDownloader } from './hooks/useDownloader'
 import { FORMAT_VIDEO } from './constants/platforms'
 
 import BackgroundOrbs from './components/BackgroundOrbs'
-import AppSidebar, { TOOL_DOWNLOADER, TOOL_STICKER } from './components/AppSidebar'
 import AppNavbar from './components/AppNavbar'
+import AppSidebar, { TOOL_DOWNLOADER, TOOL_STICKER } from './components/AppSidebar'
 import Hero from './components/Hero'
 import SearchCard from './components/SearchCard'
 import VideoPreview from './components/VideoPreview'
@@ -17,7 +17,7 @@ import Footer from './components/Footer'
 
 function App() {
   const [activeTool, setActiveTool] = useState(TOOL_DOWNLOADER)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const {
     url, loading, error, videoInfo,
@@ -36,26 +36,26 @@ function App() {
     <>
       <BackgroundOrbs />
 
-      {/* Navigation Sidebar Drawer */}
+      {/* Slide-out Mobile Menu Drawer */}
       <AppSidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
         activeTool={activeTool}
         onSelectTool={setActiveTool}
       />
 
-      {/* Main Workspace Area */}
+      {/* Main Container */}
       <div className="relative z-10 min-h-screen flex flex-col items-center px-4 py-4 sm:px-6">
-        {/* Top Navbar with Sidebar Toggle */}
+        {/* Top Navbar */}
         <AppNavbar
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
           activeTool={activeTool}
           onSelectTool={setActiveTool}
+          onOpenMobileMenu={() => setMobileMenuOpen(true)}
         />
 
         {/* 🎬 Tool 1: Video & Audio Downloader */}
         {activeTool === TOOL_DOWNLOADER && (
-          <div className="w-full flex flex-col items-center animate-fade-in">
+          <main className="w-full flex flex-col items-center animate-fade-in">
             <Hero />
 
             <SearchCard
@@ -88,15 +88,15 @@ function App() {
                 />
               </div>
             )}
-          </div>
+          </main>
         )}
 
         {/* 🎨 Tool 2: Telegram Sticker & Khmer Meme Studio */}
         {activeTool === TOOL_STICKER && (
-          <div className="w-full flex flex-col items-center animate-fade-in">
+          <main className="w-full flex flex-col items-center animate-fade-in">
             <StickerHero />
             <StickerStudio />
-          </div>
+          </main>
         )}
 
         <Footer />
