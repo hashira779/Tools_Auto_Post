@@ -1,10 +1,23 @@
 import { useState } from 'react'
 
+import imgMenSuitBlue from '../../assets/templates/men_suit_blue.png'
+import imgMenSuitNavy from '../../assets/templates/men_suit_navy_red.png'
+import imgWomenBlazer from '../../assets/templates/women_blazer.png'
+import imgDoctorCoat from '../../assets/templates/doctor_coat.png'
+import imgDoctorFemale from '../../assets/templates/doctor_female.png'
+import imgDoctorScrubs from '../../assets/templates/doctor_scrubs.png'
+import imgTeacherUniform from '../../assets/templates/teacher_uniform.png'
+import imgKhmerLace from '../../assets/templates/khmer_lace.png'
+import imgKhmerSilkGold from '../../assets/templates/khmer_silk_gold.png'
+
 export const CV_CATEGORIES = [
   { id: 'all', label: 'CV/ID Mode' },
   { id: 'doctor', label: 'គ្រូពេទ្យ (Doctor)' },
   { id: 'teacher', label: 'គ្រូបង្រៀន (Teacher)' },
   { id: 'traditional', label: 'អាវប៉ាក់ប្រពៃណី (Traditional)' },
+  { id: 'profile', label: 'Profile Photo Mode' },
+  { id: 'restore', label: 'Restore Mode' },
+  { id: 'couple', label: 'Couple Mode' },
 ]
 
 export const CV_TEMPLATES = [
@@ -17,7 +30,7 @@ export const CV_TEMPLATES = [
     gender: 'male',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/men_suit_blue.png',
+    image: imgMenSuitBlue,
     likes: 101,
     dislikes: 7,
     used: 533,
@@ -33,7 +46,7 @@ export const CV_TEMPLATES = [
     gender: 'male',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/men_suit_navy_red.png',
+    image: imgMenSuitNavy,
     likes: 58,
     dislikes: 0,
     used: 194,
@@ -49,7 +62,7 @@ export const CV_TEMPLATES = [
     gender: 'female',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/women_blazer.png',
+    image: imgWomenBlazer,
     likes: 68,
     dislikes: 1,
     used: 240,
@@ -65,7 +78,7 @@ export const CV_TEMPLATES = [
     gender: 'male',
     bg: '#FFFFFF',
     bgName: 'White',
-    image: '/templates/men_suit_blue.png',
+    image: imgMenSuitBlue,
     likes: 47,
     dislikes: 2,
     used: 118,
@@ -81,7 +94,7 @@ export const CV_TEMPLATES = [
     gender: 'female',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/women_blazer.png',
+    image: imgWomenBlazer,
     likes: 48,
     dislikes: 1,
     used: 160,
@@ -99,7 +112,7 @@ export const CV_TEMPLATES = [
     gender: 'male',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/doctor_coat.png',
+    image: imgDoctorCoat,
     likes: 82,
     dislikes: 3,
     used: 215,
@@ -115,7 +128,7 @@ export const CV_TEMPLATES = [
     gender: 'female',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/doctor_female.png',
+    image: imgDoctorFemale,
     likes: 74,
     dislikes: 1,
     used: 188,
@@ -131,7 +144,7 @@ export const CV_TEMPLATES = [
     gender: 'unisex',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/doctor_scrubs.png',
+    image: imgDoctorScrubs,
     likes: 41,
     dislikes: 0,
     used: 95,
@@ -149,7 +162,7 @@ export const CV_TEMPLATES = [
     gender: 'unisex',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/teacher_uniform.png',
+    image: imgTeacherUniform,
     likes: 64,
     dislikes: 0,
     used: 152,
@@ -167,7 +180,7 @@ export const CV_TEMPLATES = [
     gender: 'female',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/khmer_lace.png',
+    image: imgKhmerLace,
     likes: 93,
     dislikes: 0,
     used: 320,
@@ -183,12 +196,82 @@ export const CV_TEMPLATES = [
     gender: 'female',
     bg: '#0072C6',
     bgName: 'Blue',
-    image: '/templates/khmer_silk_gold.png',
+    image: imgKhmerSilkGold,
     likes: 88,
     dislikes: 0,
     used: 275,
     badge: 'RECOMMENDED',
     badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+    suitType: 'khmer_lace',
+  },
+
+  // ── Profile Photo Mode ──────────────────────────────────
+  {
+    id: 'profile-pro-male',
+    category: 'profile',
+    title: 'រូប Profile បែបអាជីព — Professional Executive Suit',
+    enTitle: 'Modern Executive Portrait',
+    gender: 'male',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: imgMenSuitNavy,
+    likes: 112,
+    dislikes: 2,
+    used: 410,
+    badge: 'HOT',
+    badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+    suitType: 'men_navy_suit',
+  },
+  {
+    id: 'profile-pro-female',
+    category: 'profile',
+    title: 'រូប Profile ស្ត្រី — Business Leader Blazer',
+    enTitle: 'Modern Business Leader Portrait',
+    gender: 'female',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: imgWomenBlazer,
+    likes: 105,
+    dislikes: 1,
+    used: 380,
+    badge: 'RECOMMENDED',
+    badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+    suitType: 'women_collar_blazer',
+  },
+
+  // ── Restore Mode ────────────────────────────────────────
+  {
+    id: 'restore-id-vintage',
+    category: 'restore',
+    title: 'ស្តាររូបថតចាស់ទៅ 4x6 ថ្មី — Vintage to HD Restoration',
+    enTitle: 'Restore Old Photo to HD 4x6 ID',
+    gender: 'male',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: imgMenSuitBlue,
+    likes: 95,
+    dislikes: 0,
+    used: 260,
+    badge: 'POPULAR',
+    badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    suitType: 'men_black_suit',
+  },
+
+  // ── Couple Mode ─────────────────────────────────────────
+  {
+    id: 'couple-traditional',
+    category: 'couple',
+    title: 'រូបថតគូស្នេហ៍អាវប៉ាក់ — Couple Traditional Silk',
+    enTitle: 'Khmer Traditional Ceremony Couple',
+    gender: 'female',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: imgKhmerSilkGold,
+    likes: 140,
+    dislikes: 3,
+    used: 520,
+    badge: 'HOT',
+    badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
     suitType: 'khmer_lace',
   },
 ]
