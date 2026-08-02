@@ -1,6 +1,6 @@
 """
 CV & ID Photo Processor — Dedicated Local AI Microservice Engine
-Powered by Local ONNX Neural Network (u2net / rembg) + Precision Suit Compositor.
+Powered by Local ONNX Neural Network (u2net / rembg) + Dynamic Collar-to-Chin Alignment.
 """
 
 import io
@@ -45,92 +45,77 @@ SUIT_FILES: Dict[str, Dict[str, Any]] = {
     "men-suit-blue": {
         "suit": "men_black_suit.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.44,
-        "suit_scale": 1.05,
+        "suit_scale": 1.15,
     },
     "men-suit-white": {
         "suit": "men_black_suit.png",
         "default_bg": "#FFFFFF",
-        "suit_y_ratio": 0.44,
-        "suit_scale": 1.05,
+        "suit_scale": 1.15,
     },
     "men-suit-navy": {
         "suit": "men_black_suit.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.44,
-        "suit_scale": 1.05,
+        "suit_scale": 1.15,
     },
     "women-blazer-collar": {
         "suit": "women_black_blazer.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.46,
-        "suit_scale": 1.02,
+        "suit_scale": 1.12,
     },
     "women-suit-tie": {
         "suit": "women_black_blazer.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.46,
-        "suit_scale": 1.02,
+        "suit_scale": 1.12,
     },
     "doctor-s1": {
         "suit": "doctor_white_coat.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.43,
-        "suit_scale": 1.04,
+        "suit_scale": 1.15,
     },
     "doctor-s2": {
         "suit": "doctor_white_coat.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.43,
-        "suit_scale": 1.04,
+        "suit_scale": 1.15,
     },
     "doctor-scrubs": {
         "suit": "doctor_white_coat.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.43,
-        "suit_scale": 1.04,
+        "suit_scale": 1.15,
     },
     "teacher-uniform": {
         "suit": "men_black_suit.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.44,
-        "suit_scale": 1.05,
+        "suit_scale": 1.15,
     },
     "khmer-traditional-lace": {
         "suit": "women_black_blazer.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.46,
-        "suit_scale": 1.02,
+        "suit_scale": 1.12,
     },
     "khmer-silk-gold": {
         "suit": "women_black_blazer.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.46,
-        "suit_scale": 1.02,
+        "suit_scale": 1.12,
     },
     "profile-pro-male": {
         "suit": "men_black_suit.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.44,
-        "suit_scale": 1.05,
+        "suit_scale": 1.15,
     },
     "profile-pro-female": {
         "suit": "women_black_blazer.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.46,
-        "suit_scale": 1.02,
+        "suit_scale": 1.12,
     },
     "restore-id-vintage": {
         "suit": "men_black_suit.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.44,
-        "suit_scale": 1.05,
+        "suit_scale": 1.15,
     },
     "couple-traditional": {
         "suit": "women_black_blazer.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.46,
-        "suit_scale": 1.02,
+        "suit_scale": 1.12,
     },
 }
 
@@ -184,7 +169,7 @@ def extract_head_with_local_ai(input_pil: Image.Image) -> Image.Image:
         except Exception as e:
             logger.warning(f"Local AI rembg failed, falling back: {e}")
 
-    # Fallback to OpenCV Grabcut
+    # Fallback with GrabCut
     if HAS_CV2:
         try:
             img_rgb = input_pil.convert("RGB")
@@ -193,10 +178,10 @@ def extract_head_with_local_ai(input_pil: Image.Image) -> Image.Image:
             mask = np.zeros(user_np.shape[:2], np.uint8)
             bgdModel = np.zeros((1, 65), np.float64)
             fgdModel = np.zeros((1, 65), np.float64)
-            rect = (int(w * 0.05), int(h * 0.05), int(w * 0.90), int(h * 0.90))
-            cv2.grabCut(user_np, mask, rect, bgdModel, fgdModel, 3, cv2.GC_INIT_WITH_RECT)
+            rect = (int(w * 0.08), int(h * 0.08), int(w * 0.84), int(h * 0.84))
+            cv2.grabCut(user_np, mask, rect, bgdModel, fgdModel, 4, cv2.GC_INIT_WITH_RECT)
             mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
-            mask2 = cv2.GaussianBlur(mask2 * 255, (5, 5), 0)
+            mask2 = cv2.GaussianBlur(mask2 * 255, (7, 7), 0)
             
             rgba = input_pil.convert("RGBA")
             rgba.putalpha(Image.fromarray(mask2))
@@ -218,9 +203,9 @@ def process_cv_photo(
     """
     100% Local AI Pipeline:
     1. Removes background from user selfie using local ONNX neural network.
-    2. Detects face center and scales portrait into standard ID canvas.
+    2. Detects chin position and dynamically aligns suit collar right under the chin.
     3. Fills solid studio background (#0072C6 / #FFFFFF).
-    4. Overlays high-resolution formal suit template cleanly over neck.
+    4. Drapes solid white shirt & suit jacket over the neck and chest.
     5. Exports 300 DPI high-resolution JPEG.
     """
     input_img = Image.open(io.BytesIO(image_bytes))
@@ -235,7 +220,7 @@ def process_cv_photo(
     # 1. Local AI Neural Cutout
     user_cutout = extract_head_with_local_ai(input_img)
 
-    # 2. Detect face in cutout to properly align portrait height
+    # 2. Detect face in cutout to properly align portrait height & chin
     cutout_rgb = user_cutout.convert("RGB")
     cv_bgr = cv2.cvtColor(np.array(cutout_rgb), cv2.COLOR_RGB2BGR) if HAS_CV2 else None
     face_box = detect_face(cv_bgr) if cv_bgr is not None else None
@@ -245,10 +230,10 @@ def process_cv_photo(
     if face_box:
         fx, fy, fw, fh = face_box
         face_cx = fx + fw // 2
-        face_cy = fy + fh // 2
 
-        crop_top = max(0, fy - int(fh * 0.65))
-        crop_bottom = min(uh, fy + int(fh * 2.10))
+        # Standard ID framing (top of hair to upper chest)
+        crop_top = max(0, fy - int(fh * 0.55))
+        crop_bottom = min(uh, fy + int(fh * 2.0))
         crop_h = crop_bottom - crop_top
         crop_w = int(crop_h * (target_w / target_h))
 
@@ -268,22 +253,22 @@ def process_cv_photo(
     canvas = Image.new("RGBA", (target_w, target_h), (*bg_rgb, 255))
     canvas.paste(user_scaled, (0, 0), mask=user_scaled.split()[3])
 
-    # 4. Overlay High-Resolution Suit Template
+    # 4. Overlay High-Resolution Suit Template Hugging the Chin
     suit_filename = suit_config.get("suit", "men_black_suit.png")
     suit_path = SUITS_DIR / suit_filename
 
     if suit_path.exists():
         suit_img = Image.open(suit_path).convert("RGBA")
 
-        # Scale suit width to fit canvas
-        scale = suit_config.get("suit_scale", 1.05)
+        # Scale suit width to fill shoulders
+        scale = suit_config.get("suit_scale", 1.15)
         suit_w = int(target_w * scale)
         aspect = suit_img.width / suit_img.height
         suit_h = int(suit_w / aspect)
         suit_resized = suit_img.resize((suit_w, suit_h), Image.Resampling.LANCZOS)
 
-        # Position suit collar over the user's neck
-        suit_y = int(target_h * suit_config.get("suit_y_ratio", 0.44))
+        # Align suit collar directly under chin (at ~48% height)
+        suit_y = int(target_h * 0.48)
         suit_x = (target_w - suit_w) // 2
 
         # Paste suit overlay over user
