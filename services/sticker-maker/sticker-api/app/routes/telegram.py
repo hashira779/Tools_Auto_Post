@@ -25,12 +25,12 @@ def _get_default_user_id() -> int:
         os.getenv("DEFAULT_STICKER_USER_ID")
         or os.getenv("STICKER_BOT_OWNER_ID")
         or os.getenv("ALLOWED_USERS", "").split(",")[0]
-        or "789123456"
+        or "7673456476"
     ).strip()
     try:
         return int(val)
     except ValueError:
-        return 789123456
+        return 7673456476
 
 
 def _get_service() -> TelegramStickerService:
