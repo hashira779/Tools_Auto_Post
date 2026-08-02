@@ -1,4 +1,5 @@
 export const TOOL_DOWNLOADER = 'downloader'
+export const TOOL_CV = 'cv'
 export const TOOL_STICKER = 'sticker'
 
 export default function AppSidebar({
@@ -31,7 +32,7 @@ export default function AppSidebar({
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center text-white font-black text-sm">
                 ⚡
               </div>
-              <span className="font-extrabold text-white text-base">CamTech Studio</span>
+              <span className="font-extrabold text-white text-base">CamTech Pro Studio</span>
             </div>
             <button
               onClick={onClose}
@@ -45,14 +46,15 @@ export default function AppSidebar({
           <div className="space-y-6">
             <div>
               <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">
-                Tools
+                Studio Tools
               </div>
               <div className="space-y-1.5">
+                {/* 1. Downloader */}
                 <button
                   onClick={() => handleSelect(TOOL_DOWNLOADER)}
                   className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
                     activeTool === TOOL_DOWNLOADER
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 font-bold'
                       : 'text-slate-300 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -65,11 +67,30 @@ export default function AppSidebar({
                   </span>
                 </button>
 
+                {/* 2. AI CV 4x6 Studio */}
+                <button
+                  onClick={() => handleSelect(TOOL_CV)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
+                    activeTool === TOOL_CV
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-600/30 font-bold'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="flex-1 text-left">AI CV 4×6 Photo Studio</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30">
+                    NEW
+                  </span>
+                </button>
+
+                {/* 3. Telegram Sticker Studio */}
                 <button
                   onClick={() => handleSelect(TOOL_STICKER)}
                   className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
                     activeTool === TOOL_STICKER
-                      ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/30'
+                      ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/30 font-bold'
                       : 'text-slate-300 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -98,7 +119,7 @@ export default function AppSidebar({
                   <span className="w-5 h-5 rounded bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs">
                     🎤
                   </span>
-                  <span className="flex-1 text-left">Lyrics /srt Bot</span>
+                  <span className="flex-1 text-left">Lyrics /srt Subtitle Bot</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">
                     FREE
                   </span>
@@ -129,7 +150,7 @@ export default function AppSidebar({
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>Systems Online</span>
           </div>
-          <span>v2.4</span>
+          <span>v2.5</span>
         </div>
       </div>
     </>

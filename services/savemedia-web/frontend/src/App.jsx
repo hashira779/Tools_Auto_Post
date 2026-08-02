@@ -3,14 +3,15 @@ import { useDownloader } from './hooks/useDownloader'
 import { FORMAT_VIDEO } from './constants/platforms'
 
 import BackgroundOrbs from './components/BackgroundOrbs'
-import AppNavbar from './components/AppNavbar'
-import AppSidebar, { TOOL_DOWNLOADER, TOOL_STICKER } from './components/AppSidebar'
+import AppNavbar, { TOOL_DOWNLOADER, TOOL_CV, TOOL_STICKER } from './components/AppNavbar'
+import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
 import SearchCard from './components/SearchCard'
 import VideoPreview from './components/VideoPreview'
 import FormatTabs from './components/FormatTabs'
 import QualityGrid from './components/QualityGrid'
 import DownloadButton from './components/DownloadButton'
+import CvStudio from './components/cv/CvStudio'
 import StickerHero from './components/sticker/StickerHero'
 import StickerStudio from './components/sticker/StickerStudio'
 import Footer from './components/Footer'
@@ -91,7 +92,14 @@ function App() {
           </main>
         )}
 
-        {/* 🎨 Tool 2: Telegram Sticker & Khmer Meme Studio */}
+        {/* 📷 Tool 2: AI Professional CV 4x6 & ID Photo Studio */}
+        {activeTool === TOOL_CV && (
+          <main className="w-full flex flex-col items-center animate-fade-in">
+            <CvStudio />
+          </main>
+        )}
+
+        {/* 🎨 Tool 3: Telegram Sticker & Khmer Meme Studio */}
         {activeTool === TOOL_STICKER && (
           <main className="w-full flex flex-col items-center animate-fade-in">
             <StickerHero />
