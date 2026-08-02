@@ -1,5 +1,5 @@
 """
-CV & ID Photo Router — FastAPI Endpoints for AI Face Extraction & Suit Swap
+CV & ID Photo Router — FastAPI Endpoints for Photorealistic AI Face Swap & Suit Compositor
 """
 
 import base64
@@ -8,7 +8,7 @@ from typing import Optional
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Response
 from fastapi.responses import JSONResponse
 
-from app.services.cv_processor import process_cv_photo, TEMPLATES, STANDARDS
+from app.services.cv_processor import process_cv_photo, TEMPLATE_FILES, STANDARDS
 
 logger = logging.getLogger(__name__)
 
@@ -19,13 +19,10 @@ router = APIRouter(prefix="/api/cv", tags=["CV & ID Photo Studio"])
 async def list_templates():
     """List all available CV/ID suit and uniform templates."""
     results = []
-    for t_id, meta in TEMPLATES.items():
+    for t_id, filename in TEMPLATE_FILES.items():
         results.append({
             "id": t_id,
-            "title": meta.get("title"),
-            "gender": meta.get("gender"),
-            "default_bg": meta.get("bg_color"),
-            "suit_style": meta.get("suit_style"),
+            "filename": filename,
         })
     return {"templates": results, "standards": list(STANDARDS.keys())}
 
@@ -41,8 +38,8 @@ async def generate_cv_photo(
 ):
     """
     Process uploaded selfie photo:
-    - Extracts head & face cleanly.
-    - Blends onto chosen suit/uniform template.
+    - Runs photorealistic AI face swap onto real suit template.
+    - Applies Poisson seamless blending and skin tone harmonization.
     - Returns high-resolution 300 DPI JPEG image binary.
     """
     try:
