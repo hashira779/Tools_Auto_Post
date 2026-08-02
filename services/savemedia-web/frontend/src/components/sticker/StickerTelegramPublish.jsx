@@ -86,12 +86,10 @@ export default function StickerTelegramPublish({
         {result.url && (
           <div className="mb-6 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
-              href={result.url}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={result.deeplink_app || result.url}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 btn-pro text-white rounded-xl font-bold text-base shadow-xl"
             >
-              <span>📦</span> Add Sticker Pack to Telegram
+              <span>📦</span> Open &amp; Add in Telegram App
             </a>
             <button
               onClick={handleDownload}
