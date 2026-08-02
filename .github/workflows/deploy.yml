@@ -13,12 +13,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Deploy to Server
-        run: |
-          echo "Syncing files to CamTech directory..."
-          rsync -a --exclude '.git' ./ /home/ubuntu-server/CamTech/
-          
-          echo "Rebuilding and restarting Docker..."
-          cd /home/ubuntu-server/CamTech
-          echo "pTT!CT01" | sudo -S docker compose up -d --build
-          echo "Deployment complete!"
+      - name: Make deploy script executable
+        run: chmod +x ./scripts/deploy_production.sh
+
+      - name: Safe Deploy with Automated Rollback
+        run: ./scripts/deploy_production.sh

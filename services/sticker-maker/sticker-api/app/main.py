@@ -57,6 +57,12 @@ def create_app() -> FastAPI:
     app.include_router(sticker_router)
     app.include_router(telegram_router)
 
+    # Top-level Health Checks
+    @app.get("/api/health")
+    @app.get("/health")
+    async def root_health():
+        return {"status": "ok", "service": "sticker-maker"}
+
     return app
 
 
