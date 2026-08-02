@@ -19,18 +19,14 @@ except ImportError:
 
 try:
     from rembg import remove, new_session
-    try:
-        # Load u2net model for precise human portrait matting
-        REMBG_SESSION = new_session("u2netp")
-    except Exception as init_err:
-        logging.warning(f"Failed to pre-load rembg session: {init_err}")
-        REMBG_SESSION = None
     HAS_REMBG = True
 except ImportError:
     HAS_REMBG = False
-    REMBG_SESSION = None
 
 logger = logging.getLogger(__name__)
+
+# Lazy-loaded session
+_REMBG_SESSION = None
 
 # Asset Directories
 SUITS_DIR = Path(__file__).resolve().parent.parent / "assets" / "suits"
@@ -121,8 +117,6 @@ SUIT_FILES: Dict[str, Dict[str, Any]] = {
     },
 }
 
-TEMPLATE_FILES = {k: v["suit"] for k, v in SUIT_FILES.items()}
-
 
 def hex_to_rgb(hex_str: str) -> Tuple[int, int, int]:
     """Convert hex color '#0072C6' to RGB tuple."""
@@ -130,7 +124,7 @@ def hex_to_rgb(hex_str: str) -> Tuple[int, int, int]:
     if len(hex_str) == 3:
         hex_str = "".join([c * 2 for c in hex_str])
     if len(hex_str) != 6:
-        return (0, 114, 198)  # Cambodian Blue
+        return (0, 114, 198)
     return tuple(int(hex_str[i : i + 2], 16) for i in (0, 2, 4))  # type: ignore
 
 
@@ -161,13 +155,15 @@ def detect_face(cv_bgr: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
 
 def extract_head_with_local_ai(input_pil: Image.Image) -> Image.Image:
     """Uses local ONNX neural network to extract head & hair cleanly with alpha channel."""
+    global _REMBG_SESSION
     if HAS_REMBG:
         try:
-            if REMBG_SESSION:
-                cutout = remove(input_pil, session=REMBG_SESSION, post_process_mask=True)
-            else:
-                cutout = remove(input_pil, post_process_mask=True)
-            
+            # Lazy load the model on first request so it doesn't block server startup healthchecks!
+            if _REMBG_SESSION is None:
+                logger.info("Initializing rembg u2netp local AI model...")
+                _REMBG_SESSION = new_session("u2netp")
+                
+            cutout = remove(input_pil, session=_REMBG_SESSION, post_process_mask=True)
             cutout_rgba = cutout.convert("RGBA")
             
             # Feather the edges of the AI mask slightly to avoid jagged pixels
@@ -189,7 +185,6 @@ def extract_head_with_local_ai(input_pil: Image.Image) -> Image.Image:
             bgdModel = np.zeros((1, 65), np.float64)
             fgdModel = np.zeros((1, 65), np.float64)
             
-            # Tighter bounding box to avoid square edges on sides
             rect = (int(w * 0.15), int(h * 0.05), int(w * 0.70), int(h * 0.85))
             cv2.grabCut(user_np, mask, rect, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_RECT)
             
@@ -197,7 +192,6 @@ def extract_head_with_local_ai(input_pil: Image.Image) -> Image.Image:
             
             rgba = input_pil.convert("RGBA")
             alpha = Image.fromarray(mask2)
-            # Heavy blur to hide grabcut artifacts
             alpha = alpha.filter(ImageFilter.GaussianBlur(3.0))
             rgba.putalpha(alpha)
             return rgba
