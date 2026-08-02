@@ -4,6 +4,7 @@ yt-dlp wrapper service for extracting metadata and downloading media.
 
 import os
 import re
+import time
 import shutil
 import uuid
 import logging
@@ -31,12 +32,19 @@ def _base_opts() -> dict:
         "no_warnings": True,
         "noplaylist": True,
         "retries": 3,
+        "extractor_retries": 3,
+        "fragment_retries": 3,
+        "retry_sleep": {"http": 1, "extractor": 1},
         "http_headers": {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/120.0.0.0 Safari/537.36"
+                "Chrome/124.0.0.0 Safari/537.36"
             ),
+            "Accept-Language": "en-US,en;q=0.9",
+            "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"Windows"',
         },
     }
     if COOKIES_FILE and os.path.exists(COOKIES_FILE):
@@ -111,18 +119,36 @@ def extract_formats(info: dict) -> tuple[list[FormatInfo], list[FormatInfo]]:
 
 # ── Core Operations ──────────────────────────────────────────────
 
-def fetch_info(url: str) -> Optional[dict]:
-    """Extract video metadata without downloading."""
+def fetch_info(url: str, max_retries: int = 3, retry_delay: float = 1.0) -> Optional[dict]:
+    """
+    Extract video metadata without downloading.
+    Includes automatic retry for transient anti-bot/challenge responses (e.g. TikTok).
+    """
     opts = _base_opts()
     opts["skip_download"] = True
-    with yt_dlp.YoutubeDL(opts) as ydl:
-        return ydl.extract_info(url, download=False)
+    
+    last_error = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                if info:
+                    return info
+        except Exception as e:
+            last_error = e
+            logger.warning(f"fetch_info attempt {attempt}/{max_retries} failed for {url}: {e}")
+            if attempt < max_retries:
+                time.sleep(retry_delay * attempt)
+
+    if last_error:
+        raise last_error
+    return None
 
 
-def download_file(url: str, format_type: str, quality: str, progress_hook=None) -> tuple[Optional[Path], Optional[dict]]:
+def download_file(url: str, format_type: str, quality: str, progress_hook=None, max_retries: int = 2) -> tuple[Optional[Path], Optional[dict]]:
     """
     Download media and return (filepath, info_dict).
-    Creates a unique session directory for each download.
+    Creates a unique session directory for each download with retry support.
     """
     session_id = str(uuid.uuid4())[:8]
     session_dir = DOWNLOAD_DIR / session_id
@@ -152,15 +178,24 @@ def download_file(url: str, format_type: str, quality: str, progress_hook=None) 
             )
         opts["merge_output_format"] = "mp4"
 
-    try:
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-    except Exception as e:
-        shutil.rmtree(session_dir, ignore_errors=True)
-        raise e
+    info = None
+    last_error = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                if info:
+                    break
+        except Exception as e:
+            last_error = e
+            logger.warning(f"download_file attempt {attempt}/{max_retries} failed for {url}: {e}")
+            if attempt < max_retries:
+                time.sleep(1.0 * attempt)
 
     if not info:
         shutil.rmtree(session_dir, ignore_errors=True)
+        if last_error:
+            raise last_error
         return None, None
 
     # Find the downloaded file
