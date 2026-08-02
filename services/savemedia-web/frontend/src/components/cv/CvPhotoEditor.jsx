@@ -66,7 +66,7 @@ export default function CvPhotoEditor({ selectedTemplate, onBack }) {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.detail || 'Python microservice error')
+        throw new Error(errData.detail || 'Python microservice processing failed')
       }
 
       const data = await res.json()
@@ -92,7 +92,7 @@ export default function CvPhotoEditor({ selectedTemplate, onBack }) {
   }
 
   return (
-    <div className="w-full max-w-[860px] animate-fade-in mb-10 select-none">
+    <div className="w-full max-w-[880px] animate-fade-in mb-10 select-none">
       {/* Header with Back Button */}
       <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
         <div>
@@ -117,33 +117,46 @@ export default function CvPhotoEditor({ selectedTemplate, onBack }) {
         {/* Left Column: Result & Live AI Preview */}
         <div className="md:col-span-5 flex flex-col items-center">
           <div className="p-3 bg-slate-950 rounded-2xl shadow-2xl border border-white/15 w-full flex flex-col items-center">
-            <div className="relative rounded-xl overflow-hidden shadow-inner flex items-center justify-center bg-slate-900 border border-white/10 max-h-[380px] w-full aspect-[4/6]">
+            <div className="relative rounded-xl overflow-hidden shadow-inner flex items-center justify-center bg-slate-900 border border-white/10 max-h-[400px] w-full aspect-[4/6]">
+              {/* Spinner when processing */}
               {isProcessing && (
                 <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-md z-30 flex flex-col items-center justify-center p-4 text-center">
-                  <div className="w-10 h-10 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3" />
+                  <div className="w-10 h-10 border-3 border-cyan-400 border-t-transparent rounded-full animate-spin mb-3" />
                   <div className="text-xs font-bold text-white">🤖 Python AI Processing...</div>
                   <div className="text-[10px] text-slate-400 mt-1">
-                    Detecting face &amp; blending onto {selectedTemplate?.suitType?.replace('_', ' ') || 'suit'}
+                    Extracting face &amp; blending onto {selectedTemplate?.suitType?.replace('_', ' ') || 'suit'}
                   </div>
                 </div>
               )}
 
+              {/* Show AI Result if generated */}
               {resultImage ? (
                 <img
                   src={resultImage}
                   alt="AI CV Generated Result"
-                  className="w-full h-full object-contain"
-                />
-              ) : imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="User Upload Preview"
-                  className="w-full h-full object-contain opacity-60"
+                  className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="flex flex-col items-center text-slate-500 text-xs">
-                  <span className="text-4xl mb-2">👤</span>
-                  <span>Upload selfie to start AI</span>
+                /* Show Template Photo if waiting for upload */
+                <div className="relative w-full h-full">
+                  <img
+                    src={selectedTemplate?.image || '/templates/men_suit_blue.png'}
+                    alt={selectedTemplate?.title || 'Template'}
+                    className="w-full h-full object-cover"
+                  />
+                  {!imagePreview && (
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center p-4 text-center">
+                      <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-2xl shadow-xl mb-2 text-cyan-300">
+                        📸
+                      </div>
+                      <div className="text-xs font-bold text-white">
+                        ដាក់រូប Selfie ដើម្បីប្តូរមុខ
+                      </div>
+                      <div className="text-[10px] text-slate-300 mt-0.5">
+                        (Upload selfie to replace head)
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -162,7 +175,7 @@ export default function CvPhotoEditor({ selectedTemplate, onBack }) {
           {/* Step 1: Upload Photo */}
           <div className="glass-card p-5">
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span>1. ជ្រើសរើសរូបថតផ្ទាល់ខ្លួន (Upload Photo)</span>
+              <span>1. ជ្រើសរើសរូបថតផ្ទាល់ខ្លួន (Upload Selfie / Photo)</span>
               {imagePreview && (
                 <button
                   onClick={() => {
@@ -187,14 +200,14 @@ export default function CvPhotoEditor({ selectedTemplate, onBack }) {
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-4 px-4 rounded-xl border-2 border-dashed border-white/20 hover:border-cyan-500 bg-slate-900/50 hover:bg-slate-900 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer text-slate-300 hover:text-white"
+              className="w-full py-5 px-4 rounded-xl border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 bg-slate-900/60 hover:bg-slate-900 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer text-slate-200 hover:text-white group"
             >
-              <span className="text-2xl">📸</span>
-              <span className="text-xs font-semibold">
-                {imagePreview ? 'ប្តូររូបថតផ្សេង (Change Photo)' : 'ចុចដើម្បី Upload រូបថត ឬ Selfie'}
+              <span className="text-3xl group-hover:scale-110 transition-transform">📸</span>
+              <span className="text-xs font-bold text-cyan-300">
+                {imagePreview ? 'ប្តូររូបថតផ្សេង (Change Photo)' : 'ចុចទីនេះដើម្បី Upload រូបថតផ្ទាល់ខ្លួន ឬ Selfie'}
               </span>
-              <span className="text-[10px] text-slate-500 font-normal">
-                Supports JPG, PNG, WebP
+              <span className="text-[10px] text-slate-400 font-normal">
+                Supports JPG, PNG, WebP — Auto face detection
               </span>
             </button>
           </div>

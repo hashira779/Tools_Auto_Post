@@ -2,29 +2,60 @@ import { useState } from 'react'
 
 export const CV_CATEGORIES = [
   { id: 'all', label: 'CV/ID Mode' },
-  { id: 'profile', label: 'Profile Photo Mode' },
-  { id: 'restore', label: 'Restore Mode' },
-  { id: 'doctor', label: 'គ្រូពេទ្យ' },
-  { id: 'teacher', label: 'គ្រូបង្រៀន' },
-  { id: 'traditional', label: 'អាវប៉ាក់ប្រពៃណី' },
-  { id: 'couple', label: 'Couple Mode' },
+  { id: 'doctor', label: 'គ្រូពេទ្យ (Doctor)' },
+  { id: 'teacher', label: 'គ្រូបង្រៀន (Teacher)' },
+  { id: 'traditional', label: 'អាវប៉ាក់ប្រពៃណី (Traditional)' },
 ]
 
 export const CV_TEMPLATES = [
+  // ── CV / ID Suits ──────────────────────────────────────────
   {
     id: 'men-suit-blue',
     category: 'all',
     title: 'ពីរបភាពធម្មតាទៅ CV 4x6 ផ្ទៃខៀវ',
-    enTitle: 'Standard Men Suit (Cambodian Blue BG)',
+    enTitle: 'Classic Black Suit + Tie (Cambodian Blue BG)',
     gender: 'male',
     bg: '#0072C6',
     bgName: 'Blue',
+    image: '/templates/men_suit_blue.png',
     likes: 101,
     dislikes: 7,
     used: 533,
     badge: 'RECOMMENDED',
     badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
     suitType: 'men_black_suit',
+  },
+  {
+    id: 'men-suit-navy',
+    category: 'all',
+    title: 'A professional 4×6 cm (Navy Suit & Tie)',
+    enTitle: 'Navy Blue Tailored Suit + Red Tie',
+    gender: 'male',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: '/templates/men_suit_navy_red.png',
+    likes: 58,
+    dislikes: 0,
+    used: 194,
+    badge: 'POPULAR',
+    badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    suitType: 'men_navy_suit',
+  },
+  {
+    id: 'women-blazer-collar',
+    category: 'all',
+    title: 'fully closed collar neck + black blazer corporate style',
+    enTitle: 'Women Corporate Closed Collar Blazer',
+    gender: 'female',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: '/templates/women_blazer.png',
+    likes: 68,
+    dislikes: 1,
+    used: 240,
+    badge: 'RECOMMENDED',
+    badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+    suitType: 'women_collar_blazer',
   },
   {
     id: 'men-suit-white',
@@ -34,6 +65,7 @@ export const CV_TEMPLATES = [
     gender: 'male',
     bg: '#FFFFFF',
     bgName: 'White',
+    image: '/templates/men_suit_blue.png',
     likes: 47,
     dislikes: 2,
     used: 118,
@@ -42,58 +74,32 @@ export const CV_TEMPLATES = [
     suitType: 'men_black_suit',
   },
   {
-    id: 'women-blazer-collar',
-    category: 'all',
-    title: 'fully closed collar neck + black blazer corporate style',
-    enTitle: 'Women Corporate Collar & Blazer',
-    gender: 'female',
-    bg: '#0072C6',
-    bgName: 'Blue',
-    likes: 68,
-    dislikes: 1,
-    used: 240,
-    badge: 'RECOMMENDED',
-    badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
-    suitType: 'women_collar_blazer',
-  },
-  {
-    id: 'men-tie-red',
-    category: 'all',
-    title: 'A professional 4×6 cm (Navy Suit & Tie)',
-    enTitle: 'Navy Blue Suit & Tie',
-    gender: 'male',
-    bg: '#0072C6',
-    bgName: 'Blue',
-    likes: 36,
-    dislikes: 0,
-    used: 94,
-    badge: 'HOT',
-    badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-    suitType: 'men_navy_suit',
-  },
-  {
     id: 'women-suit-tie',
     category: 'all',
     title: 'A girl (female) into a professional CV photo',
-    enTitle: 'Female Professional Suit & Tie',
+    enTitle: 'Female Professional Suit & Blouse',
     gender: 'female',
     bg: '#0072C6',
     bgName: 'Blue',
+    image: '/templates/women_blazer.png',
     likes: 48,
     dislikes: 1,
     used: 160,
-    badge: 'POPULAR',
-    badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    badge: 'HOT',
+    badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
     suitType: 'women_suit_tie',
   },
+
+  // ── Doctor គ្រូពេទ្យ (No Logos) ───────────────────────────
   {
-    id: 'doctor-coat',
+    id: 'doctor-s1',
     category: 'doctor',
-    title: 'គ្រូពេទ្យ — Medical Doctor Lab Coat',
-    enTitle: 'Doctor / Nurse Uniform',
-    gender: 'unisex',
+    title: 'គ្រូពេទ្យ S1 Style — Male Doctor Lab Coat',
+    enTitle: 'Male Doctor White Lab Coat (No Logo)',
+    gender: 'male',
     bg: '#0072C6',
     bgName: 'Blue',
+    image: '/templates/doctor_coat.png',
     likes: 82,
     dislikes: 3,
     used: 215,
@@ -102,33 +108,87 @@ export const CV_TEMPLATES = [
     suitType: 'doctor_coat',
   },
   {
-    id: 'teacher-uniform',
-    category: 'teacher',
-    title: 'គ្រូបង្រៀន — Formal Academic Teacher Outfit',
-    enTitle: 'Teacher / Academic Uniform',
-    gender: 'unisex',
-    bg: '#FFFFFF',
-    bgName: 'White',
-    likes: 54,
-    dislikes: 0,
-    used: 130,
-    badge: 'POPULAR',
-    badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-    suitType: 'teacher_outfit',
-  },
-  {
-    id: 'khmer-traditional-lace',
-    category: 'traditional',
-    title: 'អាវប៉ាក់ប្រពៃណី — Traditional Studio Portrait',
-    enTitle: 'Cambodian Traditional Lace Blouse',
+    id: 'doctor-s2',
+    category: 'doctor',
+    title: 'គ្រូពេទ្យ S2 Style — Female Doctor Lab Coat',
+    enTitle: 'Female Doctor White Lab Coat (No Logo)',
     gender: 'female',
     bg: '#0072C6',
     bgName: 'Blue',
+    image: '/templates/doctor_female.png',
+    likes: 74,
+    dislikes: 1,
+    used: 188,
+    badge: 'RECOMMENDED',
+    badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+    suitType: 'doctor_coat',
+  },
+  {
+    id: 'doctor-scrubs',
+    category: 'doctor',
+    title: 'គ្រូពេទ្យ S3 Style — Blue Medical Scrubs',
+    enTitle: 'Hospital Medical Scrubs (Clean Solid Blue)',
+    gender: 'unisex',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: '/templates/doctor_scrubs.png',
+    likes: 41,
+    dislikes: 0,
+    used: 95,
+    badge: 'HOT',
+    badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    suitType: 'doctor_scrubs',
+  },
+
+  // ── Teacher គ្រូបង្រៀន (No Logos) ─────────────────────────
+  {
+    id: 'teacher-uniform',
+    category: 'teacher',
+    title: 'គ្រូបង្រៀន — Formal Academic Teacher Outfit',
+    enTitle: 'Formal Teacher Uniform Shirt (No Logo)',
+    gender: 'unisex',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: '/templates/teacher_uniform.png',
+    likes: 64,
+    dislikes: 0,
+    used: 152,
+    badge: 'POPULAR',
+    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    suitType: 'teacher_outfit',
+  },
+
+  // ── Traditional អាវប៉ាក់ប្រពៃណី (No Logos) ────────────────
+  {
+    id: 'khmer-traditional-lace',
+    category: 'traditional',
+    title: 'អាវប៉ាក់ប្រពៃណី — Traditional White Lace Blouse',
+    enTitle: 'Cambodian Traditional Lace Blouse Portrait',
+    gender: 'female',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: '/templates/khmer_lace.png',
     likes: 93,
     dislikes: 0,
     used: 320,
     badge: 'HOT',
-    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+    suitType: 'khmer_lace',
+  },
+  {
+    id: 'khmer-silk-gold',
+    category: 'traditional',
+    title: 'អាវប៉ាក់ហូលផាមួង — Golden Silk Ceremony Outfit',
+    enTitle: 'Traditional Silk Blouse (Gold & Purple)',
+    gender: 'female',
+    bg: '#0072C6',
+    bgName: 'Blue',
+    image: '/templates/khmer_silk_gold.png',
+    likes: 88,
+    dislikes: 0,
+    used: 275,
+    badge: 'RECOMMENDED',
+    badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
     suitType: 'khmer_lace',
   },
 ]
@@ -138,19 +198,19 @@ export default function CvTemplateGrid({ onSelectTemplate }) {
 
   const filteredTemplates = activeCategory === 'all'
     ? CV_TEMPLATES
-    : CV_TEMPLATES.filter((t) => t.category === activeCategory || t.category === 'all')
+    : CV_TEMPLATES.filter((t) => t.category === activeCategory)
 
   return (
-    <div className="w-full max-w-[920px] animate-fade-in mb-10">
+    <div className="w-full max-w-[960px] animate-fade-in mb-10">
       {/* Category Pills Navigation */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-6 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none">
         {CV_CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer border ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer border ${
               activeCategory === cat.id
-                ? 'bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/30'
+                ? 'bg-indigo-600 text-white border-indigo-400 shadow-lg shadow-indigo-600/30 scale-105'
                 : 'bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800 border-white/10'
             }`}
           >
@@ -160,45 +220,43 @@ export default function CvTemplateGrid({ onSelectTemplate }) {
       </div>
 
       {/* Grid of Template Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         {filteredTemplates.map((tpl) => (
           <div
             key={tpl.id}
             onClick={() => onSelectTemplate(tpl)}
-            className="group relative bg-slate-900/70 hover:bg-slate-900 border border-white/10 hover:border-indigo-500/40 rounded-2xl p-4 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10 flex flex-col justify-between"
+            className="group relative bg-slate-900/80 hover:bg-slate-900 border border-white/10 hover:border-indigo-500/40 rounded-2xl p-3 sm:p-4 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-indigo-500/15 flex flex-col justify-between"
           >
             {/* Top Card Visual Area */}
-            <div className="relative w-full h-44 rounded-xl overflow-hidden mb-3 bg-slate-950 flex items-center justify-center border border-white/5">
-              {/* Simulated Background */}
-              <div
-                className="absolute inset-0 transition-opacity duration-300 opacity-90 group-hover:opacity-100"
-                style={{ backgroundColor: tpl.bg }}
+            <div className="relative w-full h-56 rounded-xl overflow-hidden mb-3 bg-slate-950 flex items-center justify-center border border-white/5">
+              {/* Real Template Image */}
+              <img
+                src={tpl.image}
+                alt={tpl.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-
-              {/* Portrait Silhouette / Preview Icon */}
-              <div className="relative z-10 flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-slate-900/80 border-2 border-white/20 flex items-center justify-center text-2xl shadow-xl">
-                  {tpl.gender === 'female' ? '👩‍💼' : tpl.suitType === 'doctor_coat' ? '🩺' : tpl.suitType === 'khmer_lace' ? '✨' : '🤵'}
-                </div>
-                <div className="mt-2 px-2.5 py-0.5 rounded-md bg-slate-950/80 backdrop-blur-md text-[10px] font-bold text-white border border-white/10">
-                  {tpl.suitType.replace('_', ' ').toUpperCase()}
-                </div>
-              </div>
 
               {/* Badges */}
               {tpl.badge && (
                 <div className="absolute top-2.5 right-2.5 z-20">
-                  <span className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md border ${tpl.badgeColor}`}>
+                  <span className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md border backdrop-blur-md ${tpl.badgeColor}`}>
                     {tpl.badge}
                   </span>
                 </div>
               )}
 
               <div className="absolute top-2.5 left-2.5 z-20">
-                <span className="w-7 h-7 rounded-lg bg-black/40 backdrop-blur-md flex items-center justify-center text-white/80 hover:text-white transition-colors">
+                <span className="w-7 h-7 rounded-lg bg-black/50 backdrop-blur-md flex items-center justify-center text-white/90 hover:text-white transition-colors">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
+                </span>
+              </div>
+
+              {/* Bottom overlay badge */}
+              <div className="absolute bottom-2 left-2 z-20">
+                <span className="px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[10px] font-bold text-white border border-white/10">
+                  CV 4×6
                 </span>
               </div>
             </div>
@@ -224,8 +282,8 @@ export default function CvTemplateGrid({ onSelectTemplate }) {
                   <span>Used {tpl.used}</span>
                 </div>
 
-                <span className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/20">
-                  4×6 cm
+                <span className="px-2.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/20">
+                  ⚡ 1-Tap Use
                 </span>
               </div>
             </div>
