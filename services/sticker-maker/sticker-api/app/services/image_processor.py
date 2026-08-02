@@ -1,6 +1,6 @@
 """
 Image processing service for sticker creation.
-Pure Pillow-based — no AI, no external models. Fast and free.
+Pure Pillow-based — no AI, no external models. Fast (<20ms) and lightweight.
 """
 
 from __future__ import annotations
@@ -45,6 +45,13 @@ def process_image(image_bytes: bytes, style: str = "original") -> bytes:
         WebP bytes ready for Telegram, guaranteed under 512 KB.
     """
     img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+
+    # Fast pre-scale to fit within 512x512 to ensure instantaneous filter execution
+    w, h = img.size
+    if max(w, h) > STICKER_SIZE:
+        scale = STICKER_SIZE / max(w, h)
+        img = img.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS)
+
     sticker_style = StickerStyle.from_str(style)
 
     if sticker_style == StickerStyle.OUTLINE:
@@ -55,7 +62,6 @@ def process_image(image_bytes: bytes, style: str = "original") -> bytes:
         img = _rounded_crop(img)
     elif sticker_style == StickerStyle.CARTOON:
         img = _cartoon_effect(img)
-    # ORIGINAL: just resize
 
     img = _resize_to_sticker(img)
     return _to_webp(img)
@@ -68,14 +74,6 @@ def create_text_sticker(
 ) -> bytes:
     """
     Generate a text-based sticker with gradient background.
-
-    Args:
-        text: The text to render.
-        bg_color: Hex color for background.
-        text_color: Hex color for text.
-
-    Returns:
-        WebP bytes.
     """
     size = STICKER_SIZE
     bg_rgba = _hex_to_rgba(bg_color)
@@ -84,22 +82,18 @@ def create_text_sticker(
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    # Draw gradient rounded rectangle background
     _draw_gradient_rect(draw, img, (20, 20, size - 20, size - 20), bg_rgba, radius=40)
 
-    # Load font and fit text
     font = _load_best_font(text, target_width=size - 100)
     wrapped = _wrap_text(text, font, max_width=size - 100)
 
-    # Measure text
     bbox = draw.textbbox((0, 0), wrapped, font=font)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
     tx = (size - tw) // 2
     ty = (size - th) // 2
 
-    # Drop shadow
+    # Shadow & main text
     draw.text((tx + 2, ty + 2), wrapped, fill=(0, 0, 0, 80), font=font, align="center")
-    # Main text
     draw.text((tx, ty), wrapped, fill=txt_rgba, font=font, align="center")
 
     return _to_webp(img)
@@ -109,7 +103,7 @@ def get_available_styles() -> list[dict]:
     """Return all available style options with metadata."""
     return [
         {"id": "original", "name": "Original", "icon": "📷", "description": "Keep original image, resize to 512×512"},
-        {"id": "outline", "name": "White Outline", "icon": "✏️", "description": "Add a white border outline"},
+        {"id": "outline", "name": "White Outline", "icon": "✏️", "description": "Add a white sticker border outline"},
         {"id": "circle", "name": "Circle Crop", "icon": "⭕", "description": "Circular crop with white border"},
         {"id": "rounded", "name": "Rounded", "icon": "🔲", "description": "Rounded corners with smooth edges"},
         {"id": "cartoon", "name": "Cartoon", "icon": "🎨", "description": "Posterize with bold edge lines"},
@@ -118,91 +112,93 @@ def get_available_styles() -> list[dict]:
 
 # ── Style Effects ────────────────────────────────────────────────
 
-def _add_white_outline(img: Image.Image, width: int = 12) -> Image.Image:
-    """Add a white outline around the image content."""
-    # If image has transparency, outline the non-transparent parts
+def _add_white_outline(img: Image.Image, outline_px: int = 8) -> Image.Image:
+    """Add a white sticker outline around the subject or photo."""
     alpha = img.split()[3]
+    extrema = alpha.getextrema()
+    has_transparency = extrema[0] < 240
 
-    # Dilate alpha to create outline region
-    dilated = alpha.filter(ImageFilter.MaxFilter(width * 2 + 1))
+    if has_transparency:
+        # Transparent cutout: expand alpha to make outline
+        dilated = alpha.filter(ImageFilter.MaxFilter(outline_px * 2 + 1))
+        outline_img = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        white_layer = Image.new("RGBA", img.size, (255, 255, 255, 255))
+        outline_img.paste(white_layer, mask=dilated)
+        outline_img.paste(img, mask=alpha)
+        return outline_img
+    else:
+        # Solid image: add clean rounded border card
+        margin = 12
+        w, h = img.size
+        target_w, target_h = max(1, w - margin * 2), max(1, h - margin * 2)
+        scaled_img = img.resize((target_w, target_h), Image.LANCZOS)
 
-    # Create white outline layer
-    outline_img = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    white_layer = Image.new("RGBA", img.size, (255, 255, 255, 255))
-    outline_img.paste(white_layer, mask=dilated)
+        canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(canvas)
+        # White sticker background
+        draw.rounded_rectangle((0, 0, w - 1, h - 1), radius=28, fill=(255, 255, 255, 255))
 
-    # Composite original on top
-    outline_img.paste(img, mask=alpha)
-    return outline_img
+        # Paste inner image
+        inner_mask = Image.new("L", (target_w, target_h), 0)
+        ImageDraw.Draw(inner_mask).rounded_rectangle((0, 0, target_w - 1, target_h - 1), radius=20, fill=255)
+        canvas.paste(scaled_img, (margin, margin), mask=inner_mask)
+        return canvas
 
 
-def _circle_crop(img: Image.Image, border: int = 10) -> Image.Image:
+def _circle_crop(img: Image.Image, border: int = 8) -> Image.Image:
     """Crop to a circle with a white border."""
-    # Make square
     min_side = min(img.size)
     left = (img.width - min_side) // 2
     top = (img.height - min_side) // 2
-    img = img.crop((left, top, left + min_side, top + min_side))
-    img = img.resize((STICKER_SIZE, STICKER_SIZE), Image.LANCZOS)
+    cropped = img.crop((left, top, left + min_side, top + min_side))
+    cropped = cropped.resize((STICKER_SIZE, STICKER_SIZE), Image.LANCZOS)
 
-    # Create circular mask
-    mask = Image.new("L", (STICKER_SIZE, STICKER_SIZE), 0)
-    ImageDraw.Draw(mask).ellipse((0, 0, STICKER_SIZE - 1, STICKER_SIZE - 1), fill=255)
-
-    # Result canvas
     result = Image.new("RGBA", (STICKER_SIZE, STICKER_SIZE), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(result)
+    # White circle outer
+    draw.ellipse((0, 0, STICKER_SIZE - 1, STICKER_SIZE - 1), fill=(255, 255, 255, 255))
 
-    # White border circle
-    ImageDraw.Draw(result).ellipse(
-        (0, 0, STICKER_SIZE - 1, STICKER_SIZE - 1),
-        fill=(255, 255, 255, 255),
-    )
+    # Inner image
+    inner_size = STICKER_SIZE - border * 2
+    inner_img = cropped.resize((inner_size, inner_size), Image.LANCZOS)
+    inner_mask = Image.new("L", (inner_size, inner_size), 0)
+    ImageDraw.Draw(inner_mask).ellipse((0, 0, inner_size - 1, inner_size - 1), fill=255)
+    result.paste(inner_img, (border, border), mask=inner_mask)
 
-    # Inner mask
-    inner_mask = Image.new("L", (STICKER_SIZE, STICKER_SIZE), 0)
-    ImageDraw.Draw(inner_mask).ellipse(
-        (border, border, STICKER_SIZE - border - 1, STICKER_SIZE - border - 1),
-        fill=255,
-    )
-    result.paste(img, mask=inner_mask)
-
-    # Apply outer circle mask
+    # Outer circle mask
     final = Image.new("RGBA", (STICKER_SIZE, STICKER_SIZE), (0, 0, 0, 0))
-    final.paste(result, mask=mask)
+    outer_mask = Image.new("L", (STICKER_SIZE, STICKER_SIZE), 0)
+    ImageDraw.Draw(outer_mask).ellipse((0, 0, STICKER_SIZE - 1, STICKER_SIZE - 1), fill=255)
+    final.paste(result, mask=outer_mask)
     return final
 
 
-def _rounded_crop(img: Image.Image, radius: int = 60) -> Image.Image:
-    """Crop image with rounded corners."""
-    # Resize to sticker size first
-    img = ImageOps.fit(img, (STICKER_SIZE, STICKER_SIZE), Image.LANCZOS)
-    img = img.convert("RGBA")
+def _rounded_crop(img: Image.Image, radius: int = 36, border: int = 8) -> Image.Image:
+    """Apply rounded corners with a white border."""
+    w, h = img.size
+    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+    draw.rounded_rectangle((0, 0, w - 1, h - 1), radius=radius, fill=(255, 255, 255, 255))
 
-    # Create rounded rectangle mask
-    mask = Image.new("L", (STICKER_SIZE, STICKER_SIZE), 0)
-    ImageDraw.Draw(mask).rounded_rectangle(
-        (0, 0, STICKER_SIZE - 1, STICKER_SIZE - 1),
-        radius=radius,
-        fill=255,
-    )
-
-    # Apply mask
-    result = Image.new("RGBA", (STICKER_SIZE, STICKER_SIZE), (0, 0, 0, 0))
-    result.paste(img, mask=mask)
-    return result
+    inner_w, inner_h = max(1, w - border * 2), max(1, h - border * 2)
+    inner_img = img.resize((inner_w, inner_h), Image.LANCZOS)
+    inner_mask = Image.new("L", (inner_w, inner_h), 0)
+    ImageDraw.Draw(inner_mask).rounded_rectangle((0, 0, inner_w - 1, inner_h - 1), radius=max(4, radius - border), fill=255)
+    canvas.paste(inner_img, (border, border), mask=inner_mask)
+    return canvas
 
 
 def _cartoon_effect(img: Image.Image) -> Image.Image:
-    """Posterize with edge emphasis for a cartoon look."""
+    """Apply a fast posterized cartoon FX."""
     rgb = img.convert("RGB")
+    rgb = rgb.filter(ImageFilter.MedianFilter(size=3))
     posterized = ImageOps.posterize(rgb, 4)
 
-    # Find edges
+    # Edge overlay
     edges = rgb.convert("L").filter(ImageFilter.FIND_EDGES)
     edges = ImageOps.invert(edges)
-    edges = edges.point(lambda x: 0 if x < 180 else 255)
+    edges = edges.point(lambda x: 0 if x < 170 else 255)
 
-    # Combine
     posterized = posterized.convert("RGBA")
     edge_layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
     edge_layer.paste(
@@ -211,8 +207,6 @@ def _cartoon_effect(img: Image.Image) -> Image.Image:
     )
 
     result = Image.alpha_composite(posterized, edge_layer)
-
-    # Preserve original alpha
     if img.mode == "RGBA":
         result.putalpha(img.split()[3])
 
@@ -228,7 +222,7 @@ def _resize_to_sticker(img: Image.Image) -> Image.Image:
         return Image.new("RGBA", (STICKER_SIZE, STICKER_SIZE), (0, 0, 0, 0))
 
     ratio = min(STICKER_SIZE / w, STICKER_SIZE / h)
-    new_w, new_h = int(w * ratio), int(h * ratio)
+    new_w, new_h = max(1, int(w * ratio)), max(1, int(h * ratio))
     img = img.resize((new_w, new_h), Image.LANCZOS)
 
     canvas = Image.new("RGBA", (STICKER_SIZE, STICKER_SIZE), (0, 0, 0, 0))
@@ -262,19 +256,17 @@ def _draw_gradient_rect(
     """Draw a rounded rectangle with a vertical gradient."""
     x0, y0, x1, y1 = bbox
 
-    # Create gradient layer
     gradient = Image.new("RGBA", img.size, (0, 0, 0, 0))
     g_draw = ImageDraw.Draw(gradient)
 
     for y in range(y0, y1):
-        ratio = (y - y0) / (y1 - y0)
+        ratio = (y - y0) / max(1, (y1 - y0))
         r = max(0, min(255, int(color[0] * (1 - ratio * 0.3))))
         g = max(0, min(255, int(color[1] * (1 - ratio * 0.3))))
         b = max(0, min(255, int(color[2] * (1 - ratio * 0.3))))
         a = color[3] if len(color) > 3 else 255
         g_draw.line([(x0, y), (x1, y)], fill=(r, g, b, a))
 
-    # Apply rounded corners
     mask = Image.new("L", img.size, 0)
     ImageDraw.Draw(mask).rounded_rectangle(bbox, radius=radius, fill=255)
 
@@ -292,64 +284,66 @@ def _hex_to_rgba(hex_color: str) -> tuple[int, int, int, int]:
     elif len(hex_color) == 8:
         r, g, b, a = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16), int(hex_color[6:8], 16)
         return (r, g, b, a)
-    return (88, 86, 214, 255)  # Default purple
+    return (88, 86, 214, 255)
 
 
 def _load_best_font(text: str, target_width: int) -> ImageFont.FreeTypeFont:
     """Load font and binary-search for optimal size."""
     from pathlib import Path
-
     font_paths = [
-        "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf",
-        "/usr/share/fonts/truetype/noto/NotoSansKhmer-Bold.ttf",
-        "C:/Windows/Fonts/arialbd.ttf",
-        "C:/Windows/Fonts/arial.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+        "C:\\Windows\\Fonts\\arialbd.ttf",
+        "C:\\Windows\\Fonts\\segoeui.ttf",
     ]
-
-    font_path = next((fp for fp in font_paths if Path(fp).exists()), None)
-
-    lo, hi, best = 20, 200, 48
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        try:
-            test_font = ImageFont.truetype(font_path, size=mid) if font_path else ImageFont.load_default(size=mid)
-        except (OSError, TypeError):
-            test_font = ImageFont.load_default()
+    font_file = None
+    for p in font_paths:
+        if Path(p).exists():
+            font_file = p
             break
 
-        wrapped = _wrap_text(text, test_font, max_width=target_width)
-        d = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
-        bb = d.textbbox((0, 0), wrapped, font=test_font)
-        tw, th = bb[2] - bb[0], bb[3] - bb[1]
+    for size in range(48, 16, -4):
+        try:
+            if font_file:
+                font = ImageFont.truetype(font_file, size=size)
+            else:
+                font = ImageFont.load_default()
+                return font
 
-        if tw <= target_width and th <= target_width:
-            best = mid
-            lo = mid + 1
-        else:
-            hi = mid - 1
+            dummy = Image.new("L", (1, 1))
+            draw = ImageDraw.Draw(dummy)
+            bbox = draw.textbbox((0, 0), text, font=font)
+            if (bbox[2] - bbox[0]) <= target_width:
+                return font
+        except Exception:
+            continue
 
-    try:
-        return ImageFont.truetype(font_path, size=best) if font_path else ImageFont.load_default(size=best)
-    except (OSError, TypeError):
-        return ImageFont.load_default()
+    return ImageFont.load_default()
 
 
-def _wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> str:
-    """Word-wrap text to fit within max_width pixels."""
-    d = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+def _wrap_text(text: str, font, max_width: int) -> str:
+    """Wrap text to fit within max_width."""
     words = text.split()
-    lines, current = [], ""
+    if not words:
+        return text
+
+    dummy = Image.new("L", (1, 1))
+    draw = ImageDraw.Draw(dummy)
+
+    lines = []
+    current_line = []
 
     for word in words:
-        test = f"{current} {word}".strip() if current else word
-        bb = d.textbbox((0, 0), test, font=font)
-        if bb[2] - bb[0] <= max_width:
-            current = test
+        test_line = " ".join(current_line + [word])
+        bbox = draw.textbbox((0, 0), test_line, font=font)
+        if (bbox[2] - bbox[0]) <= max_width:
+            current_line.append(word)
         else:
-            if current:
-                lines.append(current)
-            current = word
+            if current_line:
+                lines.append(" ".join(current_line))
+            current_line = [word]
 
-    if current:
-        lines.append(current)
-    return "\n".join(lines) if lines else text
+    if current_line:
+        lines.append(" ".join(current_line))
+
+    return "\n".join(lines)
