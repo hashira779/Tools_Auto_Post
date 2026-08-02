@@ -116,17 +116,41 @@ services:
     networks:
       - camtech-net
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  #  Future Services
+  #  Sticker Maker — Telegram Sticker Pack Creator
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  # auth-api:
-  #   build:
-  #     context: ./services/auth-api
-  #   container_name: camtech-auth-api
-  #   expose:
-  #     - "8001"
-  #   networks:
-  #     - camtech-net
+  sticker-frontend:
+    build:
+      context: ./services/sticker-maker/frontend
+      dockerfile: Dockerfile
+    container_name: camtech-sticker-frontend
+    ports:
+      - "${STICKER_PORT:-8080}:80"
+    depends_on:
+      sticker-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - camtech-net
+
+  sticker-api:
+    build:
+      context: ./services/sticker-maker/sticker-api
+      dockerfile: Dockerfile
+    container_name: camtech-sticker-api
+    environment:
+      - STICKER_BOT_TOKEN=${STICKER_BOT_TOKEN:-}
+    expose:
+      - "8001"
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/api/health')" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - camtech-net
 
 networks:
   camtech-net:
