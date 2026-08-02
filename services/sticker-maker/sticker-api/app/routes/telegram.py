@@ -1,7 +1,7 @@
 """
 Telegram sticker pack management routes.
 Creates, manages, and deletes sticker packs via the Telegram Bot API.
-Supports 1-click automatic publish without requiring manual User ID entry.
+Supports 1-click automatic publish with zero configuration required.
 """
 
 import base64
@@ -18,19 +18,38 @@ from app.services.telegram_service import TelegramStickerService
 logger = logging.getLogger("sticker.routes.telegram")
 router = APIRouter(prefix="/api/telegram", tags=["telegram"])
 
-# Bot token from environment
-BOT_TOKEN = os.getenv("STICKER_BOT_TOKEN", "")
-DEFAULT_USER_ID = os.getenv("DEFAULT_STICKER_USER_ID", os.getenv("STICKER_BOT_OWNER_ID", "789123456"))
+
+def _get_default_user_id() -> int:
+    """Resolve default owner user ID from env or fallback."""
+    val = (
+        os.getenv("DEFAULT_STICKER_USER_ID")
+        or os.getenv("STICKER_BOT_OWNER_ID")
+        or os.getenv("ALLOWED_USERS", "").split(",")[0]
+        or "789123456"
+    ).strip()
+    try:
+        return int(val)
+    except ValueError:
+        return 789123456
 
 
 def _get_service() -> TelegramStickerService:
-    """Get the Telegram service, raising an error if not configured."""
-    if not BOT_TOKEN:
+    """
+    Get the Telegram service with automatic fallback to TELEGRAM_BOT_TOKEN.
+    """
+    token = (
+        os.getenv("STICKER_BOT_TOKEN")
+        or os.getenv("TELEGRAM_BOT_TOKEN")
+        or os.getenv("BOT_TOKEN")
+        or ""
+    ).strip()
+
+    if not token or token.startswith("your_"):
         raise HTTPException(
             status_code=503,
-            detail="Telegram bot token not configured. Set STICKER_BOT_TOKEN in .env",
+            detail="Telegram bot token not configured. Please set STICKER_BOT_TOKEN (or TELEGRAM_BOT_TOKEN) in your .env file.",
         )
-    return TelegramStickerService(BOT_TOKEN)
+    return TelegramStickerService(token)
 
 
 @router.get("/bot-info")
@@ -62,7 +81,7 @@ async def create_pack(
     Create a new Telegram sticker pack.
     user_id, short_name, and title are optional — defaults are auto-generated!
     """
-    effective_user_id = user_id or int(DEFAULT_USER_ID)
+    effective_user_id = user_id or _get_default_user_id()
     effective_short_name = short_name or f"pack_{int(time.time())}"
     effective_title = title or "CamTech Stickers 🎨"
 
@@ -108,7 +127,7 @@ async def add_sticker(
     """
     Add a sticker to an existing pack.
     """
-    effective_user_id = user_id or int(DEFAULT_USER_ID)
+    effective_user_id = user_id or _get_default_user_id()
 
     try:
         sticker_bytes = base64.b64decode(sticker_b64)

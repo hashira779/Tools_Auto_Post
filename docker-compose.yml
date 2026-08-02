@@ -125,7 +125,8 @@ services:
       dockerfile: Dockerfile
     container_name: camtech-sticker-api
     environment:
-      - STICKER_BOT_TOKEN=${STICKER_BOT_TOKEN:-}
+      - STICKER_BOT_TOKEN=${STICKER_BOT_TOKEN:-${TELEGRAM_BOT_TOKEN:-}}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
     expose:
       - "8001"
     healthcheck:
