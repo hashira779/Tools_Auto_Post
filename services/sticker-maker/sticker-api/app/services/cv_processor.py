@@ -1,12 +1,11 @@
 """
-CV & ID Photo Processor — Python Microservice
-Ultra-Clean ID Photo Head Extraction & Photorealistic Suit Overlay.
-Preserves user's authentic hair, face, beard, and skin while dressing them in official suits.
+CV & ID Photo Processor — Local AI Microservice
+Powered by Local ONNX Neural Network (u2net / rembg) + Precision Suit Compositor.
+100% Local AI Execution — No Cloud API required.
 """
 
 import io
 import os
-import math
 import logging
 from typing import Tuple, Optional, Dict, Any
 from pathlib import Path
@@ -19,9 +18,21 @@ try:
 except ImportError:
     HAS_CV2 = False
 
+try:
+    from rembg import remove, new_session
+    # Initialize lightweight local ONNX model session (u2netp ~4MB for ultra-fast local CPU inference)
+    try:
+        REMBG_SESSION = new_session("u2netp")
+    except Exception:
+        REMBG_SESSION = None
+    HAS_REMBG = True
+except ImportError:
+    HAS_REMBG = False
+    REMBG_SESSION = None
+
 logger = logging.getLogger(__name__)
 
-# Suit Asset Directory
+# Asset Directories
 SUITS_DIR = Path(__file__).resolve().parent.parent / "assets" / "suits"
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "assets" / "templates"
 
@@ -37,7 +48,7 @@ SUIT_FILES: Dict[str, Dict[str, Any]] = {
     "men-suit-blue": {
         "suit": "men_black_suit.png",
         "default_bg": "#0072C6",
-        "suit_y_ratio": 0.44,  # Where suit collar top sits
+        "suit_y_ratio": 0.44,
         "suit_scale": 1.05,
     },
     "men-suit-white": {
@@ -166,70 +177,42 @@ def detect_face(cv_bgr: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
     return None
 
 
-def extract_user_portrait(
-    user_img_pil: Image.Image,
-    target_w: int,
-    target_h: int,
-    bg_rgb: Tuple[int, int, int],
-) -> Image.Image:
+def extract_head_with_local_ai(input_pil: Image.Image) -> Image.Image:
     """
-    Extracts user's head, hair, ears, beard, and neck cleanly.
-    Centers them onto the requested official studio background.
+    Uses local neural network (rembg ONNX) to extract head & hair cleanly with alpha channel.
+    Falls back to precision GrabCut if rembg is unavailable.
     """
-    img_rgb = user_img_pil.convert("RGB")
-    cv_bgr = cv2.cvtColor(np.array(img_rgb), cv2.COLOR_RGB2BGR)
+    if HAS_REMBG:
+        try:
+            if REMBG_SESSION:
+                cutout = remove(input_pil, session=REMBG_SESSION)
+            else:
+                cutout = remove(input_pil)
+            return cutout.convert("RGBA")
+        except Exception as e:
+            logger.warning(f"Local AI rembg failed, falling back: {e}")
 
-    face_box = detect_face(cv_bgr)
-    w, h = user_img_pil.size
+    # Fallback to OpenCV Grabcut
+    if HAS_CV2:
+        try:
+            img_rgb = input_pil.convert("RGB")
+            w, h = img_rgb.size
+            user_np = np.array(img_rgb)
+            mask = np.zeros(user_np.shape[:2], np.uint8)
+            bgdModel = np.zeros((1, 65), np.float64)
+            fgdModel = np.zeros((1, 65), np.float64)
+            rect = (int(w * 0.05), int(h * 0.05), int(w * 0.90), int(h * 0.90))
+            cv2.grabCut(user_np, mask, rect, bgdModel, fgdModel, 3, cv2.GC_INIT_WITH_RECT)
+            mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
+            mask2 = cv2.GaussianBlur(mask2 * 255, (5, 5), 0)
+            
+            rgba = input_pil.convert("RGBA")
+            rgba.putalpha(Image.fromarray(mask2))
+            return rgba
+        except Exception as e:
+            logger.warning(f"GrabCut fallback failed: {e}")
 
-    if face_box:
-        fx, fy, fw, fh = face_box
-        # Center of face
-        face_cx = fx + fw // 2
-        face_cy = fy + fh // 2
-
-        # Crop framing for ID portrait (top of head to chest)
-        crop_top = max(0, fy - int(fh * 0.70))
-        crop_bottom = min(h, fy + int(fh * 2.10))
-        crop_h = crop_bottom - crop_top
-        crop_w = int(crop_h * (target_w / target_h))
-
-        crop_left = max(0, face_cx - crop_w // 2)
-        crop_right = min(w, crop_left + crop_w)
-        if crop_right - crop_left < crop_w:
-            crop_left = max(0, crop_right - crop_w)
-
-        cropped = user_img_pil.crop((crop_left, crop_top, crop_right, crop_bottom))
-    else:
-        # Fallback to standard top center crop
-        cropped = ImageOps.fit(user_img_pil, (target_w, target_h), Image.Resampling.LANCZOS)
-
-    # Resize to canvas
-    user_scaled = ImageOps.fit(cropped, (target_w, target_h), Image.Resampling.LANCZOS).convert("RGBA")
-
-    # Clean background replacement
-    # Using GrabCut / adaptive thresholding if background is distinct
-    try:
-        user_np = np.array(user_scaled.convert("RGB"))
-        mask = np.zeros(user_np.shape[:2], np.uint8)
-        bgdModel = np.zeros((1, 65), np.float64)
-        fgdModel = np.zeros((1, 65), np.float64)
-        rect = (int(target_w * 0.05), int(target_h * 0.05), int(target_w * 0.90), int(target_h * 0.90))
-        cv2.grabCut(user_np, mask, rect, bgdModel, fgdModel, 3, cv2.GC_INIT_WITH_RECT)
-        mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
-
-        # Smooth edges
-        mask2 = cv2.GaussianBlur(mask2 * 255, (7, 7), 0)
-        mask_pil = Image.fromarray(mask2)
-
-        # Composite user head onto clean solid studio background
-        canvas = Image.new("RGBA", (target_w, target_h), (*bg_rgb, 255))
-        canvas.paste(user_scaled, (0, 0), mask=mask_pil)
-        return canvas
-    except Exception as e:
-        logger.warning(f"Grabcut fallback: {e}")
-        # Return scaled user directly
-        return user_scaled
+    return input_pil.convert("RGBA")
 
 
 def process_cv_photo(
@@ -241,26 +224,60 @@ def process_cv_photo(
     contrast: float = 1.0,
 ) -> bytes:
     """
-    Flawless CV & ID Photo pipeline:
-    1. Extracts user's exact head, hair, beard, and neck cleanly.
-    2. Places user on official studio background.
-    3. Overlays transparent suit/blazer template cleanly over chest & neck.
-    4. Produces authentic, sharp 300 DPI ID photo without ghost faces.
+    100% Local AI Pipeline:
+    1. Removes background from user selfie using local ONNX neural network.
+    2. Detects face center and scales portrait into standard ID canvas.
+    3. Fills solid studio background (#0072C6 / #FFFFFF).
+    4. Overlays high-resolution formal suit template cleanly over neck.
+    5. Exports 300 DPI high-resolution JPEG.
     """
     input_img = Image.open(io.BytesIO(image_bytes))
     input_img = ImageOps.exif_transpose(input_img)
 
-    # 1. Look up dimensions and template config
     target_w, target_h = STANDARDS.get(size_standard, STANDARDS["4x6"])
     suit_config = SUIT_FILES.get(template_id, SUIT_FILES["men-suit-blue"])
 
     final_bg_hex = bg_color_hex or suit_config.get("default_bg", "#0072C6")
     bg_rgb = hex_to_rgb(final_bg_hex)
 
-    # 2. Extract user's clean portrait onto official background
-    base_portrait = extract_user_portrait(input_img, target_w, target_h, bg_rgb)
+    # 1. Local AI Neural Cutout
+    user_cutout = extract_head_with_local_ai(input_img)
 
-    # 3. Load & Overlay Transparent Suit
+    # 2. Detect face in cutout to properly align portrait height
+    cutout_rgb = user_cutout.convert("RGB")
+    cv_bgr = cv2.cvtColor(np.array(cutout_rgb), cv2.COLOR_RGB2BGR) if HAS_CV2 else None
+    face_box = detect_face(cv_bgr) if cv_bgr is not None else None
+
+    uw, uh = user_cutout.size
+
+    if face_box:
+        fx, fy, fw, fh = face_box
+        face_cx = fx + fw // 2
+        face_cy = fy + fh // 2
+
+        # Standard ID framing (top of head to chest)
+        crop_top = max(0, fy - int(fh * 0.65))
+        crop_bottom = min(uh, fy + int(fh * 2.10))
+        crop_h = crop_bottom - crop_top
+        crop_w = int(crop_h * (target_w / target_h))
+
+        crop_left = max(0, face_cx - crop_w // 2)
+        crop_right = min(uw, crop_left + crop_w)
+        if crop_right - crop_left < crop_w:
+            crop_left = max(0, crop_right - crop_w)
+
+        user_framed = user_cutout.crop((crop_left, crop_top, crop_right, crop_bottom))
+    else:
+        user_framed = user_cutout
+
+    # Scale framed user to canvas dimensions
+    user_scaled = ImageOps.fit(user_framed, (target_w, target_h), Image.Resampling.LANCZOS)
+
+    # 3. Create Studio Background Canvas
+    canvas = Image.new("RGBA", (target_w, target_h), (*bg_rgb, 255))
+    canvas.paste(user_scaled, (0, 0), mask=user_scaled.split()[3])
+
+    # 4. Overlay High-Resolution Suit Template
     suit_filename = suit_config.get("suit", "men_black_suit.png")
     suit_path = SUITS_DIR / suit_filename
 
@@ -279,16 +296,16 @@ def process_cv_photo(
         suit_x = (target_w - suit_w) // 2
 
         # Paste suit overlay over user
-        base_portrait.paste(suit_resized, (suit_x, suit_y), mask=suit_resized)
+        canvas.paste(suit_resized, (suit_x, suit_y), mask=suit_resized)
 
-    # 4. Enhance Brightness/Contrast if requested
-    result_pil = base_portrait.convert("RGB")
+    # 5. Brightness & Contrast Polish
+    final_pil = canvas.convert("RGB")
     if brightness != 1.0:
-        result_pil = ImageEnhance.Brightness(result_pil).enhance(brightness)
+        final_pil = ImageEnhance.Brightness(final_pil).enhance(brightness)
     if contrast != 1.0:
-        result_pil = ImageEnhance.Contrast(result_pil).enhance(contrast)
+        final_pil = ImageEnhance.Contrast(final_pil).enhance(contrast)
 
-    # 5. Output 300 DPI JPEG
+    # 6. Save 300 DPI Output
     out_io = io.BytesIO()
-    result_pil.save(out_io, format="JPEG", quality=96, dpi=(300, 300))
+    final_pil.save(out_io, format="JPEG", quality=96, dpi=(300, 300))
     return out_io.getvalue()
