@@ -143,6 +143,8 @@ def process_cv_photo(
     brightness: float = 1.0,
     contrast: float = 1.0,
 ) -> bytes:
+    from PIL import ImageDraw, ImageChops
+
     input_img = Image.open(io.BytesIO(image_bytes))
     input_img = ImageOps.exif_transpose(input_img)
 
@@ -187,11 +189,36 @@ def process_cv_photo(
 
     user_scaled = ImageOps.fit(user_framed, (target_w, target_h), Image.Resampling.LANCZOS)
 
-    canvas = Image.new("RGBA", (target_w, target_h), (*bg_rgb, 255))
-    canvas.paste(user_scaled, (0, 0), mask=user_scaled.split()[3])
-
     suit_filename = suit_config.get("suit", "men_black_suit.png")
     suit_path = SUITS_DIR / suit_filename
+    
+    suit_y = int(target_h * 0.48)
+    
+    # Erase the user's original shoulders and chest so they don't stick out past the suit
+    erase_mask = Image.new("L", (target_w, target_h), 255)
+    draw_erase = ImageDraw.Draw(erase_mask)
+    
+    neck_center = target_w // 2
+    neck_width = int(target_w * 0.45) # wide enough for neck, narrow enough to hide shoulders
+    neck_left = neck_center - neck_width // 2
+    neck_right = neck_center + neck_width // 2
+    
+    # Erase left shoulder
+    draw_erase.rectangle([0, suit_y - 20, neck_left, target_h], fill=0)
+    # Erase right shoulder
+    draw_erase.rectangle([neck_right, suit_y - 20, target_w, target_h], fill=0)
+    # Erase lower torso (below the suit V-neck)
+    draw_erase.rectangle([0, suit_y + int(target_h * 0.20), target_w, target_h], fill=0)
+    
+    # Blur the mask to create a soft transition
+    erase_mask = erase_mask.filter(ImageFilter.GaussianBlur(12))
+    
+    # Apply erasing mask to user cutout
+    final_user_alpha = ImageChops.darker(user_scaled.split()[3], erase_mask)
+    user_scaled.putalpha(final_user_alpha)
+
+    canvas = Image.new("RGBA", (target_w, target_h), (*bg_rgb, 255))
+    canvas.paste(user_scaled, (0, 0), mask=user_scaled.split()[3])
 
     if suit_path.exists():
         suit_img = Image.open(suit_path).convert("RGBA")
@@ -202,9 +229,7 @@ def process_cv_photo(
         suit_h = int(suit_w / aspect)
         suit_resized = suit_img.resize((suit_w, suit_h), Image.Resampling.LANCZOS)
 
-        suit_y = int(target_h * 0.48)
         suit_x = (target_w - suit_w) // 2
-
         canvas.paste(suit_resized, (suit_x, suit_y), mask=suit_resized)
 
     final_pil = canvas.convert("RGB")
