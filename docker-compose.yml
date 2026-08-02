@@ -5,7 +5,7 @@
 #    docker compose up --build
 #
 #  Or run individual services:
-#    docker compose up savemedia-frontend savemedia-api
+#    docker compose up savemedia-frontend savemedia-api cv-studio-api
 #    docker compose up auto-post-bot
 # ══════════════════════════════════════════════════════════════════
 
@@ -22,7 +22,7 @@ services:
       - camtech-net
 
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  #  SaveMedia Web — Video/Audio Downloader
+  #  SaveMedia Web — Frontend Gateway
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   savemedia-frontend:
@@ -35,6 +35,7 @@ services:
     depends_on:
       - savemedia-api
       - sticker-api
+      - cv-studio-api
     restart: unless-stopped
     networks:
       - camtech-net
@@ -84,6 +85,31 @@ services:
       - camtech-net
 
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  CV & ID Photo AI Studio API — Microservice
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  cv-studio-api:
+    build:
+      context: ./services/cv-studio-api
+      dockerfile: Dockerfile
+    container_name: camtech-cv-studio-api
+    environment:
+      - U2NET_HOME=/app/models
+    volumes:
+      - cv-models:/app/models
+    expose:
+      - "8002"
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/api/health')" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   #  Auto Post Bot — Telegram Bot
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -115,6 +141,7 @@ services:
     restart: unless-stopped
     networks:
       - camtech-net
+
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   #  Sticker Maker API — Microservice for Telegram Stickers
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -149,3 +176,4 @@ networks:
 volumes:
   savemedia-downloads:
   bot-downloads:
+  cv-models:

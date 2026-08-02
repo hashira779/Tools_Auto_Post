@@ -79,6 +79,11 @@ if ! check_health "http://localhost:80/api/sticker/styles" "Sticker API"; then
     DEPLOY_FAILED=1
 fi
 
+# Verify CV Studio AI API (routed via Nginx)
+if ! check_health "http://localhost:80/api/cv/templates" "CV & ID Photo Studio API"; then
+    DEPLOY_FAILED=1
+fi
+
 # 6. Automated Rollback if deployment failed
 if [ "$DEPLOY_FAILED" -eq 1 ]; then
     echo "===================================================="
