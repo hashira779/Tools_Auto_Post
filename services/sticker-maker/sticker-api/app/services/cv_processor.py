@@ -1,12 +1,13 @@
 """
 CV & ID Photo Processor — Python Microservice
-Photorealistic AI Face-Swap & Seamless Poisson Blending onto Real Studio Uniform & Suit Templates.
+Ultra-Precise AI Face-Swap, Eye-Level Affine Alignment & Seamless Poisson Blending onto Studio Uniforms.
 """
 
 import io
 import os
+import math
 import logging
-from typing import Tuple, Optional, Dict, Any
+from typing import Tuple, Optional, Dict, List, Any
 from pathlib import Path
 from PIL import Image, ImageOps, ImageEnhance, ImageFilter
 import numpy as np
@@ -59,72 +60,111 @@ def hex_to_rgb(hex_str: str) -> Tuple[int, int, int]:
     return tuple(int(hex_str[i : i + 2], 16) for i in (0, 2, 4))  # type: ignore
 
 
-def detect_face(cv_bgr: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
+def detect_face_and_eyes(cv_bgr: np.ndarray) -> Tuple[Optional[Tuple[int, int, int, int]], List[Tuple[int, int]]]:
     """
-    Detect face bounding box (x, y, w, h) using OpenCV Haar Cascade.
+    Detects face bounding box and eye centers for rotational alignment.
     """
     if not HAS_CV2:
-        return None
+        return None, []
 
     try:
         gray = cv2.cvtColor(cv_bgr, cv2.COLOR_BGR2GRAY)
-        cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-        face_cascade = cv2.CascadeClassifier(cascade_path)
         
+        # Face detector
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
         faces = face_cascade.detectMultiScale(
             gray,
-            scaleFactor=1.1,
+            scaleFactor=1.08,
             minNeighbors=4,
             minSize=(int(cv_bgr.shape[1] * 0.12), int(cv_bgr.shape[0] * 0.12)),
         )
 
-        if len(faces) > 0:
-            # Pick largest detected face
-            faces = sorted(faces, key=lambda f: f[2] * f[3], reverse=True)
-            fx, fy, fw, fh = faces[0]
-            return (int(fx), int(fy), int(fw), int(fh))
+        if len(faces) == 0:
+            return None, []
+
+        # Get largest face
+        faces = sorted(faces, key=lambda f: f[2] * f[3], reverse=True)
+        fx, fy, fw, fh = faces[0]
+
+        # Detect eyes within face region
+        eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_eye.xml")
+        face_gray = gray[fy : fy + int(fh * 0.65), fx : fx + fw]
+        eyes = eye_cascade.detectMultiScale(face_gray, scaleFactor=1.1, minNeighbors=3, minSize=(int(fw * 0.12), int(fh * 0.12)))
+
+        eye_centers = []
+        if len(eyes) >= 2:
+            # Sort left to right
+            eyes = sorted(eyes, key=lambda e: e[0])
+            for ex, ey, ew, eh in eyes[:2]:
+                eye_centers.append((fx + ex + ew // 2, fy + ey + eh // 2))
+
+        return (int(fx), int(fy), int(fw), int(fh)), eye_centers
     except Exception as e:
-        logger.warning(f"Face detection failed: {e}")
+        logger.warning(f"Face & eye detection error: {e}")
+        return None, []
 
-    return None
 
-
-def match_skin_tone(src_face_bgr: np.ndarray, target_face_bgr: np.ndarray) -> np.ndarray:
+def align_face_rotation(cv_bgr: np.ndarray, eye_centers: List[Tuple[int, int]]) -> np.ndarray:
     """
-    Color transfer in LAB color space to match the template's studio lighting.
+    Rotates image so eyes are horizontally level (0 degrees tilt).
+    """
+    if len(eye_centers) < 2:
+        return cv_bgr
+
+    left_eye, right_eye = eye_centers[0], eye_centers[1]
+    dx = right_eye[0] - left_eye[0]
+    dy = right_eye[1] - left_eye[1]
+    angle = math.degrees(math.atan2(dy, dx))
+
+    # If angle is minor (< 35 deg), level it
+    if abs(angle) < 35:
+        center = ((left_eye[0] + right_eye[0]) // 2, (left_eye[1] + right_eye[1]) // 2)
+        m = cv2.getRotationMatrix2D(center, angle, 1.0)
+        h, w = cv_bgr.shape[:2]
+        return cv2.warpAffine(cv_bgr, m, (w, h), flags=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE)
+
+    return cv_bgr
+
+
+def match_skin_tone_lab(src_bgr: np.ndarray, target_bgr: np.ndarray) -> np.ndarray:
+    """
+    Seamless LAB color transfer to match studio lighting temperature & luminance.
     """
     if not HAS_CV2:
-        return src_face_bgr
+        return src_bgr
 
     try:
-        src_lab = cv2.cvtColor(src_face_bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
-        tgt_lab = cv2.cvtColor(target_face_bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
+        src_lab = cv2.cvtColor(src_bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
+        tgt_lab = cv2.cvtColor(target_bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
 
         src_mean, src_std = src_lab.mean(axis=(0, 1)), src_lab.std(axis=(0, 1))
         tgt_mean, tgt_std = tgt_lab.mean(axis=(0, 1)), tgt_lab.std(axis=(0, 1))
 
-        src_std[src_std == 0] = 1.0
+        src_std[src_std < 1e-4] = 1.0
 
-        # Adjust LAB channels
-        result_lab = (src_lab - src_mean) * (tgt_std / src_std) + tgt_mean
+        # Gentle blending factor (75% match to preserve real skin nuances)
+        alpha = 0.75
+        adjusted_std = (1 - alpha) * src_std + alpha * tgt_std
+        adjusted_mean = (1 - alpha) * src_mean + alpha * tgt_mean
+
+        result_lab = (src_lab - src_mean) * (adjusted_std / src_std) + adjusted_mean
         result_lab = np.clip(result_lab, 0, 255).astype(np.uint8)
 
         return cv2.cvtColor(result_lab, cv2.COLOR_LAB2BGR)
     except Exception as e:
-        logger.warning(f"Skin tone matching fallback: {e}")
-        return src_face_bgr
+        logger.warning(f"Skin tone match fallback: {e}")
+        return src_bgr
 
 
-def seamless_face_swap(
+def seamless_face_swap_perfect(
     user_img_pil: Image.Image,
     template_path: Path,
     brightness: float = 1.0,
     contrast: float = 1.0,
 ) -> Image.Image:
     """
-    Seamlessly swaps user's face into the real high-res template photo using Poisson blending.
+    Ultra-precise AI face swap onto real template photo.
     """
-    # 1. Load Template Photo
     if not template_path.exists():
         logger.error(f"Template not found at {template_path}")
         return user_img_pil
@@ -132,85 +172,100 @@ def seamless_face_swap(
     template_pil = Image.open(template_path).convert("RGB")
     tpl_w, tpl_h = template_pil.size
 
-    # Convert to OpenCV BGR
     tpl_bgr = cv2.cvtColor(np.array(template_pil), cv2.COLOR_RGB2BGR)
     user_bgr = cv2.cvtColor(np.array(user_img_pil.convert("RGB")), cv2.COLOR_RGB2BGR)
 
-    # 2. Detect Faces
-    user_face_box = detect_face(user_bgr)
-    tpl_face_box = detect_face(tpl_bgr)
+    # 1. Detect Source User Face & Eyes
+    user_face_box, user_eyes = detect_face_and_eyes(user_bgr)
+    if user_eyes and len(user_eyes) == 2:
+        user_bgr = align_face_rotation(user_bgr, user_eyes)
+        user_face_box, _ = detect_face_and_eyes(user_bgr)
 
-    # Fallback coordinates if detection fails
+    # Fallback face boxes
     if not user_face_box:
         uw, uh = user_img_pil.size
-        user_face_box = (int(uw * 0.25), int(uh * 0.15), int(uw * 0.5), int(uh * 0.5))
+        user_face_box = (int(uw * 0.22), int(uh * 0.15), int(uw * 0.56), int(uh * 0.56))
 
+    tpl_face_box, _ = detect_face_and_eyes(tpl_bgr)
     if not tpl_face_box:
         tpl_face_box = (int(tpl_w * 0.28), int(tpl_h * 0.15), int(tpl_w * 0.44), int(tpl_h * 0.44))
 
     ux, uy, uw, uh = user_face_box
     tx, ty, tw, th = tpl_face_box
 
-    # 3. Crop User Face Region (Face + Cheeks + Forehead + Chin)
-    # Expand slightly for full facial structure
-    pad_top = int(uh * 0.15)
-    pad_bottom = int(uh * 0.15)
-    pad_side = int(uw * 0.12)
+    # 2. Extract Precision User Face (Forehead, Eyes, Nose, Mouth, Jaw)
+    pad_y_top = int(uh * 0.10)
+    pad_y_bot = int(uh * 0.18)
+    pad_x = int(uw * 0.10)
 
-    ux1 = max(0, ux - pad_side)
-    uy1 = max(0, uy - pad_top)
-    ux2 = min(user_bgr.shape[1], ux + uw + pad_side)
-    uy2 = min(user_bgr.shape[0], uy + uh + pad_bottom)
+    y1 = max(0, uy - pad_y_top)
+    y2 = min(user_bgr.shape[0], uy + uh + pad_y_bot)
+    x1 = max(0, ux - pad_x)
+    x2 = min(user_bgr.shape[1], ux + uw + pad_x)
 
-    user_face_crop = user_bgr[uy1:uy2, ux1:ux2]
-    if user_face_crop.size == 0:
+    user_face_roi = user_bgr[y1:y2, x1:x2]
+    if user_face_roi.size == 0:
         return template_pil
 
-    # Scale user face to match target template face size
-    target_face_w = int(tw * 1.05)
-    target_face_h = int(th * 1.05)
-    user_face_resized = cv2.resize(user_face_crop, (target_face_w, target_face_h), interpolation=cv2.INTER_LANCZOS4)
+    # Resize user face to target face size
+    target_face_w = int(tw * 1.04)
+    target_face_h = int(th * 1.10)
+    user_face_aligned = cv2.resize(user_face_roi, (target_face_w, target_face_h), interpolation=cv2.INTER_LANCZOS4)
 
-    # 4. Extract target face area for skin-tone harmonization
-    tx1 = max(0, tx)
-    ty1 = max(0, ty)
-    tx2 = min(tpl_w, tx + tw)
-    ty2 = min(tpl_h, ty + th)
-    tpl_face_crop = tpl_bgr[ty1:ty2, tx1:tx2]
+    # 3. Match Skin Tone & Studio Lighting
+    tpl_y1 = max(0, ty)
+    tpl_y2 = min(tpl_h, ty + th)
+    tpl_x1 = max(0, tx)
+    tpl_x2 = min(tpl_w, tx + tw)
+    tpl_face_roi = tpl_bgr[tpl_y1:tpl_y2, tpl_x1:tpl_x2]
 
-    if tpl_face_crop.size > 0:
-        user_face_resized = match_skin_tone(user_face_resized, tpl_face_crop)
+    if tpl_face_roi.size > 0:
+        user_face_aligned = match_skin_tone_lab(user_face_aligned, tpl_face_roi)
 
-    # 5. Create Smooth Seamless Cloning Mask (Ellipse centered on facial features)
-    mask = np.zeros(user_face_resized.shape[:2], dtype=np.uint8)
-    center_ellipse = (target_face_w // 2, int(target_face_h * 0.50))
-    axes = (int(target_face_w * 0.42), int(target_face_h * 0.46))
-    cv2.ellipse(mask, center_ellipse, axes, 0, 0, 360, 255, -1)
+    # 4. Construct Precision Facial Convex Hull Mask
+    fh_h, fh_w = user_face_aligned.shape[:2]
+    mask = np.zeros((fh_h, fh_w), dtype=np.uint8)
 
-    # Blur mask for ultra-smooth edge transition
-    mask = cv2.GaussianBlur(mask, (15, 15), 0)
+    # 10-point anatomical facial contour
+    points = np.array([
+        [int(fh_w * 0.50), int(fh_h * 0.04)],   # Top Forehead center
+        [int(fh_w * 0.78), int(fh_h * 0.18)],   # Right temple
+        [int(fh_w * 0.88), int(fh_h * 0.45)],   # Right cheekbone
+        [int(fh_w * 0.82), int(fh_h * 0.75)],   # Right jawline
+        [int(fh_w * 0.62), int(fh_h * 0.94)],   # Right chin
+        [int(fh_w * 0.50), int(fh_h * 0.98)],   # Chin tip
+        [int(fh_w * 0.38), int(fh_h * 0.94)],   # Left chin
+        [int(fh_w * 0.18), int(fh_h * 0.75)],   # Left jawline
+        [int(fh_w * 0.12), int(fh_h * 0.45)],   # Left cheekbone
+        [int(fh_w * 0.22), int(fh_h * 0.18)],   # Left temple
+    ], dtype=np.int32)
 
-    # 6. Apply Seamless Poisson Blending
-    clone_center = (tx + tw // 2, ty + int(th * 0.50))
+    cv2.fillConvexPoly(mask, points, 255)
+
+    # High quality Gaussian feathering for flawless boundary blending
+    blur_kernel = max(11, int(fh_w * 0.08) | 1)
+    mask = cv2.GaussianBlur(mask, (blur_kernel, blur_kernel), 0)
+
+    # 5. Seamless Poisson Cloning (Seamless boundary blending)
+    clone_center = (tx + tw // 2, ty + int(th * 0.52))
 
     try:
         blended_bgr = cv2.seamlessClone(
-            user_face_resized,
+            user_face_aligned,
             tpl_bgr,
             mask,
             clone_center,
             cv2.NORMAL_CLONE,
         )
     except Exception as e:
-        logger.warning(f"Poisson clone fallback: {e}")
-        # Fallback to alpha composite
+        logger.warning(f"Poisson seamless clone fallback: {e}")
         blended_bgr = tpl_bgr
 
-    # Convert back to PIL
+    # Convert to PIL
     result_rgb = cv2.cvtColor(blended_bgr, cv2.COLOR_BGR2RGB)
     result_pil = Image.fromarray(result_rgb)
 
-    # Apply brightness/contrast adjustments
+    # Apply brightness/contrast enhancement
     if brightness != 1.0:
         result_pil = ImageEnhance.Brightness(result_pil).enhance(brightness)
     if contrast != 1.0:
@@ -228,12 +283,7 @@ def process_cv_photo(
     contrast: float = 1.0,
 ) -> bytes:
     """
-    Main pipeline:
-    1. Loads uploaded user photo.
-    2. Identifies selected photorealistic uniform template.
-    3. Runs AI Face-Swap with Poisson Seamless Blending onto real suit.
-    4. Resizes to requested official standard (4x6 / 3x4 / 2x2).
-    5. Exports 300 DPI high-resolution JPEG.
+    Main entry point for CV & ID Photo generation.
     """
     input_img = Image.open(io.BytesIO(image_bytes))
     input_img = ImageOps.exif_transpose(input_img)
@@ -242,8 +292,8 @@ def process_cv_photo(
     template_filename = TEMPLATE_FILES.get(template_id, "men_suit_blue.png")
     template_path = ASSETS_DIR / template_filename
 
-    # Seamless AI Face Swap
-    swapped_pil = seamless_face_swap(
+    # Execute precision seamless face swap
+    swapped_pil = seamless_face_swap_perfect(
         user_img_pil=input_img,
         template_path=template_path,
         brightness=brightness,
