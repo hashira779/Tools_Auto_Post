@@ -1,12 +1,15 @@
 """
 Telegram sticker pack management routes.
 Creates, manages, and deletes sticker packs via the Telegram Bot API.
+Supports 1-click automatic publish without requiring manual User ID entry.
 """
 
 import base64
 import logging
 import os
 import re
+import time
+from typing import Optional
 
 from fastapi import APIRouter, Form, HTTPException
 
@@ -17,6 +20,7 @@ router = APIRouter(prefix="/api/telegram", tags=["telegram"])
 
 # Bot token from environment
 BOT_TOKEN = os.getenv("STICKER_BOT_TOKEN", "")
+DEFAULT_USER_ID = os.getenv("DEFAULT_STICKER_USER_ID", os.getenv("STICKER_BOT_OWNER_ID", "789123456"))
 
 
 def _get_service() -> TelegramStickerService:
@@ -24,18 +28,23 @@ def _get_service() -> TelegramStickerService:
     if not BOT_TOKEN:
         raise HTTPException(
             status_code=503,
-            detail="Telegram bot token not configured. Set STICKER_BOT_TOKEN environment variable.",
+            detail="Telegram bot token not configured. Set STICKER_BOT_TOKEN in .env",
         )
     return TelegramStickerService(BOT_TOKEN)
 
 
 @router.get("/bot-info")
 async def get_bot_info():
-    """Get the connected Telegram bot's info."""
+    """Get the connected Telegram bot's info and 1-click deeplink."""
     service = _get_service()
     try:
         username = await service.get_bot_username()
-        return {"ok": True, "bot_username": username}
+        return {
+            "ok": True,
+            "bot_username": username,
+            "deeplink_web": f"https://t.me/{username}",
+            "deeplink_app": f"tg://resolve?domain={username}",
+        }
     except Exception as e:
         logger.error("Failed to get bot info: %s", e)
         raise HTTPException(status_code=502, detail=f"Telegram API error: {str(e)}")
@@ -43,28 +52,24 @@ async def get_bot_info():
 
 @router.post("/create-pack")
 async def create_pack(
-    user_id: int = Form(...),
-    short_name: str = Form(...),
-    title: str = Form(...),
+    user_id: Optional[int] = Form(None),
+    short_name: Optional[str] = Form(None),
+    title: Optional[str] = Form(None),
     sticker_b64: str = Form(...),
     emoji: str = Form("😀"),
 ):
     """
     Create a new Telegram sticker pack.
-
-    - **user_id**: Telegram user ID (user must have started chat with the bot)
-    - **short_name**: Short name for the pack (letters, digits, underscores)
-    - **title**: Display title for the pack (1-64 chars)
-    - **sticker_b64**: Base64-encoded WebP sticker image
-    - **emoji**: Emoji for the first sticker
+    user_id, short_name, and title are optional — defaults are auto-generated!
     """
-    # Validate inputs
-    sanitized = re.sub(r"[^a-zA-Z0-9_]", "", short_name)
-    if not sanitized or len(sanitized) < 1:
-        raise HTTPException(status_code=400, detail="Pack name must contain letters, digits, or underscores")
+    effective_user_id = user_id or int(DEFAULT_USER_ID)
+    effective_short_name = short_name or f"pack_{int(time.time())}"
+    effective_title = title or "CamTech Stickers 🎨"
 
-    if not title or len(title) > 64:
-        raise HTTPException(status_code=400, detail="Title must be 1-64 characters")
+    # Validate inputs
+    sanitized = re.sub(r"[^a-zA-Z0-9_]", "", effective_short_name)
+    if not sanitized:
+        sanitized = f"camtech_{int(time.time())}"
 
     try:
         sticker_bytes = base64.b64decode(sticker_b64)
@@ -75,14 +80,14 @@ async def create_pack(
 
     try:
         await service.get_bot_username()
-        pack_name = service.make_pack_name(sanitized, user_id)
+        pack_name = service.make_pack_name(sanitized, effective_user_id)
 
         result = await service.create_sticker_set(
-            user_id=user_id,
+            user_id=effective_user_id,
             name=pack_name,
-            title=title,
+            title=effective_title[:64],
             sticker_bytes=sticker_bytes,
-            emoji=emoji,
+            emoji=emoji or "😀",
         )
         return {"ok": True, **result}
 
@@ -95,19 +100,16 @@ async def create_pack(
 
 @router.post("/add-sticker")
 async def add_sticker(
-    user_id: int = Form(...),
+    user_id: Optional[int] = Form(None),
     pack_name: str = Form(...),
     sticker_b64: str = Form(...),
     emoji: str = Form("😀"),
 ):
     """
     Add a sticker to an existing pack.
-
-    - **user_id**: Telegram user ID
-    - **pack_name**: Full pack name (from create-pack response)
-    - **sticker_b64**: Base64-encoded WebP sticker image
-    - **emoji**: Emoji for this sticker
     """
+    effective_user_id = user_id or int(DEFAULT_USER_ID)
+
     try:
         sticker_bytes = base64.b64decode(sticker_b64)
     except Exception:
@@ -117,10 +119,10 @@ async def add_sticker(
 
     try:
         result = await service.add_sticker_to_set(
-            user_id=user_id,
-            name=pack_name,
+            user_id=effective_user_id,
+            name=pack_name.strip(),
             sticker_bytes=sticker_bytes,
-            emoji=emoji,
+            emoji=emoji or "😀",
         )
         return {"ok": True, **result}
 

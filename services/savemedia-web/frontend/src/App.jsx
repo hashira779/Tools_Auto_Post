@@ -57,7 +57,7 @@ function App() {
             {videoInfo && (
               <div
                 id="results-card"
-                className="w-full max-w-[700px] card-playful p-6 sm:p-7 shadow-xl animate-pop-in mb-8"
+                className="w-full max-w-[760px] glass-card p-6 sm:p-8 animate-fade-in mb-8"
               >
                 <VideoPreview videoInfo={videoInfo} />
                 <FormatTabs activeTab={formatTab} onSwitch={switchFormatTab} />

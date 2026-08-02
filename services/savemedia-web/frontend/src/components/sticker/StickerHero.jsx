@@ -1,36 +1,37 @@
 export default function StickerHero() {
   return (
-    <header className="text-center mb-10 max-w-[720px] animate-pop-in">
-      {/* Logo Icon */}
-      <div className="inline-flex items-center gap-3 mb-5">
-        <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center text-3xl shadow-[0_10px_20px_rgba(0,0,0,0.05)] border-2 border-purple-100">
-          🎨
-        </div>
+    <header className="text-center mb-10 max-w-[760px] animate-fade-in">
+      {/* Brand Badge */}
+      <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-violet-950/50 border border-violet-500/20 shadow-lg mb-6 backdrop-blur-md">
+        <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
+        <span className="text-xs font-semibold text-violet-200 tracking-wide">
+          Telegram Sticker Studio Pro
+        </span>
       </div>
 
       {/* Title */}
-      <h1 className="text-4xl sm:text-6xl font-black text-[#1e293b] tracking-tight leading-tight mb-3">
-        Telegram <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 bg-clip-text text-transparent">Sticker Maker</span>
+      <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight mb-4 text-white">
+        Create Telegram Stickers <span className="gradient-text-accent">in Seconds</span>
       </h1>
 
       {/* Subtitle */}
-      <p className="text-base sm:text-lg text-[var(--color-text-secondary)] font-medium leading-relaxed max-w-[540px] mx-auto">
-        Turn any photo into Telegram stickers in seconds!
-        <br className="hidden sm:block" />
-        Choose a style, pick an emoji, and publish directly to your Telegram sticker pack.
+      <p className="text-sm sm:text-base text-slate-400 font-normal leading-relaxed max-w-[540px] mx-auto">
+        Transform your photos into 512×512 WebP stickers, add pro styles, and export directly to Telegram with zero friction.
       </p>
 
-      {/* Badges */}
-      <div className="flex justify-center gap-2.5 mt-6 flex-wrap">
+      {/* Feature Badges */}
+      <div className="flex justify-center gap-2 mt-7 flex-wrap">
         {[
-          { text: '100% Free', icon: '✨', bg: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-          { text: 'Auto 512×512 WebP', icon: '📐', bg: 'bg-blue-50 text-blue-700 border-blue-100' },
-          { text: '5 Creative Styles', icon: '🎭', bg: 'bg-purple-50 text-purple-700 border-purple-100' },
-          { text: 'Instant Telegram Publish', icon: '🚀', bg: 'bg-pink-50 text-pink-700 border-pink-100' },
+          { text: '100% Free Forever', icon: '⚡' },
+          { text: 'Auto 512×512 WebP', icon: '📐' },
+          { text: '5 Creative FX Styles', icon: '🎨' },
+          { text: '1-Click Telegram Export', icon: '🚀' },
         ].map((b) => (
           <span
             key={b.text}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold border shadow-xs select-none ${b.bg}`}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl
+                       text-xs font-semibold tracking-wide bg-slate-900/60 backdrop-blur-md
+                       text-slate-300 border border-white/5 shadow-sm"
           >
             <span>{b.icon}</span>
             <span>{b.text}</span>

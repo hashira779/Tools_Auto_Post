@@ -69,8 +69,13 @@ if ! check_health "http://localhost:80/" "CamTech Frontend"; then
     DEPLOY_FAILED=1
 fi
 
-# Verify Media API
-if ! check_health "http://localhost:8000/api/health" "Media API"; then
+# Verify Media API (routed via Nginx)
+if ! check_health "http://localhost:80/api/health" "Media API"; then
+    DEPLOY_FAILED=1
+fi
+
+# Verify Sticker API (routed via Nginx)
+if ! check_health "http://localhost:80/api/sticker/styles" "Sticker API"; then
     DEPLOY_FAILED=1
 fi
 

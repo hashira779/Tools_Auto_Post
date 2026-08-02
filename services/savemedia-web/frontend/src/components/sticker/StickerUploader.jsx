@@ -34,21 +34,21 @@ export default function StickerUploader({ onUpload }) {
   }, [])
 
   return (
-    <div className="card-playful p-6 sm:p-10 transition-all duration-300">
+    <div className="glass-card p-6 sm:p-8 animate-fade-in">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-black text-gray-800 flex items-center justify-center gap-2">
-          <span>📸</span> Step 1: Upload Your Image
+        <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center justify-center gap-2">
+          <span>📸</span> Step 1: Upload Image
         </h2>
-        <p className="text-sm text-gray-500 font-medium mt-1">
-          Drop any photo or graphic here to convert it into a Telegram sticker
+        <p className="text-xs sm:text-sm text-slate-400 font-normal mt-1">
+          Drop any photo or design to convert it into a Telegram sticker
         </p>
       </div>
 
       <div
-        className={`border-3 border-dashed rounded-3xl p-10 sm:p-14 text-center cursor-pointer transition-all duration-300 select-none ${
+        className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-200 select-none ${
           dragOver
-            ? 'border-purple-500 bg-purple-50 scale-[1.01] shadow-inner'
-            : 'border-purple-200 bg-purple-50/40 hover:border-purple-400 hover:bg-purple-50/70 hover:shadow-md'
+            ? 'border-indigo-400 bg-indigo-500/10 scale-[1.01]'
+            : 'border-white/10 bg-slate-950/50 hover:border-indigo-500/50 hover:bg-slate-900/50'
         }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -63,37 +63,37 @@ export default function StickerUploader({ onUpload }) {
           onChange={(e) => handleFiles(e.target.files)}
         />
 
-        <div className="w-20 h-20 mx-auto bg-white rounded-3xl flex items-center justify-center text-4xl shadow-[0_8px_20px_rgba(147,51,234,0.12)] border border-purple-100 mb-4 transition-transform duration-300 hover:scale-110">
+        <div className="w-16 h-16 mx-auto bg-slate-900 rounded-2xl flex items-center justify-center text-3xl border border-white/10 mb-3 shadow-inner">
           {dragOver ? '📥' : '🖼️'}
         </div>
 
-        <p className="text-lg font-black text-gray-800 mb-1">
-          {dragOver ? 'Drop it right here!' : 'Click or Drag & Drop your image'}
+        <p className="text-base sm:text-lg font-bold text-white mb-1">
+          {dragOver ? 'Drop image here' : 'Click or Drag & Drop image'}
         </p>
-        <p className="text-xs sm:text-sm text-gray-400 font-semibold mb-5">
-          Supports transparent PNG, JPG, WebP, GIF (Max 10 MB)
+        <p className="text-xs text-slate-400 mb-4">
+          PNG, JPG, WebP, GIF (Max 10 MB)
         </p>
 
-        <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white rounded-2xl shadow-xs border border-purple-100 text-xs font-extrabold text-purple-700 hover:bg-purple-50 transition-colors">
-          <span>📁</span> Browse Local Files
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-xs font-semibold text-slate-200 transition-colors">
+          <span>📁</span> Browse Local File
         </div>
       </div>
 
-      {/* Feature Badges */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8">
+      {/* Feature highlights */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-6">
         {[
-          { icon: '📐', title: 'Auto 512×512', desc: 'Fits Telegram spec' },
-          { icon: '🎨', title: '5 Fun Styles', desc: 'Outlines & cartoon' },
-          { icon: '⚡', title: 'Instant WebP', desc: 'Ultra lightweight' },
-          { icon: '🤖', title: 'Direct Bot Link', desc: 'No manual bots' },
+          { icon: '📐', title: 'Auto 512×512', desc: 'Telegram Ready' },
+          { icon: '🎨', title: '5 FX Styles', desc: 'Outlines & Cartoon' },
+          { icon: '⚡', title: 'Pure WebP', desc: 'Super Lightweight' },
+          { icon: '🚀', title: '1-Click Export', desc: 'Instant Telegram Link' },
         ].map((f) => (
           <div
             key={f.title}
-            className="p-3 bg-gray-50/80 rounded-2xl border border-gray-100 text-center"
+            className="p-3 bg-slate-950/40 rounded-xl border border-white/5 text-center"
           >
-            <div className="text-xl mb-1">{f.icon}</div>
-            <div className="text-xs font-black text-gray-800">{f.title}</div>
-            <div className="text-[11px] font-semibold text-gray-400">{f.desc}</div>
+            <div className="text-lg mb-0.5">{f.icon}</div>
+            <div className="text-xs font-bold text-slate-200">{f.title}</div>
+            <div className="text-[10px] text-slate-400">{f.desc}</div>
           </div>
         ))}
       </div>

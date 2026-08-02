@@ -8,23 +8,21 @@ export default function FormatTabs({ activeTab, onSwitch }) {
   ]
 
   return (
-    <div id="format-tabs" className="flex gap-2 bg-gray-100 rounded-3xl p-2 mb-6 shadow-inner">
+    <div id="format-tabs" className="flex gap-2 bg-slate-950/80 rounded-2xl p-1.5 mb-6 border border-white/5">
       {tabs.map((tab) => (
         <button
           key={tab.key}
-          className={`flex-1 flex items-center justify-center gap-3 px-6 py-3
-                      rounded-2xl text-base font-bold cursor-pointer border-none
-                      transition-all duration-300
+          className={`flex-1 flex items-center justify-center gap-2.5 px-4 py-2.5
+                      rounded-xl text-xs sm:text-sm font-semibold cursor-pointer border
+                      transition-all duration-200 select-none
                       ${activeTab === tab.key
-                        ? 'bg-white text-[var(--color-accent-blue)] shadow-[0_4px_10px_rgba(0,0,0,0.08)] scale-100'
-                        : 'bg-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-200/50 scale-95 hover:scale-100'
+                        ? 'bg-slate-800 text-white border-white/10 shadow-md font-bold'
+                        : 'bg-transparent text-slate-400 border-transparent hover:text-slate-200 hover:bg-white/5'
                       }`}
           onClick={() => onSwitch(tab.key)}
         >
-          <span className={`transition-transform duration-300 ${activeTab === tab.key ? 'scale-125' : ''}`}>
-            {tab.icon}
-          </span>
-          {tab.label}
+          <span>{tab.icon}</span>
+          <span>{tab.label}</span>
         </button>
       ))}
     </div>

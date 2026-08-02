@@ -2,12 +2,12 @@ export default function VideoPreview({ videoInfo }) {
   if (!videoInfo) return null
 
   return (
-    <div className="flex flex-col sm:flex-row gap-5 mb-8 pb-8 border-b-2 border-gray-100">
+    <div className="flex flex-col sm:flex-row gap-5 mb-6 pb-6 border-b border-white/10">
       {/* Thumbnail */}
       {videoInfo.thumbnail && (
-        <div className="relative overflow-hidden rounded-3xl shrink-0
-                        w-full sm:w-[220px] h-[180px] sm:h-[130px]
-                        bg-gray-100 shadow-sm border-2 border-gray-50">
+        <div className="relative overflow-hidden rounded-2xl shrink-0
+                        w-full sm:w-[220px] h-[160px] sm:h-[130px]
+                        bg-slate-950 border border-white/10 shadow-lg">
           <img
             className="w-full h-full object-cover"
             src={videoInfo.thumbnail}
@@ -16,9 +16,9 @@ export default function VideoPreview({ videoInfo }) {
           />
           {/* Duration overlay */}
           {videoInfo.duration_str && (
-            <span className="absolute bottom-3 right-3 px-3 py-1
-                             bg-black/80 backdrop-blur-md rounded-xl
-                             text-xs font-black text-white tabular-nums tracking-widest shadow-lg">
+            <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5
+                             bg-slate-950/80 backdrop-blur-md rounded-lg
+                             text-[11px] font-bold text-white tabular-nums tracking-wide border border-white/10">
               {videoInfo.duration_str}
             </span>
           )}
@@ -27,19 +27,19 @@ export default function VideoPreview({ videoInfo }) {
 
       {/* Info */}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <h2 className="text-xl font-black leading-tight mb-3 line-clamp-2 text-gray-800">
+        <h2 className="text-base sm:text-lg font-bold leading-snug mb-3 line-clamp-2 text-white">
           {videoInfo.title}
         </h2>
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full
-                           text-[11px] font-black uppercase tracking-widest
-                           bg-[var(--color-accent-orange)] text-white shadow-sm">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg
+                           text-xs font-semibold uppercase tracking-wider
+                           bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
             {videoInfo.platform_name}
           </span>
           {videoInfo.duration && (
-            <span className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full
-                             text-[11px] font-black uppercase tracking-widest
-                             bg-[var(--color-accent-blue)] text-white shadow-sm">
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg
+                             text-xs font-semibold tracking-wider
+                             bg-slate-800 text-slate-300 border border-white/10">
               ⏱ {videoInfo.duration_str}
             </span>
           )}

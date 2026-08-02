@@ -18,14 +18,13 @@ export default function SearchCard({ url, onUrlChange, onFetch, loading, error }
   return (
     <div
       id="search-card"
-      className="w-full max-w-[700px] card-playful p-6 sm:p-8 
-                 transition-all duration-300 mb-8 animate-pop-in"
+      className="w-full max-w-[760px] glass-card p-4 sm:p-6 mb-8 animate-fade-in"
     >
       {/* Input Row */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
             </svg>
@@ -34,37 +33,47 @@ export default function SearchCard({ url, onUrlChange, onFetch, loading, error }
             ref={inputRef}
             id="url-input"
             type="url"
-            className="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl
-                       pl-14 pr-5 py-4 text-lg text-gray-800 font-semibold
-                       placeholder:text-gray-400 placeholder:font-medium
-                       focus:border-[var(--color-accent-blue)] focus:bg-white
+            className="w-full bg-slate-950/70 border border-white/10 rounded-xl
+                       pl-12 pr-4 py-3.5 text-sm sm:text-base text-white font-medium
+                       placeholder:text-slate-500
+                       focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20
                        outline-none transition-all duration-200"
-            placeholder="Paste your video link here!"
+            placeholder="Paste link from YouTube, TikTok, Instagram..."
             value={url}
             onChange={(e) => onUrlChange(e.target.value)}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
             autoFocus
           />
+          {url && (
+            <button
+              onClick={() => onUrlChange('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
 
         <button
           id="fetch-btn"
-          className="flex items-center justify-center gap-3 px-10 py-4
-                     btn-playful rounded-2xl text-lg font-bold uppercase tracking-wider
-                     outline-none"
+          className="flex items-center justify-center gap-2 px-7 py-3.5
+                     btn-pro rounded-xl text-sm font-bold uppercase tracking-wider
+                     cursor-pointer select-none"
           onClick={onFetch}
-          disabled={loading}
+          disabled={loading || !url.trim()}
         >
           {loading ? (
             <>
-              <span className="spinner" />
-              Fetching
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Fetching</span>
             </>
           ) : (
             <>
               {Icon.search}
-              Fetch
+              <span>Fetch</span>
             </>
           )}
         </button>
@@ -74,16 +83,16 @@ export default function SearchCard({ url, onUrlChange, onFetch, loading, error }
       {error && (
         <div
           id="error-msg"
-          className="mt-4 px-5 py-4 bg-red-50 border-2 border-red-200
-                     rounded-2xl text-red-600 text-base font-bold flex items-center gap-3
-                     animate-pop-in"
+          className="mt-4 px-4 py-3 bg-rose-500/10 border border-rose-500/20
+                     rounded-xl text-rose-300 text-xs sm:text-sm font-medium flex items-center gap-2.5
+                     animate-fade-in"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="w-4 h-4 shrink-0 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
-            <line x1="15" y1="9" x2="9" y2="15" />
-            <line x1="9" y1="9" x2="15" y2="15" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          {error}
+          <span>{error}</span>
         </div>
       )}
     </div>

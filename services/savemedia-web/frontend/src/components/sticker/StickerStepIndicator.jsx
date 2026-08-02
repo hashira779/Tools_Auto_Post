@@ -1,6 +1,6 @@
 export default function StickerStepIndicator({ steps, currentStep }) {
   return (
-    <div className="flex items-center justify-between w-full max-w-[560px] mx-auto mb-6 px-4">
+    <div className="flex items-center justify-between w-full max-w-[540px] mx-auto mb-8 px-4">
       {steps.map((s, i) => {
         const isCompleted = s.id < currentStep
         const isActive = s.id === currentStep
@@ -9,23 +9,29 @@ export default function StickerStepIndicator({ steps, currentStep }) {
           <div key={s.id} className="flex items-center flex-1 last:flex-initial">
             <div className="flex flex-col items-center gap-1.5">
               <div
-                className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm transition-all duration-300 shadow-sm ${
+                className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs transition-all duration-200 ${
                   isCompleted
-                    ? 'bg-emerald-500 text-white shadow-emerald-500/25'
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                     : isActive
-                    ? 'bg-gradient-to-tr from-purple-600 to-pink-500 text-white shadow-purple-500/30 scale-110 ring-4 ring-purple-100'
-                    : 'bg-gray-100 text-gray-400 border border-gray-200'
+                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 border border-white/20 scale-105'
+                    : 'bg-slate-900 text-slate-500 border border-white/5'
                 }`}
               >
-                {isCompleted ? '✓' : s.id}
+                {isCompleted ? (
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  s.id
+                )}
               </div>
               <span
-                className={`text-xs font-bold transition-colors duration-200 ${
+                className={`text-[11px] font-semibold transition-colors duration-200 ${
                   isActive
-                    ? 'text-purple-700 font-extrabold'
+                    ? 'text-white'
                     : isCompleted
-                    ? 'text-gray-700'
-                    : 'text-gray-400'
+                    ? 'text-slate-300'
+                    : 'text-slate-500'
                 }`}
               >
                 {s.label}
@@ -34,10 +40,10 @@ export default function StickerStepIndicator({ steps, currentStep }) {
 
             {i < steps.length - 1 && (
               <div
-                className={`h-1 flex-1 mx-2 mb-5 rounded-full transition-all duration-500 ${
+                className={`h-0.5 flex-1 mx-3 mb-4 rounded-full transition-all duration-300 ${
                   s.id < currentStep
-                    ? 'bg-gradient-to-r from-emerald-500 to-purple-600'
-                    : 'bg-gray-200'
+                    ? 'bg-gradient-to-r from-emerald-500/60 to-violet-500/60'
+                    : 'bg-white/5'
                 }`}
               />
             )}
