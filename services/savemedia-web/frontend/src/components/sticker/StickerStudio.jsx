@@ -4,13 +4,14 @@ import StickerStepIndicator from './StickerStepIndicator'
 import StickerUploader from './StickerUploader'
 import StickerStyleSelector from './StickerStyleSelector'
 import StickerPreviewCard from './StickerPreviewCard'
+import StickerTextEditor from './StickerTextEditor'
 import StickerEmojiPicker from './StickerEmojiPicker'
 import StickerTelegramPublish from './StickerTelegramPublish'
 
 const STEPS = [
   { id: 1, label: 'Upload' },
   { id: 2, label: 'Style' },
-  { id: 3, label: 'Preview' },
+  { id: 3, label: 'Preview & Text' },
   { id: 4, label: 'Publish' },
 ]
 
@@ -19,7 +20,8 @@ export default function StickerStudio() {
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const [selectedStyle, setSelectedStyle] = useState('original')
-  const [stickerResult, setStickerResult] = useState(null)
+  const [baseStickerResult, setBaseStickerResult] = useState(null)
+  const [activeStickerResult, setActiveStickerResult] = useState(null)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState(null)
   const [selectedEmoji, setSelectedEmoji] = useState('😀')
@@ -28,7 +30,8 @@ export default function StickerStudio() {
   const handleImageUpload = useCallback((file) => {
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
-    setStickerResult(null)
+    setBaseStickerResult(null)
+    setActiveStickerResult(null)
     setError(null)
     setStep(2)
   }, [])
@@ -63,7 +66,8 @@ export default function StickerStudio() {
         throw new Error(data.detail || 'Image processing failed.')
       }
 
-      setStickerResult(data.sticker)
+      setBaseStickerResult(data.sticker)
+      setActiveStickerResult(data.sticker)
       setStep(3)
     } catch (e) {
       setError(e.message)
@@ -86,7 +90,8 @@ export default function StickerStudio() {
     setStep(1)
     setImageFile(null)
     setImagePreview(null)
-    setStickerResult(null)
+    setBaseStickerResult(null)
+    setActiveStickerResult(null)
     setSelectedStyle('original')
     setSelectedEmoji('😀')
     setError(null)
@@ -118,13 +123,19 @@ export default function StickerStudio() {
         </div>
       )}
 
-      {/* Step 3: Preview + Emoji Picker */}
-      {step === 3 && stickerResult && (
+      {/* Step 3: Preview + Khmer & Meme Text Editor + Emoji Picker */}
+      {step === 3 && baseStickerResult && (
         <div className="animate-pop-in">
           <StickerPreviewCard
-            stickerData={stickerResult}
+            stickerData={activeStickerResult || baseStickerResult}
             onBack={() => setStep(2)}
           />
+
+          <StickerTextEditor
+            baseStickerData={baseStickerResult}
+            onStickerUpdated={setActiveStickerResult}
+          />
+
           <StickerEmojiPicker
             selected={selectedEmoji}
             onSelect={handleEmojiSelect}
@@ -134,10 +145,10 @@ export default function StickerStudio() {
       )}
 
       {/* Step 4: Publish to Telegram */}
-      {step === 4 && stickerResult && (
+      {step === 4 && activeStickerResult && (
         <div className="animate-pop-in">
           <StickerTelegramPublish
-            stickerData={stickerResult}
+            stickerData={activeStickerResult}
             emoji={selectedEmoji}
             onReset={handleReset}
             onBack={() => setStep(3)}
