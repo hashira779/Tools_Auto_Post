@@ -44,7 +44,7 @@ echo "$SUDO_PASS" | sudo -S docker compose up -d --remove-orphans
 
 # 5. Smoke tests / Health verification
 echo "🔍 Verifying service health..."
-MAX_RETRIES=15
+MAX_RETRIES=30
 RETRY_INTERVAL=2
 
 check_health() {
