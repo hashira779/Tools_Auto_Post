@@ -127,6 +127,9 @@ services:
     environment:
       - STICKER_BOT_TOKEN=${STICKER_BOT_TOKEN:-${TELEGRAM_BOT_TOKEN:-}}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - ALLOWED_USERS=${ALLOWED_USERS:-}
+      - STICKER_BOT_OWNER_ID=${STICKER_BOT_OWNER_ID:-}
+      - DEFAULT_STICKER_USER_ID=${DEFAULT_STICKER_USER_ID:-}
     expose:
       - "8001"
     healthcheck:

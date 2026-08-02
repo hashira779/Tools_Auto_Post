@@ -111,7 +111,13 @@ async def create_pack(
         return {"ok": True, **result}
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        err_str = str(e)
+        if "user not found" in err_str.lower() or "user_id_invalid" in err_str.lower():
+            raise HTTPException(
+                status_code=400,
+                detail="Telegram user ID not found. Please set STICKER_BOT_OWNER_ID in your .env file (get your Telegram ID by messaging @userinfobot on Telegram).",
+            )
+        raise HTTPException(status_code=400, detail=err_str)
     except Exception as e:
         logger.error("Create pack failed: %s", e, exc_info=True)
         raise HTTPException(status_code=502, detail=f"Telegram API error: {str(e)}")
