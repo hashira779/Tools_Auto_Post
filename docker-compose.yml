@@ -35,6 +35,8 @@ services:
     depends_on:
       savemedia-api:
         condition: service_healthy
+      sticker-api:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - camtech-net
@@ -116,22 +118,8 @@ services:
     networks:
       - camtech-net
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  #  Sticker Maker — Telegram Sticker Pack Creator
+  #  Sticker Maker API — Microservice for Telegram Stickers
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  sticker-frontend:
-    build:
-      context: ./services/sticker-maker/frontend
-      dockerfile: Dockerfile
-    container_name: camtech-sticker-frontend
-    ports:
-      - "${STICKER_PORT:-8080}:80"
-    depends_on:
-      sticker-api:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - camtech-net
 
   sticker-api:
     build:

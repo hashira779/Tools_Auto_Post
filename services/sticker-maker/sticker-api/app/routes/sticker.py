@@ -17,7 +17,7 @@ from app.services.image_processor import (
 )
 
 logger = logging.getLogger("sticker.routes.sticker")
-router = APIRouter(prefix="/api", tags=["sticker"])
+router = APIRouter(prefix="/api/sticker", tags=["sticker"])
 
 # Max upload size: 10 MB
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
