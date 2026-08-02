@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export default function StickerTelegramPublish({
   stickerData,
@@ -9,23 +9,12 @@ export default function StickerTelegramPublish({
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
-  const [botInfo, setBotInfo] = useState(null)
 
   // Advanced custom fields (optional)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [customUserId, setCustomUserId] = useState('')
   const [customPackName, setCustomPackName] = useState('')
   const [customTitle, setCustomTitle] = useState('')
-
-  // Fetch bot info for deeplink
-  useEffect(() => {
-    fetch('/api/telegram/bot-info')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.ok) setBotInfo(data)
-      })
-      .catch(() => {})
-  }, [])
 
   const handleInstantPublish = async () => {
     setLoading(true)
@@ -50,7 +39,14 @@ export default function StickerTelegramPublish({
         method: 'POST',
         body: formData,
       })
-      const data = await res.json()
+
+      const text = await res.text()
+      let data = {}
+      try {
+        data = JSON.parse(text)
+      } catch {
+        throw new Error(`Server returned error (${res.status}). Please try again in a moment.`)
+      }
 
       if (!res.ok) {
         throw new Error(data.detail || 'Failed to create Telegram sticker pack.')
@@ -128,7 +124,7 @@ export default function StickerTelegramPublish({
             <span>🚀</span> Step 4: Export to Telegram
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 font-normal">
-            1-Click instant export to Telegram app or web
+            1-Click instant export to Telegram
           </p>
         </div>
         <button
@@ -142,7 +138,6 @@ export default function StickerTelegramPublish({
 
       {/* 1-Click Fast Actions */}
       <div className="space-y-4 mb-6">
-        {/* Main Instant Action */}
         <button
           onClick={handleInstantPublish}
           disabled={loading}
@@ -161,38 +156,12 @@ export default function StickerTelegramPublish({
           )}
         </button>
 
-        {/* Secondary Direct Channels */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {botInfo?.deeplink_web && (
-            <a
-              href={botInfo.deeplink_web}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3.5 rounded-xl bg-slate-950/60 hover:bg-slate-900 border border-white/5 hover:border-indigo-500/30 text-left transition-all flex items-center gap-3 cursor-pointer"
-            >
-              <div className="w-9 h-9 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center text-lg shrink-0">
-                ✈️
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-white">Open Telegram Bot</div>
-                <div className="text-[11px] text-slate-400">@{botInfo.bot_username}</div>
-              </div>
-            </a>
-          )}
-
-          <button
-            onClick={handleDownload}
-            className="p-3.5 rounded-xl bg-slate-950/60 hover:bg-slate-900 border border-white/5 hover:border-indigo-500/30 text-left transition-all flex items-center gap-3 cursor-pointer"
-          >
-            <div className="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
-              💾
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-white">Download 512×512 WebP</div>
-              <div className="text-[11px] text-slate-400">Save directly to phone/PC</div>
-            </div>
-          </button>
-        </div>
+        <button
+          onClick={handleDownload}
+          className="w-full py-3.5 rounded-xl bg-slate-950/60 hover:bg-slate-900 border border-white/10 hover:border-indigo-500/30 text-center transition-all flex items-center justify-center gap-2.5 cursor-pointer text-slate-300 hover:text-white text-xs font-bold"
+        >
+          <span>💾</span> Download 512×512 WebP File (Direct Save)
+        </button>
       </div>
 
       {/* Selected Emoji badge */}

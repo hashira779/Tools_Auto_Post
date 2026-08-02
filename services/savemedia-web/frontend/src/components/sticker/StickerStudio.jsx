@@ -50,7 +50,14 @@ export default function StickerStudio() {
         method: 'POST',
         body: formData,
       })
-      const data = await res.json()
+
+      const text = await res.text()
+      let data = {}
+      try {
+        data = JSON.parse(text)
+      } catch {
+        throw new Error(`Processing service unavailable (${res.status}). Please try again.`)
+      }
 
       if (!res.ok) {
         throw new Error(data.detail || 'Image processing failed.')
