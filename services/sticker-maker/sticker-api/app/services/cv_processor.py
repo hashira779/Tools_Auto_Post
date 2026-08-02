@@ -20,8 +20,10 @@ except ImportError:
 try:
     from rembg import remove, new_session
     try:
+        # Load u2net model for precise human portrait matting
         REMBG_SESSION = new_session("u2netp")
-    except Exception:
+    except Exception as init_err:
+        logging.warning(f"Failed to pre-load rembg session: {init_err}")
         REMBG_SESSION = None
     HAS_REMBG = True
 except ImportError:
@@ -162,14 +164,22 @@ def extract_head_with_local_ai(input_pil: Image.Image) -> Image.Image:
     if HAS_REMBG:
         try:
             if REMBG_SESSION:
-                cutout = remove(input_pil, session=REMBG_SESSION)
+                cutout = remove(input_pil, session=REMBG_SESSION, post_process_mask=True)
             else:
-                cutout = remove(input_pil)
-            return cutout.convert("RGBA")
+                cutout = remove(input_pil, post_process_mask=True)
+            
+            cutout_rgba = cutout.convert("RGBA")
+            
+            # Feather the edges of the AI mask slightly to avoid jagged pixels
+            r, g, b, alpha = cutout_rgba.split()
+            alpha = alpha.filter(ImageFilter.GaussianBlur(1.0))
+            cutout_rgba.putalpha(alpha)
+            
+            return cutout_rgba
         except Exception as e:
-            logger.warning(f"Local AI rembg failed, falling back: {e}")
+            logger.warning(f"Local AI rembg failed, falling back to GrabCut: {e}")
 
-    # Fallback with GrabCut
+    # Fallback with GrabCut (Heavy Feathering to avoid square artifacts)
     if HAS_CV2:
         try:
             img_rgb = input_pil.convert("RGB")
@@ -178,13 +188,18 @@ def extract_head_with_local_ai(input_pil: Image.Image) -> Image.Image:
             mask = np.zeros(user_np.shape[:2], np.uint8)
             bgdModel = np.zeros((1, 65), np.float64)
             fgdModel = np.zeros((1, 65), np.float64)
-            rect = (int(w * 0.08), int(h * 0.08), int(w * 0.84), int(h * 0.84))
-            cv2.grabCut(user_np, mask, rect, bgdModel, fgdModel, 4, cv2.GC_INIT_WITH_RECT)
-            mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
-            mask2 = cv2.GaussianBlur(mask2 * 255, (7, 7), 0)
+            
+            # Tighter bounding box to avoid square edges on sides
+            rect = (int(w * 0.15), int(h * 0.05), int(w * 0.70), int(h * 0.85))
+            cv2.grabCut(user_np, mask, rect, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_RECT)
+            
+            mask2 = np.where((mask == 2) | (mask == 0), 0, 255).astype('uint8')
             
             rgba = input_pil.convert("RGBA")
-            rgba.putalpha(Image.fromarray(mask2))
+            alpha = Image.fromarray(mask2)
+            # Heavy blur to hide grabcut artifacts
+            alpha = alpha.filter(ImageFilter.GaussianBlur(3.0))
+            rgba.putalpha(alpha)
             return rgba
         except Exception as e:
             logger.warning(f"GrabCut fallback failed: {e}")
