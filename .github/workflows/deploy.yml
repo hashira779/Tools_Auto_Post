@@ -13,6 +13,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Free disk space before build
+        run: |
+          # Clean Docker build cache and old images
+          sudo docker builder prune -af 2>/dev/null || true
+          sudo docker image prune -af 2>/dev/null || true
+          sudo docker volume prune -f 2>/dev/null || true
+          # Clean old runner logs
+          find /home/ubuntu-server/actions-runner/_diag -name "*.log" -mtime +1 -delete 2>/dev/null || true
+          # Clean system journals
+          sudo journalctl --vacuum-time=2d 2>/dev/null || true
+          # Clean apt cache
+          sudo apt-get clean 2>/dev/null || true
+          echo "✅ Disk cleanup complete"
+          df -h /
+
       - name: Make deploy script executable
         run: chmod +x ./scripts/deploy_production.sh
 
