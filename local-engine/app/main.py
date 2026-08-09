@@ -1,12 +1,22 @@
 import os
 import io
+import sys
 import time
 import logging
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, HTMLResponse, FileResponse
 from pydantic import BaseModel
+
+# Resolve paths correctly whether running from source or PyInstaller bundle
+if getattr(sys, 'frozen', False):
+    _BASE_DIR = sys._MEIPASS
+else:
+    _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Ensure 'app' subpackage is importable
+sys.path.insert(0, os.path.join(_BASE_DIR, "app"))
 
 from gpu import get_gpu_info
 
@@ -15,7 +25,6 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
     handlers=[
-        logging.FileHandler("service.log"),
         logging.StreamHandler()
     ]
 )
@@ -24,25 +33,54 @@ logger = logging.getLogger("voxcpm2-local")
 # Define API
 app = FastAPI(title="VoxCPM2-Khmer Local Engine")
 
-# Security: CORS locked strictly to CamTech
+# Security: CORS locked strictly to CamTech & local development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://camtech.cam", "https://www.camtech.cam", "http://localhost:5173"],
+    allow_origins=[
+        "https://camtech.cam",
+        "https://www.camtech.cam",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8765",
+        "http://localhost:8765"
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
-from fastapi.responses import Response, FileResponse
 
-# Serve GUI dashboard
+# ── Serve GUI dashboard ──────────────────────────────────────────
+
 @app.get("/")
 @app.get("/app")
 async def serve_dashboard():
-    gui_path = os.path.join(os.path.dirname(__file__), "..", "gui", "gui.html")
-    if os.path.exists(gui_path):
-        return FileResponse(gui_path)
-    return Response("VoxCPM2-Khmer Local GPU Engine is Running on 127.0.0.1:8765", media_type="text/plain")
+    # Try multiple paths for gui.html
+    candidates = [
+        os.path.join(_BASE_DIR, "gui", "gui.html"),
+        os.path.join(os.path.dirname(__file__), "..", "gui", "gui.html"),
+        os.path.join(os.path.dirname(__file__), "gui", "gui.html"),
+    ]
+    for path in candidates:
+        resolved = os.path.normpath(path)
+        if os.path.exists(resolved):
+            return FileResponse(resolved, media_type="text/html")
+    
+    # Fallback: inline minimal status page
+    return HTMLResponse("""
+    <!DOCTYPE html>
+    <html><head><title>VoxCPM2-Khmer</title>
+    <style>body{background:#08090d;color:#e2e8f0;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+    .c{text-align:center}.s{color:#10b981;font-size:2rem;margin-bottom:1rem}</style></head>
+    <body><div class="c"><div class="s">✓</div><h1>VoxCPM2-Khmer Engine Running</h1>
+    <p style="color:#94a3b8">Listening on 127.0.0.1:8765</p></div></body></html>
+    """)
+
+
+# ── AI Model Manager ─────────────────────────────────────────────
+
 class ModelManager:
     def __init__(self):
         self.model = None
@@ -85,7 +123,7 @@ class ModelManager:
         # audio_tensor = self.model.generate(text)
         # return serialize_to_wav(audio_tensor)
         
-        # Simulated generation (generates a valid empty/silent WAV file structure for prototype validation)
+        # Simulated generation (generates a valid silent WAV file for prototype validation)
         import wave
         import struct
         buf = io.BytesIO()
@@ -99,24 +137,30 @@ class ModelManager:
             
         return buf.getvalue()
 
+
 # Instantiate global manager
 manager = ModelManager()
+
 
 @app.on_event("startup")
 async def startup_event():
     logger.info("VoxCPM2-Khmer Local Engine starting up on 127.0.0.1:8765")
+    # Warm the GPU cache once at startup (not on every request)
+    get_gpu_info()
     # Trigger background model load so it's instantly ready for the first request
     import threading
     threading.Thread(target=manager.load_model).start()
+
 
 class GenerateRequest(BaseModel):
     text: str
     format: str = "wav"
 
+
 @app.get("/health")
 async def health_check():
     """Website pings this to see if Local Engine is available."""
-    gpu = get_gpu_info()
+    gpu = get_gpu_info()  # Uses cached result — no subprocess spawn
     return {
         "status": "ready" if manager.is_loaded else "starting",
         "service": "voxcpm2-khmer",
@@ -126,6 +170,7 @@ async def health_check():
         "gpu_name": gpu["name"],
         "ready": manager.is_loaded
     }
+
 
 @app.post("/v1/audio/speech")
 async def generate_speech(req: GenerateRequest, request: Request):
@@ -149,6 +194,7 @@ async def generate_speech(req: GenerateRequest, request: Request):
     except Exception as e:
         logger.error(f"Inference failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,154 +1,327 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VoxCPM2-Khmer — Local GPU Engine</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #08090d;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       user-select: none;
+      overflow: hidden;
     }
-    .font-mono {
-      font-family: 'JetBrains Mono', monospace;
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Header ──────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-    .glass-card {
-      background: rgba(14, 17, 23, 0.75);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #10b981, #0d9488);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 20px rgba(16,185,129,0.25);
     }
-    .glow-emerald {
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+    .header-title { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: 0.3px; }
+    .header-subtitle { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 11px; font-weight: 600;
+      transition: all 0.3s ease;
     }
+    .status-badge.online {
+      background: rgba(16,185,129,0.1);
+      color: #34d399;
+      border: 1px solid rgba(16,185,129,0.2);
+    }
+    .status-badge.offline {
+      background: rgba(239,68,68,0.1);
+      color: #f87171;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      animation: pulse-dot 2s infinite;
+    }
+    .status-dot.on { background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,0.6); }
+    .status-dot.off { background: #f87171; animation: none; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Grid ─────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 20px 28px;
+      flex: 1;
+    }
+    .card {
+      background: rgba(14, 17, 23, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      padding: 22px;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-label {
+      font-size: 10px; font-weight: 700; color: #64748b;
+      text-transform: uppercase; letter-spacing: 1.5px;
+    }
+    .card-badge {
+      font-size: 10px; font-weight: 600; color: #34d399;
+    }
+
+    /* GPU Card */
+    .gpu-card { border: 1px solid rgba(16,185,129,0.12); box-shadow: 0 0 30px rgba(16,185,129,0.06); }
+    .gpu-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .gpu-detail { font-size: 11px; color: #64748b; }
+
+    /* VRAM Bar */
+    .vram-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; }
+    .vram-label { color: #64748b; font-weight: 500; }
+    .vram-value { color: #34d399; font-weight: 600; }
+    .vram-track {
+      width: 100%; height: 6px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 100px; overflow: hidden;
+    }
+    .vram-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #14b8a6);
+      border-radius: 100px;
+      transition: width 0.6s ease;
+    }
+
+    /* Model Card */
+    .model-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .model-desc {
+      font-size: 11px; color: #64748b; line-height: 1.6;
+    }
+    .model-desc code {
+      background: rgba(255,255,255,0.04);
+      color: #34d399;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+    }
+    .bridge-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 14px; padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      font-size: 11px;
+    }
+    .bridge-label { color: #64748b; }
+    .bridge-value { color: #34d399; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+
+    /* Console */
+    .console-card { grid-column: span 2; }
+    .console {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 14px;
+      height: 110px;
+      overflow-y: auto;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+    .log-system { color: #64748b; }
+    .log-ok { color: #34d399; }
+    .log-info { color: #94a3b8; }
+    .log-warn { color: #fbbf24; }
+
+    /* ── Footer ──────────────────────────────── */
+    .footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      font-size: 11px; color: #475569;
+    }
+    .footer-link { color: #64748b; cursor: pointer; transition: color 0.2s; }
+    .footer-link:hover { color: #e2e8f0; }
+    .footer-running { color: #10b981; font-weight: 600; }
+
+    /* Scrollbar */
+    .console::-webkit-scrollbar { width: 4px; }
+    .console::-webkit-scrollbar-track { background: transparent; }
+    .console::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
   </style>
 </head>
-<body class="bg-[#08090d] text-slate-200 min-h-screen flex flex-col justify-between p-6 select-none overflow-hidden">
+<body>
 
   <!-- Header -->
-  <header class="flex items-center justify-between border-b border-white/[0.06] pb-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-slate-950 font-bold text-lg shadow-lg shadow-emerald-500/20">
-        🇰🇭
-      </div>
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">🇰🇭</div>
       <div>
-        <h1 class="text-base font-bold text-white tracking-wide flex items-center gap-2">
-          VoxCPM2-Khmer
-          <span class="text-[10px] uppercase font-semibold tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">GPU Engine</span>
-        </h1>
-        <p class="text-xs text-slate-400">Offline Local Text-to-Speech Service</p>
+        <div class="header-title">VoxCPM2-Khmer <span style="font-size:10px;color:#34d399;background:rgba(16,185,129,0.12);padding:3px 10px;border-radius:100px;border:1px solid rgba(16,185,129,0.2);margin-left:6px;letter-spacing:1px;font-weight:700">GPU ENGINE</span></div>
+        <div class="header-subtitle">Offline Local Text-to-Speech Service</div>
       </div>
     </div>
-    <div class="flex items-center gap-2">
-      <span id="statusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        Online (127.0.0.1:8765)
-      </span>
+    <div id="statusBadge" class="status-badge offline">
+      <span id="statusDot" class="status-dot off"></span>
+      <span id="statusText">Connecting...</span>
     </div>
   </header>
 
-  <!-- Main Grid -->
-  <main class="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto py-4">
+  <!-- Grid -->
+  <main class="grid">
 
-    <!-- GPU & Hardware Info -->
-    <div class="glass-card rounded-2xl p-5 space-y-4 glow-emerald">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-          ⚡ GPU Hardware Acceleration
-        </h2>
-        <span id="gpuStatus" class="text-[11px] font-medium text-emerald-400">CUDA Ready</span>
+    <!-- GPU Card -->
+    <div class="card gpu-card">
+      <div class="card-header">
+        <span class="card-label">⚡ GPU Acceleration</span>
+        <span id="gpuBadge" class="card-badge">Detecting...</span>
       </div>
-
-      <div class="space-y-3">
-        <div>
-          <p id="gpuName" class="text-base font-bold text-white truncate">Detecting NVIDIA GPU...</p>
-          <p id="cudaVer" class="text-xs text-slate-400">CUDA Driver Version: Checking...</p>
+      <div>
+        <div id="gpuName" class="gpu-name">Scanning NVIDIA GPU...</div>
+        <div id="cudaDetail" class="gpu-detail">CUDA: Checking...</div>
+      </div>
+      <div style="margin-top: 16px;">
+        <div class="vram-row">
+          <span class="vram-label">VRAM</span>
+          <span id="vramText" class="vram-value mono">-- GB</span>
         </div>
-
-        <!-- VRAM Progress Bar -->
-        <div class="space-y-1">
-          <div class="flex justify-between text-xs font-medium">
-            <span class="text-slate-400">VRAM Capacity</span>
-            <span id="vramText" class="text-emerald-400 font-mono">0.0 / 0.0 GB</span>
-          </div>
-          <div class="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
-            <div id="vramBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style="width: 0%"></div>
-          </div>
+        <div class="vram-track">
+          <div id="vramBar" class="vram-fill" style="width: 0%"></div>
         </div>
       </div>
     </div>
 
-    <!-- AI Voice Model Status -->
-    <div class="glass-card rounded-2xl p-5 space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-          🎙️ Voice AI Model
-        </h2>
-        <span id="modelBadge" class="text-[11px] font-medium text-emerald-400">VoxCPM2-Khmer</span>
+    <!-- Model Card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">🎙️ Voice Model</span>
+        <span id="modelBadge" class="card-badge">VoxCPM2</span>
       </div>
-
-      <div class="space-y-2">
-        <p class="text-base font-bold text-white">VoxCPM2 Neural Khmer Voice</p>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Listening on <code class="font-mono text-emerald-400 bg-white/[0.04] px-1.5 py-0.5 rounded">http://127.0.0.1:8765</code>.<br>
-          Connected website requests will execute on your GPU automatically.
-        </p>
+      <div>
+        <div class="model-name">VoxCPM2 Neural Khmer Voice</div>
+        <div class="model-desc">
+          Listening on <code class="mono">http://127.0.0.1:8765</code><br>
+          Connected website requests execute on your GPU automatically.
+        </div>
       </div>
-
-      <div class="pt-2 border-t border-white/[0.04] flex items-center justify-between text-xs">
-        <span class="text-slate-400">CamTech Web Bridge</span>
-        <span class="text-emerald-400 font-medium flex items-center gap-1">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
+      <div class="bridge-row">
+        <span class="bridge-label">CamTech Web Bridge</span>
+        <span id="bridgeStatus" class="bridge-value">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
           Active
         </span>
       </div>
     </div>
 
-    <!-- Live Activity Log -->
-    <div class="glass-card rounded-2xl p-4 md:col-span-2 space-y-2">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Live System Console</h3>
-        <span class="text-[10px] text-slate-500 font-mono">Port 8765</span>
+    <!-- Console -->
+    <div class="card console-card">
+      <div class="card-header">
+        <span class="card-label">📋 System Console</span>
+        <span class="card-badge mono" style="color: #64748b;">Port 8765</span>
       </div>
-      <div id="logBox" class="bg-black/60 rounded-xl p-3 h-24 overflow-y-auto font-mono text-[11px] text-slate-300 space-y-1 border border-white/[0.04]">
-        <div class="text-slate-500">[System] VoxCPM2-Khmer Desktop Application initialized.</div>
-        <div class="text-emerald-400">[HTTP] Service listening on 127.0.0.1:8765 (CORS: https://camtech.cam)</div>
+      <div id="logBox" class="console mono">
+        <div class="log-system">[System] VoxCPM2-Khmer Desktop Application initialized.</div>
+        <div class="log-ok">[Engine] Starting up on 127.0.0.1:8765...</div>
       </div>
     </div>
-
   </main>
 
   <!-- Footer -->
-  <footer class="flex items-center justify-between border-t border-white/[0.06] pt-4 text-xs text-slate-500">
-    <p>© 2026 CamTech AI Studio — VoxCPM2-Khmer Engine v1.0</p>
-    <div class="flex items-center gap-3">
-      <button onclick="window.location.reload()" class="hover:text-slate-300 transition-colors">Refresh</button>
+  <footer class="footer">
+    <span>© 2026 CamTech AI Studio — VoxCPM2-Khmer Engine v1.0</span>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="footer-link" onclick="window.location.reload()">Refresh</span>
       <span>•</span>
-      <span class="text-emerald-500 font-medium">Running in System Tray</span>
+      <span class="footer-running">Running in System Tray</span>
     </div>
   </footer>
 
   <script>
+    const logBox = document.getElementById('logBox');
+    let isFirstCheck = true;
+
+    function addLog(msg, cls = 'log-info') {
+      const now = new Date().toLocaleTimeString('en-GB', { hour12: false });
+      const el = document.createElement('div');
+      el.className = cls;
+      el.textContent = `[${now}] ${msg}`;
+      logBox.appendChild(el);
+      logBox.scrollTop = logBox.scrollHeight;
+      // Keep log tidy
+      while (logBox.children.length > 50) logBox.removeChild(logBox.firstChild);
+    }
+
     async function updateMetrics() {
       try {
         const res = await fetch('/health');
-        if (res.ok) {
-          const data = await res.json();
-          document.getElementById('gpuName').innerText = data.gpu_name || 'NVIDIA GPU Detected';
-          document.getElementById('cudaVer').innerText = 'GPU Mode: ' + (data.gpu ? 'Hardware Accelerated (CUDA)' : 'CPU Mode');
-          document.getElementById('vramText').innerText = (data.gpu ? 'CUDA Active' : 'CPU Fallback');
-          document.getElementById('vramBar').style.width = data.gpu ? '100%' : '20%';
+        if (!res.ok) throw new Error('Not OK');
+        const data = await res.json();
+
+        // Status badge
+        const badge = document.getElementById('statusBadge');
+        const dot = document.getElementById('statusDot');
+        const txt = document.getElementById('statusText');
+        badge.className = 'status-badge online';
+        dot.className = 'status-dot on';
+        txt.textContent = data.status === 'ready' ? 'Online • Ready' : 'Online • Loading Model...';
+
+        // GPU info
+        document.getElementById('gpuName').textContent = data.gpu_name || 'No GPU Detected';
+        document.getElementById('gpuBadge').textContent = data.gpu ? 'CUDA Ready' : 'CPU Mode';
+        document.getElementById('cudaDetail').textContent = data.gpu ? 'Hardware Accelerated (CUDA)' : 'CPU Fallback Mode';
+
+        // VRAM
+        const vramPct = data.gpu ? 100 : 20;
+        document.getElementById('vramBar').style.width = vramPct + '%';
+        document.getElementById('vramText').textContent = data.gpu ? 'CUDA Active' : 'CPU';
+
+        // Bridge
+        document.getElementById('bridgeStatus').innerHTML = data.status === 'ready'
+          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg> Active'
+          : '⏳ Loading...';
+
+        if (isFirstCheck) {
+          addLog('Health check OK — engine is online.', 'log-ok');
+          if (data.gpu_name && data.gpu_name !== 'None') {
+            addLog('GPU: ' + data.gpu_name, 'log-ok');
+          }
+          isFirstCheck = false;
         }
       } catch (e) {
-        console.log('Metrics error:', e);
+        document.getElementById('statusBadge').className = 'status-badge offline';
+        document.getElementById('statusDot').className = 'status-dot off';
+        document.getElementById('statusText').textContent = 'Offline';
+        if (isFirstCheck) {
+          addLog('Waiting for engine to start...', 'log-warn');
+        }
       }
     }
-    setInterval(updateMetrics, 3000);
+
+    // Poll every 5 seconds (not 3), lightweight since GPU info is cached server-side
+    setInterval(updateMetrics, 5000);
     updateMetrics();
   </script>
 </body>
