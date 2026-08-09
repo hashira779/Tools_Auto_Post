@@ -1,9 +1,10 @@
 """
-PyInstaller Build Script — Compiles VoxCPM2-Khmer Local Engine into a single .exe
+PyInstaller Build Script — Compiles VoxCPM2-Khmer Local Engine into a standalone single-file .exe
 """
 
 import os
 import sys
+import shutil
 import subprocess
 
 def build():
@@ -11,11 +12,11 @@ def build():
     os.chdir(script_dir)
 
     print("====================================================")
-    print("  🔨 Building VoxCPM2-Khmer-Engine.exe with PyInstaller")
+    print("  🔨 Building Standalone VoxCPM2-Khmer-Engine.exe (--onefile)")
     print(f"  Working Directory: {script_dir}")
     print("====================================================")
 
-    # Install PyInstaller if missing
+    # Ensure PyInstaller is available
     try:
         import PyInstaller
     except ImportError:
@@ -25,22 +26,33 @@ def build():
     cmd = [
         sys.executable, "-m", "PyInstaller",
         "--noconfirm",
-        "--onedir",
+        "--onefile",
         "--windowed",
         "--name=VoxCPM2-Khmer-Engine",
         "--add-data=gui;gui",
         "--add-data=app;app",
+        "--hidden-import=torch",
+        "--hidden-import=transformers",
+        "--hidden-import=scipy",
         "desktop_app.py"
     ]
 
-    print("Running command:", " ".join(cmd))
+    print("Running PyInstaller command:", " ".join(cmd))
     res = subprocess.run(cmd, cwd=script_dir)
 
     if res.returncode == 0:
-        exe_path = os.path.join(script_dir, "dist", "VoxCPM2-Khmer-Engine", "VoxCPM2-Khmer-Engine.exe")
+        dist_exe = os.path.join(script_dir, "dist", "VoxCPM2-Khmer-Engine.exe")
+        public_dir = os.path.join(script_dir, "..", "services", "savemedia-web", "frontend", "public")
+        public_exe = os.path.join(public_dir, "VoxCPM2-Khmer-Engine.exe")
+
+        os.makedirs(public_dir, exist_ok=True)
+        if os.path.exists(dist_exe):
+            shutil.copy2(dist_exe, public_exe)
+            print(f"  ✓ Copied executable to frontend public directory: {public_exe}")
+
         print("====================================================")
         print(" 🎉 BUILD SUCCESSFUL!")
-        print(f" Executable located at: {exe_path}")
+        print(f" Single-file Executable: {dist_exe}")
         print("====================================================")
     else:
         print("❌ BUILD FAILED with exit code:", res.returncode)

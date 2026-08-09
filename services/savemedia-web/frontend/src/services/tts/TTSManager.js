@@ -33,41 +33,41 @@ class TTSManager {
                 const data = await response.json();
                 this.isLocalAvailable = data.ready === true;
                 this.localStatus = data;
-                return this.isLocalAvailable;
+                return data.status || (this.isLocalAvailable ? 'ready' : 'starting');
             }
         } catch (error) {
             // Silently fail - means engine is not installed or not running
             this.isLocalAvailable = false;
             this.localStatus = null;
         }
-        return false;
+        return 'offline';
     }
 
     /**
      * Automatically routes the generation request to the best available provider.
      */
-    async generateSpeech(text) {
+    async generateSpeech(text, voice = 'voxcpm2') {
         // Always verify local engine status before generating
         await this.checkLocalEngine();
 
         if (this.isLocalAvailable) {
             try {
-                return await this._generateLocal(text);
+                return await this._generateLocal(text, voice);
             } catch (error) {
                 console.warn("Local engine failed, falling back to cloud...", error);
-                // Fallback intentionally left un-returned so it cascades to cloud
             }
         }
         
         return await this._generateCloud(text);
     }
 
-    async _generateLocal(text) {
+    async _generateLocal(text, voice = 'voxcpm2') {
         const response = await fetch(`${LOCAL_ENGINE_URL}/v1/audio/speech`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 text: text,
+                voice: voice,
                 format: 'wav' 
             })
         });

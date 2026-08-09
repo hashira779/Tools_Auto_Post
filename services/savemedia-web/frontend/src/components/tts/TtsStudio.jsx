@@ -97,11 +97,11 @@ export default function TtsStudio() {
 
   useEffect(() => {
     const checkEngine = async () => {
-      const isAvailable = await ttsManager.checkLocalEngine();
-      setEngineStatus(isAvailable ? 'ready' : 'offline');
+      const status = await ttsManager.checkLocalEngine();
+      setEngineStatus(status);
     };
     checkEngine();
-    const interval = setInterval(checkEngine, 10000);
+    const interval = setInterval(checkEngine, 5000); // Check more frequently to detect ready state faster
     return () => clearInterval(interval);
   }, []);
 
@@ -135,9 +135,11 @@ export default function TtsStudio() {
 
     try {
       if (selectedVoice === 'voxcpm2-khm') {
-        const isAvailable = await ttsManager.checkLocalEngine();
-        if (!isAvailable) {
+        const status = await ttsManager.checkLocalEngine();
+        if (status === 'offline') {
           throw new Error("Local Offline Engine is not installed or not running. Please start the background service.");
+        } else if (status === 'starting') {
+          throw new Error("Engine is still loading the model. Please wait a moment.");
         }
         const blob = await ttsManager.generateSpeech(text.trim());
         setAudioBlob(blob);
@@ -210,10 +212,10 @@ export default function TtsStudio() {
         {/* ── Local Engine Status ────────────────────────── */}
         <div className="flex items-center justify-between rounded-2xl bg-[#0e1117] border border-white/[0.06] p-4">
           <div className="flex items-center gap-3">
-             <div className={`w-2.5 h-2.5 rounded-full ${engineStatus === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : engineStatus === 'checking' ? 'bg-yellow-500 animate-pulse' : 'bg-slate-600'}`}></div>
+             <div className={`w-2.5 h-2.5 rounded-full ${engineStatus === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : (engineStatus === 'checking' || engineStatus === 'starting') ? 'bg-yellow-500 animate-pulse' : 'bg-slate-600'}`}></div>
              <div>
                <h3 className="text-sm font-medium text-slate-200">Local GPU Engine</h3>
-               <p className="text-xs text-slate-500">{engineStatus === 'ready' ? 'VoxCPM2-Khmer is connected and ready.' : 'Offline engine is not installed or running.'}</p>
+               <p className="text-xs text-slate-500">{engineStatus === 'ready' ? 'VoxCPM2-Khmer is connected and ready.' : engineStatus === 'starting' ? 'Connected. Loading model into VRAM...' : 'Offline engine is not installed or running.'}</p>
              </div>
           </div>
           {engineStatus === 'offline' && (

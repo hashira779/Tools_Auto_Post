@@ -261,17 +261,27 @@
 
   <script>
     const logBox = document.getElementById('logBox');
-    let isFirstCheck = true;
+    let loggedSet = new Set();
 
-    function addLog(msg, cls = 'log-info') {
-      const now = new Date().toLocaleTimeString('en-GB', { hour12: false });
-      const el = document.createElement('div');
-      el.className = cls;
-      el.textContent = `[${now}] ${msg}`;
-      logBox.appendChild(el);
-      logBox.scrollTop = logBox.scrollHeight;
-      // Keep log tidy
-      while (logBox.children.length > 50) logBox.removeChild(logBox.firstChild);
+    function renderLogs(logs) {
+      if (!logs || !Array.isArray(logs)) return;
+      logs.forEach(item => {
+        const key = `${item.time}-${item.msg}`;
+        if (!loggedSet.has(key)) {
+          loggedSet.add(key);
+          const el = document.createElement('div');
+          let cls = 'log-info';
+          if (item.level === 'ok') cls = 'log-ok';
+          else if (item.level === 'warn') cls = 'log-warn';
+          else if (item.level === 'system') cls = 'log-system';
+          
+          el.className = cls;
+          el.textContent = `[${item.time}] ${item.msg}`;
+          logBox.appendChild(el);
+          logBox.scrollTop = logBox.scrollHeight;
+          while (logBox.children.length > 50) logBox.removeChild(logBox.firstChild);
+        }
+      });
     }
 
     async function updateMetrics() {
@@ -303,25 +313,18 @@
           ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg> Active'
           : '⏳ Loading...';
 
-        if (isFirstCheck) {
-          addLog('Health check OK — engine is online.', 'log-ok');
-          if (data.gpu_name && data.gpu_name !== 'None') {
-            addLog('GPU: ' + data.gpu_name, 'log-ok');
-          }
-          isFirstCheck = false;
+        if (data.logs) {
+          renderLogs(data.logs);
         }
       } catch (e) {
         document.getElementById('statusBadge').className = 'status-badge offline';
         document.getElementById('statusDot').className = 'status-dot off';
         document.getElementById('statusText').textContent = 'Offline';
-        if (isFirstCheck) {
-          addLog('Waiting for engine to start...', 'log-warn');
-        }
       }
     }
 
-    // Poll every 5 seconds (not 3), lightweight since GPU info is cached server-side
-    setInterval(updateMetrics, 5000);
+    // Fast polling for instant live request feedback
+    setInterval(updateMetrics, 2000);
     updateMetrics();
   </script>
 </body>

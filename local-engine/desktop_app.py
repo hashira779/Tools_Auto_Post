@@ -81,37 +81,66 @@ def main():
     server_thread = threading.Thread(target=start_server, daemon=True)
     server_thread.start()
 
-    # 2. Wait until server is ACTUALLY ready
-    if wait_for_server(timeout=20):
-        log_msg("Server is ready on http://127.0.0.1:8765")
-    else:
-        log_msg("Server failed to start within 20 seconds. Exiting.")
-        sys.exit(1)
-
-    # 3. Try pywebview for native modern UI window
+    # 2. Try pywebview for native modern UI window with a loading screen
     try:
         import webview
         log_msg("Opening pywebview window...")
+        
+        loading_html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>VoxCPM2-Khmer — Starting</title>
+            <style>
+                body { background: #08090d; color: #e2e8f0; font-family: system-ui; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; flex-direction: column; }
+                .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #10b981; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            </style>
+        </head>
+        <body>
+            <div class="spinner"></div>
+            <h2>Starting Local GPU Engine...</h2>
+            <p style="color: #94a3b8">This may take a few seconds.</p>
+        </body>
+        </html>
+        """
+        
         window = webview.create_window(
             title="VoxCPM2-Khmer — Local GPU Engine",
-            url="http://127.0.0.1:8765/app",
+            html=loading_html,
             width=820,
             height=560,
             resizable=True,
             confirm_close=False,
             background_color="#08090d"
         )
+        
+        def check_server():
+            if wait_for_server(timeout=30):
+                log_msg("Server is ready on http://127.0.0.1:8765, loading app...")
+                window.load_url("http://127.0.0.1:8765/app")
+            else:
+                log_msg("Server failed to start within 30 seconds.")
+                window.load_html("<h2>Error: Server failed to start. Check logs.</h2>")
+
+        # Start the checker thread
+        threading.Thread(target=check_server, daemon=True).start()
+        
         webview.start()
     except Exception as e:
         log_msg(f"Webview error: {traceback.format_exc()}")
         # Fallback to default browser
-        import webbrowser
-        webbrowser.open("http://127.0.0.1:8765/app")
-        try:
-            while True:
-                time.sleep(1.0)
-        except KeyboardInterrupt:
-            sys.exit(0)
+        if wait_for_server(timeout=30):
+            import webbrowser
+            webbrowser.open("http://127.0.0.1:8765/app")
+            try:
+                while True:
+                    time.sleep(1.0)
+            except KeyboardInterrupt:
+                sys.exit(0)
+        else:
+            log_msg("Server failed to start within 30 seconds. Exiting.")
+            sys.exit(1)
 
 
 if __name__ == "__main__":
