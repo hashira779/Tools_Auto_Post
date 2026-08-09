@@ -27,10 +27,25 @@ rsync -a --exclude '.git' --exclude '.venv' ./ "$APP_DIR/"
 
 cd "$APP_DIR"
 
-# 3. Build Docker images first (without stopping running containers)
+# 3. Pre-flight system check
+echo "📊 System Resource Check:"
+echo "--- Memory ---"
+free -h
+echo "--- Disk Space ---"
+df -h /
+
+# 4. Build Docker images first (without stopping running containers)
 echo "🔨 Building Docker images..."
 if ! echo "$SUDO_PASS" | sudo -S docker compose build; then
+    echo "===================================================="
     echo "❌ Build failed! Aborting deployment without affecting running services."
+    echo "🔍 Debug Info: System logs (checking for OOM or disk errors)..."
+    echo "--- dmesg (last 20 lines) ---"
+    echo "$SUDO_PASS" | sudo -S dmesg | tail -n 20 || true
+    echo "--- Disk Space ---"
+    df -h /
+    echo "===================================================="
+    
     if [ -d "$BACKUP_DIR" ]; then
         echo "🔄 Restoring previous working code..."
         rsync -a --delete "$BACKUP_DIR/" "$APP_DIR/"
@@ -38,7 +53,7 @@ if ! echo "$SUDO_PASS" | sudo -S docker compose build; then
     exit 1
 fi
 
-# 4. Gracefully apply updates
+# 5. Gracefully apply updates
 echo "🚀 Starting updated containers..."
 echo "$SUDO_PASS" | sudo -S docker compose up -d --remove-orphans
 
