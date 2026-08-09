@@ -15,10 +15,8 @@ jobs:
 
       - name: Free disk space before build
         run: |
-          # Clean Docker build cache and old images
-          sudo docker builder prune -af 2>/dev/null || true
-          sudo docker image prune -af 2>/dev/null || true
-          sudo docker volume prune -f 2>/dev/null || true
+          # Clean dangling images only (KEEP build cache for fast deploys)
+          sudo docker image prune -f 2>/dev/null || true
           # Clean old runner logs
           find /home/ubuntu-server/actions-runner/_diag -name "*.log" -mtime +1 -delete 2>/dev/null || true
           # Clean system journals
