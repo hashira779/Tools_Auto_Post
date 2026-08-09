@@ -7,8 +7,12 @@ import sys
 import subprocess
 
 def build():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
+
     print("====================================================")
     print("  🔨 Building VoxCPM2-Khmer-Engine.exe with PyInstaller")
+    print(f"  Working Directory: {script_dir}")
     print("====================================================")
 
     # Install PyInstaller if missing
@@ -30,12 +34,13 @@ def build():
     ]
 
     print("Running command:", " ".join(cmd))
-    res = subprocess.run(cmd)
+    res = subprocess.run(cmd, cwd=script_dir)
 
     if res.returncode == 0:
+        exe_path = os.path.join(script_dir, "dist", "VoxCPM2-Khmer-Engine", "VoxCPM2-Khmer-Engine.exe")
         print("====================================================")
         print(" 🎉 BUILD SUCCESSFUL!")
-        print(" Executable located in: dist/VoxCPM2-Khmer-Engine/VoxCPM2-Khmer-Engine.exe")
+        print(f" Executable located at: {exe_path}")
         print("====================================================")
     else:
         print("❌ BUILD FAILED with exit code:", res.returncode)
