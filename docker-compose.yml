@@ -144,6 +144,25 @@ services:
       - camtech-net
 
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  MMS-TTS — Offline Khmer Voice (CPU Optimized)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  mms-tts:
+    build:
+      context: ./services/mms-tts
+      dockerfile: Dockerfile
+    container_name: camtech-mms-tts
+    restart: unless-stopped
+    expose:
+      - "8002"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   #  Kokoro-82M TTS — Premium Voice AI (CPU Optimized)
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

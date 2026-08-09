@@ -36,6 +36,7 @@ FEATURED_VOICES = [
     # Khmer
     {"id": "km-KH-PisethNeural", "name": "ពិសិដ្ឋ (Khmer Male)", "lang": "ខ្មែរ", "gender": "Male", "locale": "km-KH"},
     {"id": "km-KH-SreymomNeural", "name": "ស្រីមុំ (Khmer Female)", "lang": "ខ្មែរ", "gender": "Female", "locale": "km-KH"},
+    {"id": "mms-khm", "name": "Meta MMS (Offline)", "lang": "ខ្មែរ", "gender": "Neutral", "locale": "km-KH"},
     # Chinese
     {"id": "zh-CN-YunxiNeural", "name": "Yunxi (Chinese Male)", "lang": "中文", "gender": "Male", "locale": "zh-CN"},
     {"id": "zh-CN-XiaoxiaoNeural", "name": "Xiaoxiao (Chinese Female)", "lang": "中文", "gender": "Female", "locale": "zh-CN"},
@@ -126,6 +127,9 @@ async def generate_speech(
         real_voice_id = voice_id.replace("kokoro-", "")
         return await _generate_kokoro_speech(text, real_voice_id, rate)
 
+    if voice_id == "mms-khm":
+        return await _generate_mms_speech(text, rate)
+
     # Validate voice_id exists (fallback to default)
     valid_ids = {v["id"] for v in FEATURED_VOICES}
     if voice_id not in valid_ids:
@@ -195,4 +199,39 @@ async def _generate_kokoro_speech(text: str, voice_id: str, rate: str) -> bytes:
     except Exception as e:
         logger.error(f"Kokoro TTS generation failed: {e}", exc_info=True)
         raise RuntimeError(f"Premium speech generation failed: {str(e)}")
+
+async def _generate_mms_speech(text: str, rate: str) -> bytes:
+    """Generate offline Khmer voiceover using local MMS-TTS container."""
+    speed = 1.0
+    if rate == "-25%": speed = 0.85
+    elif rate == "+25%": speed = 1.15
+    elif rate == "+50%": speed = 1.3
+    
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            payload = {
+                "model": "mms",
+                "input": text,
+                "voice": "mms-khm",
+                "response_format": "wav",
+                "speed": speed
+            }
+            
+            resp = await client.post("http://mms-tts:8002/v1/audio/speech", json=payload)
+            resp.raise_for_status()
+            
+            audio_bytes = resp.content
+            if not audio_bytes:
+                raise RuntimeError("MMS TTS returned empty audio")
+            
+            logger.info(f"Generated MMS audio for {len(text)} chars")
+            return audio_bytes
+            
+    except httpx.ConnectError:
+        logger.error("Failed to connect to mms-tts container. Is it running?")
+        raise RuntimeError("Offline MMS Engine is currently offline.")
+    except Exception as e:
+        logger.error(f"MMS TTS generation failed: {e}", exc_info=True)
+        raise RuntimeError(f"Offline speech generation failed: {str(e)}")
+
 
