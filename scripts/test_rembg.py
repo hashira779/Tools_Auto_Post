@@ -1,0 +1,10 @@
+import paramiko
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client.connect('10.1.0.11', username='ubuntu-server', password='pTT!CT01', timeout=10)
+stdin, stdout, stderr = client.exec_command('docker run --rm python:3.12-slim bash -c "pip install rembg >/dev/null 2>&1 && python -c \\"import rembg\\""')
+print("STDOUT:")
+print(stdout.read().decode())
+print("STDERR:")
+print(stderr.read().decode())
+client.close()

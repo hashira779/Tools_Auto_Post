@@ -90,6 +90,8 @@ export default function TtsStudio() {
   const [audioBlob, setAudioBlob] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [engineStatus, setEngineStatus] = useState('checking')
+  const [showInstallModal, setShowInstallModal] = useState(false)
+  const [copiedCmd, setCopiedCmd] = useState(false)
   const audioRef = useRef(null)
   const textareaRef = useRef(null)
 
@@ -215,7 +217,13 @@ export default function TtsStudio() {
              </div>
           </div>
           {engineStatus === 'offline' && (
-             <button className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] text-xs font-medium text-slate-300 rounded-lg transition-colors border border-white/[0.06]">
+             <button
+               onClick={() => setShowInstallModal(true)}
+               className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-medium text-emerald-400 rounded-lg transition-colors border border-emerald-500/20 cursor-pointer flex items-center gap-1.5"
+             >
+               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+               </svg>
                Install Engine
              </button>
           )}
@@ -425,6 +433,64 @@ export default function TtsStudio() {
                 </svg>
                 Download MP3
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Install Engine Modal ────────────────── */}
+        {showInstallModal && (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-[#0e1117] border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5 relative">
+              <button
+                onClick={() => setShowInstallModal(false)}
+                className="absolute top-4 right-4 text-slate-500 hover:text-white text-lg transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  ⚡
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-white">Install Local GPU Engine</h3>
+                  <p className="text-xs text-slate-400">Run VoxCPM2-Khmer offline on your PC GPU</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-xs text-slate-300 font-medium">Option 1: Automatic 1-Line PowerShell Command</p>
+                <div className="bg-black/50 border border-white/5 rounded-xl p-3 flex items-center justify-between gap-2 font-mono text-[11px] text-emerald-400">
+                  <span className="truncate select-all">irm https://camtech.cam/install.ps1 | iex</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText("irm https://camtech.cam/install.ps1 | iex");
+                      setCopiedCmd(true);
+                      setTimeout(() => setCopiedCmd(false), 2000);
+                    }}
+                    className="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded text-[10px] font-medium transition-colors whitespace-nowrap cursor-pointer"
+                  >
+                    {copiedCmd ? 'Copied! ✓' : 'Copy'}
+                  </button>
+                </div>
+
+                <p className="text-xs text-slate-300 font-medium pt-2">Option 2: Download Installer Script</p>
+                <a
+                  href="/install.ps1"
+                  download="install.ps1"
+                  className="w-full py-2.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 rounded-xl text-xs font-medium text-slate-200 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download install.ps1
+                </a>
+              </div>
+
+              <div className="border-t border-white/5 pt-3 text-[11px] text-slate-500 space-y-1">
+                <p>• Requires Windows 10/11 & Python 3.10+</p>
+                <p>• Automatically configures Windows startup background service</p>
+              </div>
             </div>
           </div>
         )}
