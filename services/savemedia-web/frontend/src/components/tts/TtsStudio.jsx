@@ -459,7 +459,19 @@ export default function TtsStudio() {
               </div>
 
               <div className="space-y-3">
-                <p className="text-xs text-slate-300 font-medium">Option 1: Automatic 1-Line PowerShell Command</p>
+                <p className="text-xs text-slate-300 font-medium">Option 1: Windows Desktop Application (.exe)</p>
+                <a
+                  href="/VoxCPM2-Khmer-Engine.exe"
+                  download="VoxCPM2-Khmer-Engine.exe"
+                  className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download VoxCPM2-Khmer-Engine.exe
+                </a>
+
+                <p className="text-xs text-slate-300 font-medium pt-2">Option 2: Automatic PowerShell Command</p>
                 <div className="bg-black/50 border border-white/5 rounded-xl p-3 flex items-center justify-between gap-2 font-mono text-[11px] text-emerald-400">
                   <span className="truncate select-all">irm https://camtech.cam/install.ps1 | iex</span>
                   <button
@@ -473,23 +485,11 @@ export default function TtsStudio() {
                     {copiedCmd ? 'Copied! ✓' : 'Copy'}
                   </button>
                 </div>
-
-                <p className="text-xs text-slate-300 font-medium pt-2">Option 2: Download Installer Script</p>
-                <a
-                  href="/install.ps1"
-                  download="install.ps1"
-                  className="w-full py-2.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 rounded-xl text-xs font-medium text-slate-200 flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Download install.ps1
-                </a>
               </div>
 
               <div className="border-t border-white/5 pt-3 text-[11px] text-slate-500 space-y-1">
-                <p>• Requires Windows 10/11 & Python 3.10+</p>
-                <p>• Automatically configures Windows startup background service</p>
+                <p>• Double-click the downloaded app to launch modern desktop interface</p>
+                <p>• Automatically connects website to local NVIDIA GPU on port 8765</p>
               </div>
             </div>
           </div>

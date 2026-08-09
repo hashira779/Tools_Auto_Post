@@ -33,7 +33,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global model state
+from fastapi.responses import Response, FileResponse
+
+# Serve GUI dashboard
+@app.get("/")
+@app.get("/app")
+async def serve_dashboard():
+    gui_path = os.path.join(os.path.dirname(__file__), "..", "gui", "gui.html")
+    if os.path.exists(gui_path):
+        return FileResponse(gui_path)
+    return Response("VoxCPM2-Khmer Local GPU Engine is Running on 127.0.0.1:8765", media_type="text/plain")
 class ModelManager:
     def __init__(self):
         self.model = None

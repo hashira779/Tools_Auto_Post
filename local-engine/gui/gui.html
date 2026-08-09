@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoxCPM2-Khmer — Local GPU Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      user-select: none;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-card {
+      background: rgba(14, 17, 23, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-[#08090d] text-slate-200 min-h-screen flex flex-col justify-between p-6 select-none overflow-hidden">
+
+  <!-- Header -->
+  <header class="flex items-center justify-between border-b border-white/[0.06] pb-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-slate-950 font-bold text-lg shadow-lg shadow-emerald-500/20">
+        🇰🇭
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-white tracking-wide flex items-center gap-2">
+          VoxCPM2-Khmer
+          <span class="text-[10px] uppercase font-semibold tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">GPU Engine</span>
+        </h1>
+        <p class="text-xs text-slate-400">Offline Local Text-to-Speech Service</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="statusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Online (127.0.0.1:8765)
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main class="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto py-4">
+
+    <!-- GPU & Hardware Info -->
+    <div class="glass-card rounded-2xl p-5 space-y-4 glow-emerald">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+          ⚡ GPU Hardware Acceleration
+        </h2>
+        <span id="gpuStatus" class="text-[11px] font-medium text-emerald-400">CUDA Ready</span>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <p id="gpuName" class="text-base font-bold text-white truncate">Detecting NVIDIA GPU...</p>
+          <p id="cudaVer" class="text-xs text-slate-400">CUDA Driver Version: Checking...</p>
+        </div>
+
+        <!-- VRAM Progress Bar -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-medium">
+            <span class="text-slate-400">VRAM Capacity</span>
+            <span id="vramText" class="text-emerald-400 font-mono">0.0 / 0.0 GB</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
+            <div id="vramBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Voice Model Status -->
+    <div class="glass-card rounded-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+          🎙️ Voice AI Model
+        </h2>
+        <span id="modelBadge" class="text-[11px] font-medium text-emerald-400">VoxCPM2-Khmer</span>
+      </div>
+
+      <div class="space-y-2">
+        <p class="text-base font-bold text-white">VoxCPM2 Neural Khmer Voice</p>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Listening on <code class="font-mono text-emerald-400 bg-white/[0.04] px-1.5 py-0.5 rounded">http://127.0.0.1:8765</code>.<br>
+          Connected website requests will execute on your GPU automatically.
+        </p>
+      </div>
+
+      <div class="pt-2 border-t border-white/[0.04] flex items-center justify-between text-xs">
+        <span class="text-slate-400">CamTech Web Bridge</span>
+        <span class="text-emerald-400 font-medium flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          Active
+        </span>
+      </div>
+    </div>
+
+    <!-- Live Activity Log -->
+    <div class="glass-card rounded-2xl p-4 md:col-span-2 space-y-2">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Live System Console</h3>
+        <span class="text-[10px] text-slate-500 font-mono">Port 8765</span>
+      </div>
+      <div id="logBox" class="bg-black/60 rounded-xl p-3 h-24 overflow-y-auto font-mono text-[11px] text-slate-300 space-y-1 border border-white/[0.04]">
+        <div class="text-slate-500">[System] VoxCPM2-Khmer Desktop Application initialized.</div>
+        <div class="text-emerald-400">[HTTP] Service listening on 127.0.0.1:8765 (CORS: https://camtech.cam)</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="flex items-center justify-between border-t border-white/[0.06] pt-4 text-xs text-slate-500">
+    <p>© 2026 CamTech AI Studio — VoxCPM2-Khmer Engine v1.0</p>
+    <div class="flex items-center gap-3">
+      <button onclick="window.location.reload()" class="hover:text-slate-300 transition-colors">Refresh</button>
+      <span>•</span>
+      <span class="text-emerald-500 font-medium">Running in System Tray</span>
+    </div>
+  </footer>
+
+  <script>
+    async function updateMetrics() {
+      try {
+        const res = await fetch('/health');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('gpuName').innerText = data.gpu_name || 'NVIDIA GPU Detected';
+          document.getElementById('cudaVer').innerText = 'GPU Mode: ' + (data.gpu ? 'Hardware Accelerated (CUDA)' : 'CPU Mode');
+          document.getElementById('vramText').innerText = (data.gpu ? 'CUDA Active' : 'CPU Fallback');
+          document.getElementById('vramBar').style.width = data.gpu ? '100%' : '20%';
+        }
+      } catch (e) {
+        console.log('Metrics error:', e);
+      }
+    }
+    setInterval(updateMetrics, 3000);
+    updateMetrics();
+  </script>
+</body>
+</html>
