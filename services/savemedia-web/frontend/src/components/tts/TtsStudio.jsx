@@ -459,32 +459,23 @@ export default function TtsStudio() {
               </div>
 
               <div className="space-y-3">
-                <p className="text-xs text-slate-300 font-medium">Option 1: Windows Desktop Application (.exe)</p>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl mb-4">
+                  <p className="text-xs text-emerald-400 font-medium">Safe & Secure ✓</p>
+                  <p className="text-[11px] text-emerald-500/80 mt-1">
+                    The standalone application requires no installation. Just extract the ZIP file and run the application. It runs 100% locally on your machine and only communicates with your local browser.
+                  </p>
+                </div>
+
                 <a
-                  href="/VoxCPM2-Khmer-Engine.exe"
-                  download="VoxCPM2-Khmer-Engine.exe"
+                  href="/VoxCPM2-Khmer-Engine.zip"
+                  download="VoxCPM2-Khmer-Engine.zip"
                   className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  Download VoxCPM2-Khmer-Engine.exe
+                  Download Engine (ZIP)
                 </a>
-
-                <p className="text-xs text-slate-300 font-medium pt-2">Option 2: Automatic PowerShell Command</p>
-                <div className="bg-black/50 border border-white/5 rounded-xl p-3 flex items-center justify-between gap-2 font-mono text-[11px] text-emerald-400">
-                  <span className="truncate select-all">irm https://camtech.cam/install.ps1 | iex</span>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText("irm https://camtech.cam/install.ps1 | iex");
-                      setCopiedCmd(true);
-                      setTimeout(() => setCopiedCmd(false), 2000);
-                    }}
-                    className="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded text-[10px] font-medium transition-colors whitespace-nowrap cursor-pointer"
-                  >
-                    {copiedCmd ? 'Copied! ✓' : 'Copy'}
-                  </button>
-                </div>
               </div>
 
               <div className="border-t border-white/5 pt-3 text-[11px] text-slate-500 space-y-1">

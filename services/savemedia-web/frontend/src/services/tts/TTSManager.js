@@ -5,7 +5,7 @@
  * If not, it falls back to the cloud API.
  */
 
-const LOCAL_ENGINE_URL = 'http://127.0.0.1:8765';
+const LOCAL_ENGINE_URL = 'http://localhost:8765';
 const CLOUD_API_URL = '/api/tts'; // Adjust if cloud API path is different
 
 class TTSManager {
