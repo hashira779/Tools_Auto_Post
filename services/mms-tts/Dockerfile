@@ -20,7 +20,7 @@ RUN grep -v "torch" requirements.txt > req_no_torch.txt && \
 COPY . .
 
 # Download the model weights during build to cache them
-RUN python -c "from transformers import VitsModel, AutoTokenizer; VitsModel.from_pretrained('facebook/mms-tts-khm'); AutoTokenizer.from_pretrained('facebook/mms-tts-khm')"
+RUN python -c "from transformers import VitsModel, AutoTokenizer; VitsModel.from_pretrained('khmerttsopensource/khmer-tts'); AutoTokenizer.from_pretrained('khmerttsopensource/khmer-tts')"
 
 EXPOSE 8002
 

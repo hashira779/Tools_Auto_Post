@@ -20,9 +20,9 @@ tokenizer = None
 @app.on_event("startup")
 async def startup_event():
     global model, tokenizer
-    logger.info("Loading MMS-TTS model for Khmer...")
-    model = VitsModel.from_pretrained("facebook/mms-tts-khm")
-    tokenizer = AutoTokenizer.from_pretrained("facebook/mms-tts-khm")
+    logger.info("Loading Khmer-TTS model (OpenSource fine-tuned)...")
+    model = VitsModel.from_pretrained("khmerttsopensource/khmer-tts")
+    tokenizer = AutoTokenizer.from_pretrained("khmerttsopensource/khmer-tts")
     logger.info("Model loaded successfully!")
 
 class TTSRequest(BaseModel):

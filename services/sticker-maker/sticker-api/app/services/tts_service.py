@@ -37,7 +37,7 @@ FEATURED_VOICES = [
     {"id": "km-KH-PisethNeural", "name": "ពិសិដ្ឋ (Khmer Male)", "lang": "ខ្មែរ", "gender": "Male", "locale": "km-KH"},
     {"id": "km-KH-SreymomNeural", "name": "ស្រីមុំ (Khmer Female)", "lang": "ខ្មែរ", "gender": "Female", "locale": "km-KH"},
     {"id": "google-khm", "name": "Google Translate (Khmer)", "lang": "ខ្មែរ", "gender": "Neutral", "locale": "km-KH"},
-    {"id": "mms-khm", "name": "Meta MMS (Offline)", "lang": "ខ្មែរ", "gender": "Neutral", "locale": "km-KH"},
+    {"id": "mms-khm", "name": "Khmer TTS OpenSource (Offline)", "lang": "ខ្មែរ", "gender": "Neutral", "locale": "km-KH"},
     # Chinese
     {"id": "zh-CN-YunxiNeural", "name": "Yunxi (Chinese Male)", "lang": "中文", "gender": "Male", "locale": "zh-CN"},
     {"id": "zh-CN-XiaoxiaoNeural", "name": "Xiaoxiao (Chinese Female)", "lang": "中文", "gender": "Female", "locale": "zh-CN"},
