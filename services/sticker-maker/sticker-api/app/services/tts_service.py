@@ -36,6 +36,7 @@ FEATURED_VOICES = [
     # Khmer
     {"id": "km-KH-PisethNeural", "name": "ពិសិដ្ឋ (Khmer Male)", "lang": "ខ្មែរ", "gender": "Male", "locale": "km-KH"},
     {"id": "km-KH-SreymomNeural", "name": "ស្រីមុំ (Khmer Female)", "lang": "ខ្មែរ", "gender": "Female", "locale": "km-KH"},
+    {"id": "google-khm", "name": "Google Translate (Khmer)", "lang": "ខ្មែរ", "gender": "Neutral", "locale": "km-KH"},
     {"id": "mms-khm", "name": "Meta MMS (Offline)", "lang": "ខ្មែរ", "gender": "Neutral", "locale": "km-KH"},
     # Chinese
     {"id": "zh-CN-YunxiNeural", "name": "Yunxi (Chinese Male)", "lang": "中文", "gender": "Male", "locale": "zh-CN"},
@@ -129,6 +130,9 @@ async def generate_speech(
 
     if voice_id == "mms-khm":
         return await _generate_mms_speech(text, rate)
+
+    if voice_id == "google-khm":
+        return await _generate_google_speech(text, rate)
 
     # Validate voice_id exists (fallback to default)
     valid_ids = {v["id"] for v in FEATURED_VOICES}
@@ -233,5 +237,31 @@ async def _generate_mms_speech(text: str, rate: str) -> bytes:
     except Exception as e:
         logger.error(f"MMS TTS generation failed: {e}", exc_info=True)
         raise RuntimeError(f"Offline speech generation failed: {str(e)}")
+
+async def _generate_google_speech(text: str, rate: str) -> bytes:
+    """Generate voiceover using Google Translate TTS (gTTS)."""
+    try:
+        from gtts import gTTS
+        import io
+        
+        # gTTS does not have native speed control, but we can set 'slow'
+        slow = True if rate == "-25%" else False
+        
+        tts = gTTS(text=text, lang='km', slow=slow)
+        
+        audio_buffer = io.BytesIO()
+        tts.write_to_fp(audio_buffer)
+        
+        audio_bytes = audio_buffer.getvalue()
+        if not audio_bytes:
+            raise RuntimeError("Google TTS returned empty audio")
+            
+        logger.info(f"Generated Google TTS audio for {len(text)} chars")
+        return audio_bytes
+        
+    except Exception as e:
+        logger.error(f"Google TTS generation failed: {e}", exc_info=True)
+        raise RuntimeError(f"Google speech generation failed: {str(e)}")
+
 
 
