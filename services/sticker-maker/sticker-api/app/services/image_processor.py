@@ -12,10 +12,17 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 try:
     from rembg import remove, new_session
-    # Initialize session once to keep model in memory for faster processing
-    bg_session = new_session("u2net")
+    _bg_session = None
+    
+    def get_bg_session():
+        global _bg_session
+        if _bg_session is None:
+            _bg_session = new_session("u2net")
+        return _bg_session
 except ImportError:
-    bg_session = None
+    def get_bg_session():
+        return None
+        
     def remove(data, session=None):
         return data
 
