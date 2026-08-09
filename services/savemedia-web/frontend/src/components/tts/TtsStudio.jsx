@@ -82,6 +82,7 @@ export default function TtsStudio() {
   const [selectedVoice, setSelectedVoice] = useState('km-KH-PisethNeural')
   const [selectedLang, setSelectedLang] = useState('ខ្មែរ')
   const [rate, setRate] = useState('+0%')
+  const [pitch, setPitch] = useState('+0Hz')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [audioUrl, setAudioUrl] = useState(null)
@@ -114,6 +115,7 @@ export default function TtsStudio() {
       fd.append('text', text.trim())
       fd.append('voice_id', selectedVoice)
       fd.append('rate', rate)
+      fd.append('pitch', pitch)
 
       const resp = await fetch(`${API_BASE}/generate`, { method: 'POST', body: fd })
       if (!resp.ok) {
@@ -201,7 +203,11 @@ export default function TtsStudio() {
 
           {/* Bottom hint */}
           <div className="px-4 py-2 border-t border-white/[0.04] flex items-center justify-between">
-            <span className="text-[10px] text-slate-600">
+            <span className="text-[10px] text-slate-500 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
+              Tip: Use commas (,) or periods (.) to add natural breathing pauses
+            </span>
+            <span className="text-[10px] text-slate-600 hidden sm:block">
               Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-500 text-[9px] font-mono">Ctrl+Enter</kbd> to generate
             </span>
             {error && (
@@ -260,7 +266,7 @@ export default function TtsStudio() {
         </div>
 
         {/* ── Controls Row ────────────────────────── */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch gap-3">
           {/* Speed */}
           <div className="flex-1 rounded-2xl bg-[#0e1117] border border-white/[0.06] px-4 py-3">
             <label className="text-[10px] text-slate-600 uppercase tracking-wider font-medium block mb-1.5">Speed</label>
@@ -276,6 +282,30 @@ export default function TtsStudio() {
                   onClick={() => setRate(opt.value)}
                   className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     rate === opt.value
+                      ? 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30'
+                      : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Pitch */}
+          <div className="flex-1 rounded-2xl bg-[#0e1117] border border-white/[0.06] px-4 py-3">
+            <label className="text-[10px] text-slate-600 uppercase tracking-wider font-medium block mb-1.5">Voice Pitch</label>
+            <div className="flex gap-1.5">
+              {[
+                { label: 'Deep', value: '-15Hz' },
+                { label: 'Normal', value: '+0Hz' },
+                { label: 'High', value: '+15Hz' },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setPitch(opt.value)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    pitch === opt.value
                       ? 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30'
                       : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
                   }`}
