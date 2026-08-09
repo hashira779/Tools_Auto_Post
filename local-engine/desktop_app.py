@@ -8,6 +8,7 @@ import os
 import time
 import threading
 import urllib.request
+import traceback
 
 # Ensure paths work when packaged with PyInstaller
 if getattr(sys, 'frozen', False):
@@ -19,13 +20,26 @@ else:
 sys.path.insert(0, os.path.join(APP_ROOT, "app"))
 os.chdir(APP_ROOT)
 
-import uvicorn
-from app.main import app as fastapi_app
+def log_error(msg):
+    log_path = os.path.expanduser("~/voxcpm_error.log")
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}\n")
+
+try:
+    import uvicorn
+    from app.main import app as fastapi_app
+except Exception as e:
+    log_error(f"Import error: {traceback.format_exc()}")
+    sys.exit(1)
 
 
 def start_server():
     """Starts FastAPI uvicorn server in background thread."""
-    uvicorn.run(fastapi_app, host="127.0.0.1", port=8765, log_level="warning")
+    try:
+        log_error("Starting uvicorn server...")
+        uvicorn.run(fastapi_app, host="127.0.0.1", port=8765, log_level="warning")
+    except Exception as e:
+        log_error(f"Uvicorn error: {traceback.format_exc()}")
 
 
 def wait_for_server(timeout=15):
@@ -44,16 +58,19 @@ def wait_for_server(timeout=15):
 
 
 def main():
+    log_error("Starting main process...")
     # 1. Start Server Thread
     server_thread = threading.Thread(target=start_server, daemon=True)
     server_thread.start()
 
-    # 2. Wait until server is ACTUALLY ready (not just a fixed 1-second sleep)
-    print("[VoxCPM2] Starting local engine...")
+    # 2. Wait until server is ACTUALLY ready
+    log_error("[VoxCPM2] Waiting for local engine...")
     if wait_for_server(timeout=15):
-        print("[VoxCPM2] ✓ Server is ready on http://127.0.0.1:8765")
+        log_error("[VoxCPM2] ✓ Server is ready on http://127.0.0.1:8765")
     else:
-        print("[VoxCPM2] ! Server may still be starting...")
+        log_error("[VoxCPM2] ! Server failed to start within 15 seconds.")
+        # Do not open webview if server failed
+        sys.exit(1)
 
     # 3. Try pywebview for native modern UI window
     try:
@@ -69,6 +86,7 @@ def main():
         )
         webview.start()
     except Exception as e:
+        log_error(f"Webview error: {traceback.format_exc()}")
         # Fallback to default browser
         import webbrowser
         webbrowser.open("http://127.0.0.1:8765/app")
@@ -81,4 +99,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        log_error(f"Main loop error: {traceback.format_exc()}")
