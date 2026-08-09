@@ -2,6 +2,7 @@
 # Lightweight Python image processor + Telegram Bot API client
 
 FROM python:3.12-slim
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install fonts for text stickers
 RUN apt-get update && \

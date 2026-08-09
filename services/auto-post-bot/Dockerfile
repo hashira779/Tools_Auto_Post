@@ -1,7 +1,8 @@
 # ── Auto Post Bot ────────────────────────────────────────────────
 # Build context: CamTech root (to access shared/)
 
-FROM python:3.11-slim
+FROM python:3.12-slim
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install ffmpeg, Khmer fonts, SSL certs
 RUN apt-get update && \

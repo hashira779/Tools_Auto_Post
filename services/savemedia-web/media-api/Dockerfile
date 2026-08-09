@@ -2,6 +2,7 @@
 # Multi-stage build: Python + ffmpeg for media processing
 
 FROM python:3.12-slim AS base
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install ffmpeg (required for audio extraction / video merging)
 RUN apt-get update && \
