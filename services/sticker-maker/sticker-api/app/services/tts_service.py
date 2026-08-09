@@ -8,6 +8,7 @@ import io
 import json
 import logging
 import asyncio
+import httpx
 from typing import List, Dict, Optional
 from dataclasses import dataclass, asdict
 
@@ -18,12 +19,20 @@ logger = logging.getLogger(__name__)
 # Full list is fetched dynamically via edge-tts at runtime.
 
 FEATURED_VOICES = [
-    # English
-    {"id": "en-US-GuyNeural", "name": "Guy (American)", "lang": "English", "gender": "Male", "locale": "en-US"},
-    {"id": "en-US-JennyNeural", "name": "Jenny (American)", "lang": "English", "gender": "Female", "locale": "en-US"},
-    {"id": "en-GB-RyanNeural", "name": "Ryan (British)", "lang": "English", "gender": "Male", "locale": "en-GB"},
-    {"id": "en-GB-SoniaNeural", "name": "Sonia (British)", "lang": "English", "gender": "Female", "locale": "en-GB"},
-    {"id": "en-AU-WilliamNeural", "name": "William (Australian)", "lang": "English", "gender": "Male", "locale": "en-AU"},
+    # English (Premium Kokoro)
+    {"id": "kokoro-af_heart", "name": "⭐ Heart (US Female)", "lang": "English", "gender": "Female", "locale": "en-US"},
+    {"id": "kokoro-af_bella", "name": "⭐ Bella (US Female)", "lang": "English", "gender": "Female", "locale": "en-US"},
+    {"id": "kokoro-af_nicole", "name": "⭐ Nicole (US Female)", "lang": "English", "gender": "Female", "locale": "en-US"},
+    {"id": "kokoro-am_adam", "name": "⭐ Adam (US Male)", "lang": "English", "gender": "Male", "locale": "en-US"},
+    {"id": "kokoro-am_michael", "name": "⭐ Michael (US Male)", "lang": "English", "gender": "Male", "locale": "en-US"},
+    {"id": "kokoro-bf_emma", "name": "⭐ Emma (UK Female)", "lang": "English", "gender": "Female", "locale": "en-GB"},
+    {"id": "kokoro-bm_george", "name": "⭐ George (UK Male)", "lang": "English", "gender": "Male", "locale": "en-GB"},
+    # English (Standard Edge)
+    {"id": "en-US-GuyNeural", "name": "Guy (US)", "lang": "English", "gender": "Male", "locale": "en-US"},
+    {"id": "en-US-JennyNeural", "name": "Jenny (US)", "lang": "English", "gender": "Female", "locale": "en-US"},
+    {"id": "en-GB-RyanNeural", "name": "Ryan (UK)", "lang": "English", "gender": "Male", "locale": "en-GB"},
+    {"id": "en-GB-SoniaNeural", "name": "Sonia (UK)", "lang": "English", "gender": "Female", "locale": "en-GB"},
+    {"id": "en-AU-WilliamNeural", "name": "William (AU)", "lang": "English", "gender": "Male", "locale": "en-AU"},
     # Khmer
     {"id": "km-KH-PisethNeural", "name": "ពិសិដ្ឋ (Khmer Male)", "lang": "ខ្មែរ", "gender": "Male", "locale": "km-KH"},
     {"id": "km-KH-SreymomNeural", "name": "ស្រីមុំ (Khmer Female)", "lang": "ខ្មែរ", "gender": "Female", "locale": "km-KH"},
@@ -113,6 +122,10 @@ async def generate_speech(
     if len(text) > MAX_TEXT_LENGTH:
         raise ValueError(f"Text too long. Maximum {MAX_TEXT_LENGTH} characters allowed.")
 
+    if voice_id.startswith("kokoro-"):
+        real_voice_id = voice_id.replace("kokoro-", "")
+        return await _generate_kokoro_speech(text, real_voice_id, rate)
+
     # Validate voice_id exists (fallback to default)
     valid_ids = {v["id"] for v in FEATURED_VOICES}
     if voice_id not in valid_ids:
@@ -146,3 +159,40 @@ async def generate_speech(
     except Exception as e:
         logger.error(f"TTS generation failed: {e}", exc_info=True)
         raise RuntimeError(f"Speech generation failed: {str(e)}")
+
+async def _generate_kokoro_speech(text: str, voice_id: str, rate: str) -> bytes:
+    """Generate high-quality premium voiceover using local Kokoro-FastAPI."""
+    # Convert edge-tts rate to kokoro speed (0.5 to 2.0)
+    speed = 1.0
+    if rate == "-25%": speed = 0.85
+    elif rate == "+25%": speed = 1.15
+    elif rate == "+50%": speed = 1.3
+    
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            payload = {
+                "model": "kokoro",
+                "input": text,
+                "voice": voice_id,
+                "response_format": "mp3",
+                "speed": speed
+            }
+            
+            # The docker service name is kokoro-tts, internal port 8880
+            resp = await client.post("http://kokoro-tts:8880/v1/audio/speech", json=payload)
+            resp.raise_for_status()
+            
+            audio_bytes = resp.content
+            if not audio_bytes:
+                raise RuntimeError("Kokoro TTS returned empty audio")
+            
+            logger.info(f"Generated Kokoro audio for {len(text)} chars using voice '{voice_id}'")
+            return audio_bytes
+            
+    except httpx.ConnectError:
+        logger.error("Failed to connect to kokoro-tts container. Is it running?")
+        raise RuntimeError("Premium AI Voice Engine is currently offline.")
+    except Exception as e:
+        logger.error(f"Kokoro TTS generation failed: {e}", exc_info=True)
+        raise RuntimeError(f"Premium speech generation failed: {str(e)}")
+

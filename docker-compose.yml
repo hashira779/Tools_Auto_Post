@@ -143,6 +143,32 @@ services:
     networks:
       - camtech-net
 
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Kokoro-82M TTS — Premium Voice AI (CPU Optimized)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  kokoro-tts:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    container_name: camtech-kokoro-tts
+    restart: unless-stopped
+    expose:
+      - "8880"
+    environment:
+      - DEVICE=cpu
+      - ONNX_NUM_THREADS=4
+      - ONNX_INTER_OP_THREADS=2
+      - PYTORCH_NUM_THREADS=4
+    volumes:
+      - kokoro-models:/app/api/src/models
+      - kokoro-voices:/app/api/src/voices
+      - kokoro-temp:/tmp/kokoro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8880/health"]
+      interval: 30s
+      timeout: 10s
+    networks:
+      - camtech-net
+
 networks:
   camtech-net:
     driver: bridge
@@ -150,3 +176,6 @@ networks:
 volumes:
   savemedia-downloads:
   bot-downloads:
+  kokoro-models:
+  kokoro-voices:
+  kokoro-temp:
