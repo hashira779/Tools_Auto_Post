@@ -131,9 +131,6 @@ services:
       - ALLOWED_USERS=${ALLOWED_USERS:-}
       - STICKER_BOT_OWNER_ID=${STICKER_BOT_OWNER_ID:-}
       - DEFAULT_STICKER_USER_ID=${DEFAULT_STICKER_USER_ID:-}
-      - U2NET_HOME=/app/models
-    volumes:
-      - cv-models:/app/models
     expose:
       - "8001"
     healthcheck:
@@ -153,4 +150,3 @@ networks:
 volumes:
   savemedia-downloads:
   bot-downloads:
-  cv-models:

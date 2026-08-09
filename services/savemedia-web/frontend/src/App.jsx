@@ -3,7 +3,7 @@ import { useDownloader } from './hooks/useDownloader'
 import { FORMAT_VIDEO } from './constants/platforms'
 
 import BackgroundOrbs from './components/BackgroundOrbs'
-import AppNavbar, { TOOL_DOWNLOADER, TOOL_CV, TOOL_STICKER } from './components/AppNavbar'
+import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER } from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
 import SearchCard from './components/SearchCard'
@@ -11,7 +11,7 @@ import VideoPreview from './components/VideoPreview'
 import FormatTabs from './components/FormatTabs'
 import QualityGrid from './components/QualityGrid'
 import DownloadButton from './components/DownloadButton'
-import CvStudio from './components/cv/CvStudio'
+import TtsStudio from './components/tts/TtsStudio'
 import StickerHero from './components/sticker/StickerHero'
 import StickerStudio from './components/sticker/StickerStudio'
 import Footer from './components/Footer'
@@ -92,10 +92,10 @@ function App() {
           </main>
         )}
 
-        {/* 📷 Tool 2: AI Professional CV 4x6 & ID Photo Studio */}
-        {activeTool === TOOL_CV && (
+        {/* 🎙️ Tool 2: Text-to-Voice Studio */}
+        {activeTool === TOOL_TTS && (
           <main className="w-full flex flex-col items-center animate-fade-in">
-            <CvStudio />
+            <TtsStudio />
           </main>
         )}
 

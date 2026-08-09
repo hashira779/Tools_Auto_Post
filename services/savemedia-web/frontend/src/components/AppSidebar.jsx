@@ -1,5 +1,5 @@
 export const TOOL_DOWNLOADER = 'downloader'
-export const TOOL_CV = 'cv'
+export const TOOL_TTS = 'tts'
 export const TOOL_STICKER = 'sticker'
 
 export default function AppSidebar({
@@ -67,20 +67,20 @@ export default function AppSidebar({
                   </span>
                 </button>
 
-                {/* 2. AI CV 4x6 Studio */}
+                {/* 2. Text to Voice */}
                 <button
-                  onClick={() => handleSelect(TOOL_CV)}
+                  onClick={() => handleSelect(TOOL_TTS)}
                   className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
-                    activeTool === TOOL_CV
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-600/30 font-bold'
+                    activeTool === TOOL_TTS
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/30 font-bold'
                       : 'text-slate-300 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                   </svg>
-                  <span className="flex-1 text-left">AI CV 4×6 Photo Studio</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30">
+                  <span className="flex-1 text-left">Text to Voice</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
                     NEW
                   </span>
                 </button>

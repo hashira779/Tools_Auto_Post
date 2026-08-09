@@ -1,6 +1,6 @@
 """
 CamTech Studio API — FastAPI application factory.
-Microservice for creating Telegram stickers and AI CV 4x6 / ID Photos.
+Microservice for Telegram stickers and Text-to-Speech voiceovers.
 """
 
 import logging
@@ -19,7 +19,7 @@ except ImportError:
 
 from app.routes.sticker import router as sticker_router
 from app.routes.telegram import router as telegram_router
-from app.routes.cv import router as cv_router
+from app.routes.tts import router as tts_router
 
 # ── Logging ──────────────────────────────────────────────────────
 logging.basicConfig(
@@ -33,8 +33,8 @@ def create_app() -> FastAPI:
     """Application factory — creates and configures the FastAPI app."""
     app = FastAPI(
         title="CamTech Studio API",
-        description="Microservice for Telegram Stickers and AI CV 4x6 / ID Photo Processing",
-        version="2.0.0",
+        description="Microservice for Telegram Stickers and Text-to-Speech Voiceovers",
+        version="3.0.0",
         docs_url="/docs",
         redoc_url="/redoc",
     )
@@ -57,13 +57,13 @@ def create_app() -> FastAPI:
     # Routes
     app.include_router(sticker_router)
     app.include_router(telegram_router)
-    app.include_router(cv_router)
+    app.include_router(tts_router)
 
     # Top-level Health Checks
     @app.get("/api/health")
     @app.get("/health")
     async def root_health():
-        return {"status": "ok", "service": "camtech-studio-api"}
+        return {"status": "ok", "service": "camtech-studio-api", "version": "3.0.0"}
 
     return app
 
