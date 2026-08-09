@@ -10,21 +10,21 @@ from enum import Enum
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
-try:
-    from rembg import remove, new_session
-    _bg_session = None
-    
-    def get_bg_session():
-        global _bg_session
-        if _bg_session is None:
-            _bg_session = new_session("u2net")
-        return _bg_session
-except ImportError:
-    def get_bg_session():
+_bg_session = None
+_rembg_failed = False
+
+def get_bg_session():
+    global _bg_session, _rembg_failed
+    if _rembg_failed:
         return None
-        
-    def remove(data, session=None):
-        return data
+    if _bg_session is None:
+        try:
+            from rembg import new_session
+            _bg_session = new_session("u2net")
+        except Exception:
+            _rembg_failed = True
+            return None
+    return _bg_session
 
 # Telegram sticker constraints
 STICKER_SIZE = 512
@@ -65,7 +65,7 @@ def process_image(image_bytes: bytes, style: str = "original", remove_bg: bool =
         session = get_bg_session()
         if session:
             try:
-                # rembg.remove takes bytes or PIL image, it's safer to pass bytes and get bytes back
+                from rembg import remove
                 image_bytes = remove(image_bytes, session=session)
             except Exception as e:
                 # Fallback if background removal fails
