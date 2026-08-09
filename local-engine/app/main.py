@@ -39,6 +39,25 @@ logger = logging.getLogger("voxcpm2-local")
 # Define API
 app = FastAPI(title="VoxCPM2-Khmer Local Engine")
 
+from starlette.datastructures import MutableHeaders
+
+class PrivateNetworkMiddleware:
+    """Injects Access-Control-Allow-Private-Network: true to bypass browser PNA blocks for localhost."""
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
+                headers.append("Access-Control-Allow-Private-Network", "true")
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)
+
 # Security: CORS locked strictly to CamTech & local development
 app.add_middleware(
     CORSMiddleware,
@@ -53,9 +72,12 @@ app.add_middleware(
         "http://localhost:8765"
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Outermost middleware (added last = executed first) to modify all responses including CORS preflights
+app.add_middleware(PrivateNetworkMiddleware)
 
 
 # ── Serve GUI dashboard ──────────────────────────────────────────
