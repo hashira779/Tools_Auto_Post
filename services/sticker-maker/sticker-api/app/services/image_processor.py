@@ -61,13 +61,15 @@ def process_image(image_bytes: bytes, style: str = "original", remove_bg: bool =
     Returns:
         WebP bytes ready for Telegram, guaranteed under 512 KB.
     """
-    if remove_bg and bg_session:
-        try:
-            # rembg.remove takes bytes or PIL image, it's safer to pass bytes and get bytes back
-            image_bytes = remove(image_bytes, session=bg_session)
-        except Exception as e:
-            # Fallback if background removal fails
-            pass
+    if remove_bg:
+        session = get_bg_session()
+        if session:
+            try:
+                # rembg.remove takes bytes or PIL image, it's safer to pass bytes and get bytes back
+                image_bytes = remove(image_bytes, session=session)
+            except Exception as e:
+                # Fallback if background removal fails
+                pass
             
     img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
 
