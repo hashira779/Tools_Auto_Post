@@ -460,14 +460,14 @@ export default function TtsStudio() {
 
               <div className="space-y-3">
                 <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl mb-4">
-                  <p className="text-xs text-emerald-400 font-medium">Safe & Secure ✓</p>
+                  <p className="text-xs text-emerald-400 font-medium">🔒 Safe & Secure</p>
                   <p className="text-[11px] text-emerald-500/80 mt-1">
-                    The standalone application requires no installation. Just extract the ZIP file and run the application. It runs 100% locally on your machine and only communicates with your local browser.
+                    No installation required. Extract the ZIP and run the app. It runs 100% locally on your machine — no data leaves your computer. CORS-secured to only accept requests from https://camtech.cam.
                   </p>
                 </div>
 
                 <a
-                  href="/VoxCPM2-Khmer-Engine.zip"
+                  href="https://camtech.cam/VoxCPM2-Khmer-Engine.zip"
                   download="VoxCPM2-Khmer-Engine.zip"
                   className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
                 >
@@ -479,8 +479,9 @@ export default function TtsStudio() {
               </div>
 
               <div className="border-t border-white/5 pt-3 text-[11px] text-slate-500 space-y-1">
-                <p>• Double-click the downloaded app to launch modern desktop interface</p>
-                <p>• Automatically connects website to local NVIDIA GPU on port 8765</p>
+                <p>• Extract ZIP → double-click VoxCPM2-Khmer-Engine.exe</p>
+                <p>• Connects securely to https://camtech.cam via CORS</p>
+                <p>• Requires NVIDIA GPU with CUDA support</p>
               </div>
             </div>
           </div>

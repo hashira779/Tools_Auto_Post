@@ -47,3 +47,10 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Binary executables (only distribute as .zip)
+*.exe
+*.spec
+
+# Insecure install scripts
+install.ps1
