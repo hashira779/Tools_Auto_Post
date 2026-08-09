@@ -20,13 +20,19 @@ sys.path.insert(0, os.path.join(_BASE_DIR, "app"))
 
 from gpu import get_gpu_info
 
-# Configure logging
+# Configure logging — must handle PyInstaller --windowed mode where sys.stderr is None
+_log_handlers = []
+if sys.stderr is not None:
+    _log_handlers.append(logging.StreamHandler())
+else:
+    # Windowed mode: log to a file in temp directory
+    _log_file = os.path.join(os.environ.get("TEMP", os.path.expanduser("~")), "voxcpm2_engine.log")
+    _log_handlers.append(logging.FileHandler(_log_file, encoding="utf-8"))
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
-    handlers=[
-        logging.StreamHandler()
-    ]
+    handlers=_log_handlers
 )
 logger = logging.getLogger("voxcpm2-local")
 
