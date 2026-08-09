@@ -36,6 +36,8 @@ FEATURED_VOICES = [
     # Khmer
     {"id": "km-KH-PisethNeural", "name": "ពិសិដ្ឋ (Khmer Male)", "lang": "ខ្មែរ", "gender": "Male", "locale": "km-KH"},
     {"id": "km-KH-SreymomNeural", "name": "ស្រីមុំ (Khmer Female)", "lang": "ខ្មែរ", "gender": "Female", "locale": "km-KH"},
+    {"id": "km-KH-Neural2-B", "name": "⭐ Neural2 (Khmer Male)", "lang": "ខ្មែរ", "gender": "Male", "locale": "km-KH"},
+    {"id": "km-KH-Neural2-A", "name": "⭐ Neural2 (Khmer Female)", "lang": "ខ្មែរ", "gender": "Female", "locale": "km-KH"},
     {"id": "google-khm", "name": "Google Translate (Khmer)", "lang": "ខ្មែរ", "gender": "Neutral", "locale": "km-KH"},
     {"id": "mms-khm", "name": "Meta MMS (Offline)", "lang": "ខ្មែរ", "gender": "Neutral", "locale": "km-KH"},
     # Chinese
@@ -133,6 +135,9 @@ async def generate_speech(
 
     if voice_id == "google-khm":
         return await _generate_google_speech(text, rate)
+
+    if voice_id.startswith("km-KH-Neural2"):
+        return await _generate_google_cloud_speech(text, voice_id, rate)
 
     # Validate voice_id exists (fallback to default)
     valid_ids = {v["id"] for v in FEATURED_VOICES}
@@ -262,6 +267,51 @@ async def _generate_google_speech(text: str, rate: str) -> bytes:
     except Exception as e:
         logger.error(f"Google TTS generation failed: {e}", exc_info=True)
         raise RuntimeError(f"Google speech generation failed: {str(e)}")
+
+async def _generate_google_cloud_speech(text: str, voice_id: str, rate: str) -> bytes:
+    """Generate voiceover using the official Google Cloud Text-to-Speech API."""
+    try:
+        from google.cloud import texttospeech
+        
+        # Convert our percentage rate string back to Google's float (1.0 = normal)
+        speed = 1.0
+        if rate == "+25%": speed = 1.25
+        elif rate == "+50%": speed = 1.5
+        elif rate == "-25%": speed = 0.75
+        elif rate == "-50%": speed = 0.5
+        
+        client = texttospeech.TextToSpeechClient()
+        synthesis_input = texttospeech.SynthesisInput(text=text)
+        
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="km-KH",
+            name=voice_id
+        )
+        
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.MP3,
+            speaking_rate=speed
+        )
+        
+        # We must run this in a threadpool since the client isn't fully async
+        import asyncio
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None, 
+            lambda: client.synthesize_speech(
+                input=synthesis_input, voice=voice, audio_config=audio_config
+            )
+        )
+        
+        return response.audio_content
+        
+    except Exception as e:
+        logger.error(f"Google Cloud TTS generation failed: {e}", exc_info=True)
+        # Catch permission errors gracefully to alert the user
+        if "credentials" in str(e).lower() or "permission" in str(e).lower():
+            raise RuntimeError("Google Cloud JSON key is missing or invalid. Please check your google_credentials.json file.")
+        raise RuntimeError(f"Google Cloud TTS failed: {str(e)}")
+
 
 
 

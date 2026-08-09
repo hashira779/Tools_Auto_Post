@@ -131,6 +131,9 @@ services:
       - ALLOWED_USERS=${ALLOWED_USERS:-}
       - STICKER_BOT_OWNER_ID=${STICKER_BOT_OWNER_ID:-}
       - DEFAULT_STICKER_USER_ID=${DEFAULT_STICKER_USER_ID:-}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/google_credentials.json
+    volumes:
+      - ./credentials:/app/credentials:ro
     expose:
       - "8001"
     healthcheck:
