@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local In-Browser AI Prototype</title>
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Loading spinner animation */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="glass-panel rounded-2xl p-8 max-w-lg w-full shadow-2xl">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="bg-blue-500 p-2 rounded-lg">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+            </div>
+            <h1 class="text-2xl font-bold">Local AI Voice Generator</h1>
+        </div>
+
+        <p class="text-slate-400 text-sm mb-6">
+            This prototype uses your local computer's hardware (via WebAssembly/WebGPU) to generate speech. The server does ZERO work!
+        </p>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Enter Text (English)</label>
+                <textarea id="text-input" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all resize-none h-24" placeholder="Hello, I am a local artificial intelligence running directly inside your web browser."></textarea>
+            </div>
+
+            <button id="generate-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2">
+                <span>Generate Voice (Local)</span>
+            </button>
+        </div>
+
+        <!-- Status & Audio container -->
+        <div id="status-container" class="mt-6 hidden">
+            <div id="loading-state" class="flex flex-col items-center gap-3 py-4">
+                <div class="spinner"></div>
+                <p id="status-text" class="text-sm text-blue-400 font-medium">Downloading AI Model (Happens once)...</p>
+                <!-- Progress bar container -->
+                <div class="w-full bg-slate-800 rounded-full h-2 mt-2 overflow-hidden border border-slate-700">
+                    <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300 w-0"></div>
+                </div>
+            </div>
+
+            <div id="result-state" class="hidden flex flex-col items-center gap-4 py-4 border-t border-slate-700">
+                <p class="text-sm text-green-400 font-medium flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Generation Complete!
+                </p>
+                <audio id="audio-player" controls class="w-full h-10 rounded-lg opacity-90"></audio>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Transformers.js as a module -->
+    <script type="module">
+        // Import from huggingface/transformers latest version
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers';
+
+        // We can force it not to use local models since we are running via CDN
+        env.allowLocalModels = false;
+        
+        const generateBtn = document.getElementById('generate-btn');
+        const textInput = document.getElementById('text-input');
+        const statusContainer = document.getElementById('status-container');
+        const loadingState = document.getElementById('loading-state');
+        const resultState = document.getElementById('result-state');
+        const statusText = document.getElementById('status-text');
+        const progressBar = document.getElementById('progress-bar');
+        const audioPlayer = document.getElementById('audio-player');
+
+        // Store the pipeline so we only load it once
+        let synthesizer = null;
+
+        generateBtn.addEventListener('click', async () => {
+            const text = textInput.value.trim() || textInput.placeholder;
+            
+            // UI Updates
+            generateBtn.disabled = true;
+            generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            statusContainer.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            resultState.classList.add('hidden');
+            
+            try {
+                if (!synthesizer) {
+                    statusText.textContent = "Loading AI Model (Xenova/mms-tts-eng)...";
+                    progressBar.style.width = "5%";
+                    
+                    // Initialize the pipeline with a progress callback
+                    synthesizer = await pipeline('text-to-speech', 'Xenova/mms-tts-eng', {
+                        progress_callback: (data) => {
+                            if (data.status === 'progress') {
+                                // Calculate total progress across multiple model files
+                                const percentage = Math.round((data.loaded / data.total) * 100);
+                                progressBar.style.width = `${percentage}%`;
+                                statusText.textContent = `Downloading AI Model (${percentage}%)...`;
+                            } else if (data.status === 'ready') {
+                                progressBar.style.width = `100%`;
+                            }
+                        }
+                    });
+                }
+                
+                statusText.textContent = "Generating voice using your local hardware...";
+                progressBar.classList.add('animate-pulse');
+                
+                // GENERATE AUDIO LOCALLY
+                const result = await synthesizer(text);
+                
+                // Convert the raw audio array to a WAV blob so the HTML Audio element can play it
+                // Transformers.js provides the sample_rate and audio data
+                const wavBuffer = encodeWAV(result.audio, result.sampling_rate);
+                const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                
+                audioPlayer.src = url;
+                
+                // UI Updates
+                loadingState.classList.add('hidden');
+                resultState.classList.remove('hidden');
+                progressBar.classList.remove('animate-pulse');
+                
+            } catch (error) {
+                console.error(error);
+                statusText.textContent = "Error: " + error.message;
+                statusText.classList.replace('text-blue-400', 'text-red-400');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
+        // Helper function to encode Float32Array audio data into a standard WAV format
+        function encodeWAV(samples, sampleRate) {
+            // Check if samples is a Float32Array or a multi-dimensional array from transformers
+            let flatSamples = samples;
+            if (samples[0] instanceof Float32Array) {
+                flatSamples = samples[0];
+            } else if (samples.data) {
+                flatSamples = samples.data;
+            }
+            
+            const buffer = new ArrayBuffer(44 + flatSamples.length * 2);
+            const view = new DataView(buffer);
+
+            const writeString = (view, offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + flatSamples.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM
+            view.setUint16(22, 1, true); // Mono
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, flatSamples.length * 2, true);
+
+            // Write PCM samples
+            let offset = 44;
+            for (let i = 0; i < flatSamples.length; i++, offset += 2) {
+                let s = Math.max(-1, Math.min(1, flatSamples[i]));
+                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+
+            return buffer;
+        }
+    </script>
+</body>
+</html>

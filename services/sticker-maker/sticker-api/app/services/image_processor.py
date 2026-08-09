@@ -10,6 +10,15 @@ from enum import Enum
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
+try:
+    from rembg import remove, new_session
+    # Initialize session once to keep model in memory for faster processing
+    bg_session = new_session("u2net")
+except ImportError:
+    bg_session = None
+    def remove(data, session=None):
+        return data
+
 # Telegram sticker constraints
 STICKER_SIZE = 512
 MAX_STICKER_KB = 512
@@ -33,17 +42,26 @@ class StickerStyle(str, Enum):
             return cls.ORIGINAL
 
 
-def process_image(image_bytes: bytes, style: str = "original") -> bytes:
+def process_image(image_bytes: bytes, style: str = "original", remove_bg: bool = False) -> bytes:
     """
     Process an uploaded image into a Telegram-ready 512×512 WebP sticker.
 
     Args:
         image_bytes: Raw image bytes from upload.
         style: Processing style name.
+        remove_bg: If True, uses AI to remove the background first.
 
     Returns:
         WebP bytes ready for Telegram, guaranteed under 512 KB.
     """
+    if remove_bg and bg_session:
+        try:
+            # rembg.remove takes bytes or PIL image, it's safer to pass bytes and get bytes back
+            image_bytes = remove(image_bytes, session=bg_session)
+        except Exception as e:
+            # Fallback if background removal fails
+            pass
+            
     img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
 
     # Fast pre-scale to fit within 512x512 to ensure instantaneous filter execution

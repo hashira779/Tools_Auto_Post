@@ -39,12 +39,14 @@ async def list_styles():
 async def process_sticker(
     file: UploadFile = File(...),
     style: str = Form("original"),
+    remove_bg: bool = Form(True),
 ):
     """
     Process an uploaded image into a Telegram-ready 512×512 WebP sticker.
 
     - **file**: Image file (PNG, JPG, WebP, etc.)
     - **style**: Processing style (original, outline, circle, rounded, cartoon)
+    - **remove_bg**: Automatically remove background using AI
 
     Returns the processed WebP image as base64 + metadata.
     """
@@ -61,7 +63,7 @@ async def process_sticker(
         raise HTTPException(status_code=400, detail="Empty file")
 
     try:
-        processed = process_image(contents, style=style)
+        processed = process_image(contents, style=style, remove_bg=remove_bg)
     except Exception as e:
         logger.error("Image processing failed: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
@@ -85,6 +87,7 @@ async def process_sticker(
 async def process_sticker_download(
     file: UploadFile = File(...),
     style: str = Form("original"),
+    remove_bg: bool = Form(True),
 ):
     """
     Process an image and return the WebP file directly as a download.
@@ -97,7 +100,7 @@ async def process_sticker_download(
         raise HTTPException(status_code=413, detail="Image too large (max 10 MB)")
 
     try:
-        processed = process_image(contents, style=style)
+        processed = process_image(contents, style=style, remove_bg=remove_bg)
     except Exception as e:
         logger.error("Processing failed: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")

@@ -9,3 +9,5 @@ python-multipart>=0.0.9
 edge-tts>=6.1.0
 gTTS>=2.5.2
 google-cloud-texttospeech>=2.16.0
+rembg>=2.0.50
+onnxruntime>=1.16.0
