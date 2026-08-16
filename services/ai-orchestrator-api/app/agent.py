@@ -1,5 +1,8 @@
 import json
 import requests
+import re
+import base64
+import os
 from typing import List, Dict, Any
 from .tools import TOOLS_REGISTRY
 
@@ -35,7 +38,42 @@ If you are just talking to the user or providing the final answer after using to
         Returns a generator yielding string chunks (for SSE).
         """
         system_msg = {"role": "system", "content": self._build_system_prompt()}
-        current_messages = [system_msg] + messages
+        
+        # Pre-process messages for image attachments
+        processed_messages = []
+        has_images = False
+        
+        for msg in messages:
+            content = msg.get("content", "")
+            # Find all [Attached File: ...] in the message
+            matches = re.finditer(r"\[Attached File: (.*?)\]", content)
+            
+            images_base64 = []
+            for match in matches:
+                filepath = match.group(1)
+                ext = filepath.split(".")[-1].lower()
+                
+                if ext in ["png", "jpg", "jpeg", "webp"] and os.path.exists(filepath):
+                    try:
+                        with open(filepath, "rb") as image_file:
+                            encoded = base64.b64encode(image_file.read()).decode("utf-8")
+                            images_base64.append(encoded)
+                        # Remove the file tag from content so the LLM doesn't try to use read_document
+                        content = content.replace(match.group(0), f"[Attached Image: {filepath.split('/')[-1]}]")
+                        has_images = True
+                    except Exception:
+                        pass
+            
+            new_msg = {"role": msg["role"], "content": content}
+            if images_base64:
+                new_msg["images"] = images_base64
+                
+            processed_messages.append(new_msg)
+            
+        current_messages = [system_msg] + processed_messages
+        
+        # Auto-switch to vision model if an image is detected
+        current_model = "llama3.2-vision" if (has_images and self.model == "llama3.2") else self.model
         
         loop_count = 0
         while loop_count < max_loops:
@@ -46,7 +84,7 @@ If you are just talking to the user or providing the final answer after using to
                 response = requests.post(
                     f"{self.ollama_url}/api/chat",
                     json={
-                        "model": self.model,
+                        "model": current_model,
                         "messages": current_messages,
                         "stream": False # We don't stream the tool loop, only the final answer
                     },
@@ -95,7 +133,7 @@ If you are just talking to the user or providing the final answer after using to
                 stream_response = requests.post(
                     f"{self.ollama_url}/api/chat",
                     json={
-                        "model": self.model,
+                        "model": current_model,
                         "messages": current_messages[:-1], # all except the empty placeholder
                         "stream": True
                     },
