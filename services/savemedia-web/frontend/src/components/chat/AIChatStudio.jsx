@@ -33,7 +33,7 @@ export default function AIChatStudio() {
   }
 
   return (
-    <div className="w-full flex flex-col h-[85vh] bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden font-sans relative animate-fade-in">
+    <div className="w-full h-[calc(100vh-64px)] bg-white font-sans relative flex flex-col">
       
       {/* Top Bar - Minimalist */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-b from-white via-white to-transparent h-20">
