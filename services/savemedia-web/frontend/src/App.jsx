@@ -52,7 +52,7 @@ function App() {
         />
 
         {/* Content */}
-        <div className="flex-1 w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
+        <div className="flex-1 w-full max-w-[1024px] mx-auto px-5 sm:px-6 lg:px-8 pt-12 pb-20">
           {/* Media Downloader */}
           {activeTool === TOOL_DOWNLOADER && (
             <main className="flex flex-col items-center animate-fade-in">
@@ -67,29 +67,29 @@ function App() {
               />
 
               {loading && !videoInfo && (
-                <div className="w-full card p-5 sm:p-6 mb-8 animate-pulse flex flex-col gap-5 border-[var(--color-border-2)]">
+                <div className="w-full card p-5 sm:p-6 mb-8 animate-pulse flex flex-col gap-4">
                   {/* Skeleton Header */}
                   <div className="flex gap-4">
-                    <div className="w-24 h-24 rounded-lg bg-[var(--color-surface-2)]"></div>
-                    <div className="flex-1 flex flex-col justify-center gap-2">
-                      <div className="h-5 w-3/4 bg-[var(--color-surface-2)] rounded-md"></div>
-                      <div className="h-3 w-1/2 bg-[var(--color-surface-2)] rounded-md"></div>
-                      <div className="h-3 w-1/3 bg-[var(--color-surface-2)] rounded-md mt-1"></div>
+                    <div className="w-24 h-24 rounded-lg bg-[var(--color-surface-3)]"></div>
+                    <div className="flex-1 flex flex-col justify-center gap-2.5">
+                      <div className="h-4 w-3/4 bg-[var(--color-surface-3)] rounded"></div>
+                      <div className="h-3 w-1/2 bg-[var(--color-surface-3)] rounded"></div>
+                      <div className="h-3 w-1/3 bg-[var(--color-surface-3)] rounded"></div>
                     </div>
                   </div>
                   {/* Skeleton Tabs */}
                   <div className="flex gap-2 border-b border-[var(--color-border)] pb-3">
-                    <div className="h-8 w-24 bg-[var(--color-surface-2)] rounded-md"></div>
-                    <div className="h-8 w-24 bg-[var(--color-surface-2)] rounded-md"></div>
+                    <div className="h-8 w-24 bg-[var(--color-surface-3)] rounded-lg"></div>
+                    <div className="h-8 w-24 bg-[var(--color-surface-3)] rounded-lg"></div>
                   </div>
                   {/* Skeleton Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <div className="h-12 bg-[var(--color-surface-2)] rounded-xl"></div>
-                    <div className="h-12 bg-[var(--color-surface-2)] rounded-xl"></div>
-                    <div className="h-12 bg-[var(--color-surface-2)] rounded-xl"></div>
+                    <div className="h-12 bg-[var(--color-surface-3)] rounded-xl"></div>
+                    <div className="h-12 bg-[var(--color-surface-3)] rounded-xl"></div>
+                    <div className="h-12 bg-[var(--color-surface-3)] rounded-xl"></div>
                   </div>
                   {/* Skeleton Button */}
-                  <div className="h-12 w-full bg-[var(--color-surface-2)] rounded-xl mt-2"></div>
+                  <div className="h-12 w-full bg-[var(--color-surface-3)] rounded-xl"></div>
                 </div>
               )}
 

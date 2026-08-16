@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 
 import StickerStepIndicator from './StickerStepIndicator'
 import StickerUploader from './StickerUploader'
@@ -11,43 +11,49 @@ import StickerTelegramPublish from './StickerTelegramPublish'
 const STEPS = [
   { id: 1, label: 'Upload' },
   { id: 2, label: 'Style' },
-  { id: 3, label: 'Preview & Text' },
-  { id: 4, label: 'Publish' },
+  { id: 3, label: 'Text' },
+  { id: 4, label: 'Export' },
 ]
 
 export default function StickerStudio() {
-  const [step, setStep] = useState(1)
-  const [imageFile, setImageFile] = useState(null)
+  const [currentStep, setCurrentStep] = useState(1)
+
+  // Uploaded file state
+  const [sourceImage, setSourceImage] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
+
+  // Selected style (e.g., outline, circle)
   const [selectedStyle, setSelectedStyle] = useState('original')
-  const [baseStickerResult, setBaseStickerResult] = useState(null)
-  const [activeStickerResult, setActiveStickerResult] = useState(null)
+
+  // API response: the raw processed sticker (no text yet)
+  const [baseStickerData, setBaseStickerData] = useState(null)
+
+  // Current sticker (could be base or with custom text applied)
+  const [currentStickerData, setCurrentStickerData] = useState(null)
+
+  // Selected emoji for Telegram
+  const [emoji, setEmoji] = useState('😂')
+
+  // Processing state
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState(null)
-  const [selectedEmoji, setSelectedEmoji] = useState('😀')
 
-  // Step 1 -> Step 2
-  const handleImageUpload = useCallback((file) => {
-    setImageFile(file)
+  const handleUpload = (file) => {
+    setSourceImage(file)
     setImagePreview(URL.createObjectURL(file))
-    setBaseStickerResult(null)
-    setActiveStickerResult(null)
-    setError(null)
-    setStep(2)
-  }, [])
+    setCurrentStep(2)
+  }
 
-  // Step 2 -> Step 3: Call Sticker API
-  const handleStyleSelect = useCallback(async (style) => {
-    setSelectedStyle(style)
-    if (!imageFile) return
-
+  const handleStyleGenerate = async (styleId) => {
+    if (!sourceImage) return
+    setSelectedStyle(styleId)
     setProcessing(true)
     setError(null)
 
     try {
       const formData = new FormData()
-      formData.append('file', imageFile)
-      formData.append('style', style)
+      formData.append('file', sourceImage)
+      formData.append('style', styleId)
 
       const res = await fetch('/api/sticker/process', {
         method: 'POST',
@@ -58,103 +64,86 @@ export default function StickerStudio() {
       let data = {}
       try {
         data = JSON.parse(text)
-      } catch {
-        throw new Error(`Processing service unavailable (${res.status}). Please try again.`)
+      } catch (e) {
+        throw new Error(`Server returned error (${res.status}). Please try again.`)
       }
 
       if (!res.ok) {
-        throw new Error(data.detail || 'Image processing failed.')
+        throw new Error(data.detail || 'Failed to process image.')
       }
 
-      setBaseStickerResult(data.sticker)
-      setActiveStickerResult(data.sticker)
-      setStep(3)
+      // Ensure data_b64 exists
+      if (!data.data_b64) {
+        throw new Error('Server returned invalid data format.')
+      }
+
+      setBaseStickerData(data)
+      setCurrentStickerData(data) // initially same
+      setCurrentStep(3)
     } catch (e) {
       setError(e.message)
     } finally {
       setProcessing(false)
     }
-  }, [imageFile])
+  }
 
-  // Step 3 -> Step 4
-  const handleEmojiSelect = useCallback((emoji) => {
-    setSelectedEmoji(emoji)
-  }, [])
-
-  const handleContinueToPublish = useCallback(() => {
-    setStep(4)
-  }, [])
-
-  // Reset entire flow
-  const handleReset = useCallback(() => {
-    setStep(1)
-    setImageFile(null)
+  const handleReset = () => {
+    setCurrentStep(1)
+    setSourceImage(null)
+    if (imagePreview) URL.revokeObjectURL(imagePreview)
     setImagePreview(null)
-    setBaseStickerResult(null)
-    setActiveStickerResult(null)
-    setSelectedStyle('original')
-    setSelectedEmoji('😀')
+    setBaseStickerData(null)
+    setCurrentStickerData(null)
     setError(null)
-  }, [])
+  }
 
   return (
-    <div className="w-full max-w-[760px] animate-slide-up mb-8">
-      {/* Wizard Steps */}
-      <StickerStepIndicator steps={STEPS} currentStep={step} />
+    <div className="w-full max-w-2xl mx-auto pb-10">
+      <StickerStepIndicator steps={STEPS} currentStep={currentStep} />
 
-      {/* Step 1: Upload */}
-      {step === 1 && (
-        <div className="animate-pop-in">
-          <StickerUploader onUpload={handleImageUpload} />
-        </div>
-      )}
+      <div className="relative">
+        {currentStep === 1 && (
+          <StickerUploader onUpload={handleUpload} />
+        )}
 
-      {/* Step 2: Choose Style */}
-      {step === 2 && (
-        <div className="animate-pop-in">
+        {currentStep === 2 && (
           <StickerStyleSelector
             imagePreview={imagePreview}
             selectedStyle={selectedStyle}
-            onSelectStyle={handleStyleSelect}
+            onSelectStyle={handleStyleGenerate}
             processing={processing}
             error={error}
-            onBack={handleReset}
+            onBack={() => setCurrentStep(1)}
           />
-        </div>
-      )}
+        )}
 
-      {/* Step 3: Preview + Khmer & Meme Text Editor + Emoji Picker */}
-      {step === 3 && baseStickerResult && (
-        <div className="animate-pop-in">
-          <StickerPreviewCard
-            stickerData={activeStickerResult || baseStickerResult}
-            onBack={() => setStep(2)}
-          />
+        {currentStep === 3 && baseStickerData && currentStickerData && (
+          <div className="animate-fade-in space-y-4">
+            <StickerPreviewCard
+              stickerData={currentStickerData}
+              onBack={() => setCurrentStep(2)}
+            />
+            <StickerTextEditor
+              baseStickerData={baseStickerData}
+              onStickerUpdated={setCurrentStickerData}
+            />
+            <StickerEmojiPicker
+              selected={emoji}
+              onSelect={setEmoji}
+              onContinue={() => setCurrentStep(4)}
+            />
+          </div>
+        )}
 
-          <StickerTextEditor
-            baseStickerData={baseStickerResult}
-            onStickerUpdated={setActiveStickerResult}
-          />
-
-          <StickerEmojiPicker
-            selected={selectedEmoji}
-            onSelect={handleEmojiSelect}
-            onContinue={handleContinueToPublish}
-          />
-        </div>
-      )}
-
-      {/* Step 4: Publish to Telegram */}
-      {step === 4 && activeStickerResult && (
-        <div className="animate-pop-in">
+        {currentStep === 4 && currentStickerData && (
           <StickerTelegramPublish
-            stickerData={activeStickerResult}
-            emoji={selectedEmoji}
+            stickerData={currentStickerData}
+            emoji={emoji}
             onReset={handleReset}
-            onBack={() => setStep(3)}
+            onBack={() => setCurrentStep(3)}
           />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

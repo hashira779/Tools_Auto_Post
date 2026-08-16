@@ -65,40 +65,45 @@ export default function StickerTelegramPublish({ stickerData, emoji, onReset, on
   // ── Success State ───────────────────────────────────────────────
   if (result) {
     return (
-      <div className="card p-6 sm:p-10 text-center animate-fade-in">
-        <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4 border border-[var(--color-border)]" style={{ background: 'var(--color-success-dim)' }}>
-          ✓
+      <div className="card p-8 sm:p-10 text-center animate-fade-in flex flex-col items-center">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 bg-[var(--color-success-dim)] border border-[rgba(52,211,153,0.15)]">
+          <svg className="w-8 h-8 text-[var(--color-success)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
         </div>
 
-        <h2 className="text-xl sm:text-2xl font-bold text-[var(--color-text)] mb-2">
+        <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
           Sticker Pack Ready
         </h2>
 
-        <p className="text-sm text-[var(--color-text-3)] max-w-md mx-auto mb-6">
+        <p className="text-[14px] text-[var(--color-text-3)] max-w-sm mx-auto mb-8 leading-relaxed">
           Your sticker is live. Click below to add it to your Telegram app.
         </p>
 
         {result.url && (
-          <div className="mb-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="w-full max-w-sm flex flex-col gap-3 mb-8">
             <a
               href={result.deeplink_app || result.url}
-              className="w-full sm:w-auto px-6 py-3.5 btn-primary text-sm font-semibold inline-flex items-center justify-center gap-2"
+              className="w-full py-3.5 btn-primary text-[14px] font-medium flex items-center justify-center gap-2"
             >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-18.6 7.171A2 2 0 0 0 1.51 13.5l5.228 2.052 3.197 9.406a2.128 2.128 0 0 0 3.999.043l3.228-9.451 5.39-2.083a2.001 2.001 0 0 0 .141-3.693l-13.882-6.02" />
+              </svg>
               Open in Telegram
             </a>
             <button
               onClick={handleDownload}
-              className="w-full sm:w-auto btn-secondary px-6 py-3.5 text-sm font-medium flex items-center justify-center gap-2"
+              className="w-full py-3 btn-secondary text-[14px] font-medium flex items-center justify-center gap-2"
             >
               Save WebP File
             </button>
           </div>
         )}
 
-        <div className="pt-5 border-t border-[var(--color-border)]">
+        <div className="w-full pt-6 border-t border-[var(--color-border)]">
           <button
             onClick={onReset}
-            className="btn-ghost text-sm px-4 py-2"
+            className="btn-ghost text-[13px] px-4 py-2"
           >
             Create Another Sticker
           </button>
@@ -111,30 +116,30 @@ export default function StickerTelegramPublish({ stickerData, emoji, onReset, on
   return (
     <div className="card p-5 sm:p-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--color-border)]">
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--color-border)]">
         <div>
-          <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-text)]">
+          <h2 className="text-[15px] font-semibold text-[var(--color-text)]">
             Step 4: Export to Telegram
           </h2>
-          <p className="text-sm text-[var(--color-text-3)] mt-0.5">
+          <p className="text-[12px] text-[var(--color-text-3)] mt-0.5">
             1-click export to Telegram
           </p>
         </div>
         <button
           onClick={onBack}
           disabled={loading}
-          className="btn-ghost text-xs px-3 py-1.5"
+          className="btn-ghost text-[11px] px-3 py-1.5"
         >
           ← Back
         </button>
       </div>
 
       {/* Actions */}
-      <div className="space-y-3 mb-5">
+      <div className="space-y-3 mb-6">
         <button
           onClick={handleInstantPublish}
           disabled={loading}
-          className="w-full py-3.5 btn-primary font-semibold text-sm flex items-center justify-center gap-2.5"
+          className="w-full py-3.5 btn-primary font-medium text-[14px] flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -142,13 +147,18 @@ export default function StickerTelegramPublish({ stickerData, emoji, onReset, on
               <span>Creating Telegram Pack...</span>
             </>
           ) : (
-            <span>Add Sticker to Telegram</span>
+            <>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-18.6 7.171A2 2 0 0 0 1.51 13.5l5.228 2.052 3.197 9.406a2.128 2.128 0 0 0 3.999.043l3.228-9.451 5.39-2.083a2.001 2.001 0 0 0 .141-3.693l-13.882-6.02" />
+              </svg>
+              <span>Add Sticker to Telegram</span>
+            </>
           )}
         </button>
 
         <button
           onClick={handleDownload}
-          className="w-full py-3 btn-secondary text-sm font-medium flex items-center justify-center gap-2"
+          className="w-full py-3 btn-secondary text-[13px] font-medium flex items-center justify-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -158,27 +168,29 @@ export default function StickerTelegramPublish({ stickerData, emoji, onReset, on
       </div>
 
       {/* Emoji badge */}
-      <div className="flex items-center gap-2.5 p-3 card-elevated rounded-xl mb-5">
-        <span className="text-xl">{emoji}</span>
-        <span className="text-sm text-[var(--color-text-2)]">
+      <div className="flex items-center gap-3 p-3.5 card-elevated rounded-xl mb-6 border border-[var(--color-border-2)]">
+        <span className="text-2xl drop-shadow-sm">{emoji}</span>
+        <span className="text-[13px] text-[var(--color-text-2)]">
           Reaction emoji: <strong className="text-[var(--color-text)]">{emoji}</strong>
         </span>
       </div>
 
       {/* Advanced */}
-      <div className="pt-4 border-t border-[var(--color-border)]">
+      <div className="pt-5 border-t border-[var(--color-border)]">
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-xs font-medium text-[var(--color-text-3)] hover:text-[var(--color-text-2)] flex items-center gap-1.5 cursor-pointer select-none"
+          className="text-[11px] font-semibold text-[var(--color-text-4)] hover:text-[var(--color-text-2)] uppercase tracking-wider flex items-center gap-1.5 cursor-pointer select-none transition-colors"
         >
-          <span>{showAdvanced ? '▾' : '▸'}</span>
-          <span>Advanced: Custom Pack Name & User ID</span>
+          <span>Advanced Settings</span>
+          <svg className={`w-3 h-3 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
         </button>
 
         {showAdvanced && (
-          <div className="mt-4 space-y-3 p-4 card-elevated rounded-xl animate-fade-in">
+          <div className="mt-4 space-y-4 p-4 card-elevated rounded-xl animate-slide-up border border-[var(--color-border-2)]">
             <div>
-              <label className="block text-[11px] font-medium text-[var(--color-text-3)] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5">
                 Telegram User ID (Optional)
               </label>
               <input
@@ -186,12 +198,12 @@ export default function StickerTelegramPublish({ stickerData, emoji, onReset, on
                 value={customUserId}
                 onChange={(e) => setCustomUserId(e.target.value)}
                 placeholder="Leave blank for automatic"
-                className="input-field w-full px-3.5 py-2.5 text-xs"
+                className="input-field w-full px-3 py-2 text-[13px]"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-medium text-[var(--color-text-3)] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5">
                 Pack Short Name (Optional)
               </label>
               <input
@@ -199,12 +211,12 @@ export default function StickerTelegramPublish({ stickerData, emoji, onReset, on
                 value={customPackName}
                 onChange={(e) => setCustomPackName(e.target.value)}
                 placeholder="e.g. my_stickers"
-                className="input-field w-full px-3.5 py-2.5 text-xs"
+                className="input-field w-full px-3 py-2 text-[13px]"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-medium text-[var(--color-text-3)] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5">
                 Display Title (Optional)
               </label>
               <input
@@ -212,7 +224,7 @@ export default function StickerTelegramPublish({ stickerData, emoji, onReset, on
                 value={customTitle}
                 onChange={(e) => setCustomTitle(e.target.value)}
                 placeholder="e.g. My Cool Stickers"
-                className="input-field w-full px-3.5 py-2.5 text-xs"
+                className="input-field w-full px-3 py-2 text-[13px]"
               />
             </div>
           </div>
@@ -221,7 +233,7 @@ export default function StickerTelegramPublish({ stickerData, emoji, onReset, on
 
       {/* Error */}
       {error && (
-        <div className="mt-4 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2" style={{ background: 'var(--color-error-dim)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
+        <div className="mt-5 px-4 py-3 rounded-lg text-[13px] font-medium flex items-center gap-2" style={{ background: 'var(--color-error-dim)', color: 'var(--color-error)', border: '1px solid rgba(248, 113, 113, 0.15)' }}>
           {error}
         </div>
       )}

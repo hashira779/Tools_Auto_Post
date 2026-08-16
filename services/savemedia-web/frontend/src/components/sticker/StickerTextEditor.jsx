@@ -220,18 +220,18 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
   }, [renderCanvas])
 
   return (
-    <div className="card p-4 sm:p-5 mb-4">
+    <div className="card p-5 sm:p-6 mb-4">
       {/* Hidden processing canvas */}
       <canvas ref={canvasRef} className="hidden" width={512} height={512} />
 
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border)]">
-        <h3 className="text-base font-semibold text-[var(--color-text)]">
+      <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--color-border)]">
+        <h3 className="text-[15px] font-semibold text-[var(--color-text)]">
           Add Text & Memes
         </h3>
         {text && (
           <button
             onClick={() => setText('')}
-            className="text-xs text-[var(--color-error)] hover:text-red-300 font-medium px-2 py-1 rounded-md hover:bg-[var(--color-error-dim)] transition-colors cursor-pointer"
+            className="text-[11px] text-[var(--color-error)] hover:text-red-400 font-medium px-2.5 py-1.5 rounded-lg hover:bg-[var(--color-error-dim)] transition-colors cursor-pointer"
           >
             Clear Text
           </button>
@@ -239,8 +239,8 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
       </div>
 
       {/* Khmer Presets */}
-      <div className="mb-4">
-        <div className="text-xs font-medium text-[var(--color-text-3)] mb-2">
+      <div className="mb-5">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-4)] mb-2 px-1">
           Khmer Memes
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -248,9 +248,9 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
             <button
               key={p.text}
               onClick={() => setText(p.text)}
-              className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer border focus-ring ${
+              className={`text-[12px] px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer border focus-ring ${
                 text === p.text
-                  ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-400)]'
+                  ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-500)]'
                   : 'bg-[var(--color-surface)] text-[var(--color-text-2)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] border-[var(--color-border)]'
               }`}
             >
@@ -261,8 +261,8 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
       </div>
 
       {/* English Presets */}
-      <div className="mb-4">
-        <div className="text-xs font-medium text-[var(--color-text-3)] mb-2">
+      <div className="mb-6">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-4)] mb-2 px-1">
           English Memes
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -270,9 +270,9 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
             <button
               key={p.text}
               onClick={() => setText(p.text)}
-              className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer border focus-ring ${
+              className={`text-[12px] px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer border focus-ring ${
                 text === p.text
-                  ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-400)]'
+                  ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-500)]'
                   : 'bg-[var(--color-surface)] text-[var(--color-text-2)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] border-[var(--color-border)]'
               }`}
             >
@@ -283,8 +283,8 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
       </div>
 
       {/* Custom Text */}
-      <div className="mb-4">
-        <label className="block text-xs font-medium text-[var(--color-text-2)] mb-1.5">
+      <div className="mb-6">
+        <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-2 px-1">
           Custom Text (Khmer, English, Emojis)
         </label>
         <input
@@ -292,19 +292,19 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="e.g. សើចឡើងរឹងថ្គាម, LOL, OMG..."
-          className="input-field w-full px-4 py-3 text-sm"
+          className="input-field w-full px-4 py-3 text-[14px]"
         />
       </div>
 
       {/* Controls */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-[var(--color-border)]">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-[var(--color-border)]">
         {/* Style */}
         <div>
-          <label className="block text-xs font-medium text-[var(--color-text-3)] mb-1.5">Text Style</label>
+          <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5 px-1">Style</label>
           <select
             value={style}
             onChange={(e) => setStyle(e.target.value)}
-            className="input-field w-full px-3 py-2 text-xs cursor-pointer"
+            className="input-field w-full px-3 py-2 text-[12px] cursor-pointer"
           >
             {TEXT_STYLES.map((s) => (
               <option key={s.id} value={s.id}>{s.name}</option>
@@ -314,11 +314,11 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
 
         {/* Font */}
         <div>
-          <label className="block text-xs font-medium text-[var(--color-text-3)] mb-1.5">Font</label>
+          <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5 px-1">Font</label>
           <select
             value={font}
             onChange={(e) => setFont(e.target.value)}
-            className="input-field w-full px-3 py-2 text-xs cursor-pointer"
+            className="input-field w-full px-3 py-2 text-[12px] cursor-pointer"
           >
             {FONTS.map((f) => (
               <option key={f.id} value={f.id}>{f.name}</option>
@@ -328,15 +328,15 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
 
         {/* Position */}
         <div>
-          <label className="block text-xs font-medium text-[var(--color-text-3)] mb-1.5">Position</label>
-          <div className="flex gap-1">
+          <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5 px-1">Position</label>
+          <div className="flex gap-1 h-[34px]">
             {POSITIONS.map((p) => (
               <button
                 key={p.id}
                 onClick={() => setPosition(p.id)}
-                className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors border cursor-pointer focus-ring ${
+                className={`flex-1 rounded-lg text-[11px] font-medium transition-colors border cursor-pointer focus-ring ${
                   position === p.id
-                    ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-400)]'
+                    ? 'bg-[var(--color-surface-3)] text-[var(--color-text)] border-[var(--color-border-2)]'
                     : 'bg-[var(--color-surface)] text-[var(--color-text-3)] hover:text-[var(--color-text)] border-[var(--color-border)]'
                 }`}
               >

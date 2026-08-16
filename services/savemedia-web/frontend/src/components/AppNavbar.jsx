@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-
+import CamtechLogo from './CamtechLogo'
 export const TOOL_DOWNLOADER = 'downloader'
 export const TOOL_TTS = 'tts'
 export const TOOL_STICKER = 'sticker'
@@ -50,33 +50,25 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
   }, [botsMenuOpen])
 
   return (
-    <header className={`sticky top-0 z-40 w-full navbar transition-all duration-300 ${scrolled ? 'border-b border-[var(--color-border)] shadow-sm' : 'border-b border-transparent'}`}>
-      <div className="max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="h-16 flex items-center justify-between">
+    <header
+      className={`sticky top-0 z-40 w-full navbar transition-[border-color] duration-200 ${
+        scrolled ? 'border-b border-[var(--color-border-2)]' : 'border-b border-transparent'
+      }`}
+    >
+      <div className="max-w-[1024px] mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="h-14 flex items-center justify-between">
 
           {/* ── Left: Logo ────────────────────────────── */}
           <button
             onClick={() => onSelectTool(TOOL_DOWNLOADER)}
-            className="flex items-center gap-3 select-none cursor-pointer group focus-ring rounded-lg py-1 px-2 -ml-2"
+            className="flex items-center select-none cursor-pointer group focus-ring rounded-lg py-1.5 px-2 -ml-2"
             aria-label="CamTech home"
           >
-            <img
-              src="/favicon.svg"
-              alt=""
-              className="w-7 h-7 sm:w-8 sm:h-8 transition-transform duration-200 group-hover:scale-105"
-              width="32"
-              height="32"
-            />
-            <div className="flex items-baseline gap-1">
-              <span className="font-bold text-[var(--color-text)] text-base sm:text-lg tracking-tight">
-                CamTech
-              </span>
-              <span className="text-[var(--color-text-3)] text-xs font-medium">.cam</span>
-            </div>
+            <CamtechLogo variant="full" theme="color" width={140} />
           </button>
 
           {/* ── Center: Nav Tabs (Desktop) ────────────── */}
-          <nav className="hidden md:flex items-center gap-1" role="tablist" aria-label="Tools">
+          <nav className="hidden md:flex items-center gap-0.5" role="tablist" aria-label="Tools">
             {NAV_TOOLS.map((tool) => {
               const isActive = activeTool === tool.id
               return (
@@ -85,10 +77,10 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => onSelectTool(tool.id)}
-                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-150 cursor-pointer focus-ring ${
+                  className={`px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors duration-150 cursor-pointer focus-ring ${
                     isActive
-                      ? 'text-[var(--color-text)] bg-[var(--color-surface-2)]'
-                      : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-1)]'
+                      ? 'text-[var(--color-text)] bg-[var(--color-surface-3)]'
+                      : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-2)]'
                   }`}
                 >
                   {tool.label}
@@ -98,16 +90,16 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
           </nav>
 
           {/* ── Right: Bots + Mobile Menu ─────────────── */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
 
             {/* Bots Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setBotsMenuOpen((p) => !p)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer focus-ring ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer focus-ring ${
                   botsMenuOpen
-                    ? 'bg-[var(--color-surface-2)] text-[var(--color-text)]'
-                    : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-1)]'
+                    ? 'bg-[var(--color-surface-3)] text-[var(--color-text)]'
+                    : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-2)]'
                 }`}
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -121,9 +113,9 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
 
               {/* Dropdown Panel */}
               {botsMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 dropdown-panel p-2 z-50 animate-slide-in-down">
-                  <div className="px-2 py-1.5 mb-1">
-                    <span className="text-[11px] font-semibold text-[var(--color-text-3)] uppercase tracking-wider">
+                <div className="absolute right-0 mt-2 w-60 dropdown-panel p-1.5 z-50 animate-slide-in-down">
+                  <div className="px-2.5 py-2">
+                    <span className="text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider">
                       Telegram Bots
                     </span>
                   </div>
@@ -139,19 +131,19 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                     >
                       <div className="min-w-0">
                         <div className="text-[13px] font-medium text-[var(--color-text)] truncate">{bot.name}</div>
-                        <div className="text-[11px] text-[var(--color-text-3)]">{bot.desc}</div>
+                        <div className="text-[11px] text-[var(--color-text-4)]">{bot.desc}</div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-3">
                         <span className="badge text-[10px] py-0.5 px-1.5">{bot.label}</span>
-                        <svg className="w-3.5 h-3.5 text-[var(--color-text-4)] group-hover:text-[var(--color-text-3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-3 h-3 text-[var(--color-text-4)] group-hover:text-[var(--color-text-3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </div>
                     </a>
                   ))}
 
-                  <div className="mt-1 pt-1.5 border-t border-[var(--color-border)] px-2.5">
-                    <p className="text-[11px] text-[var(--color-text-4)]">
+                  <div className="mt-1 pt-1.5 border-t border-[var(--color-border)] px-2.5 pb-1">
+                    <p className="text-[10px] text-[var(--color-text-4)]">
                       Open in Telegram to get started
                     </p>
                   </div>
@@ -162,10 +154,10 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
             {/* Mobile Menu Button */}
             <button
               onClick={onOpenMobileMenu}
-              className="md:hidden w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-1)] transition-colors cursor-pointer focus-ring"
+              className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer focus-ring"
               aria-label="Open menu"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
@@ -185,15 +177,15 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => onSelectTool(tool.id)}
-                  className={`flex-1 py-3 text-center text-xs font-medium transition-colors cursor-pointer relative ${
+                  className={`flex-1 py-2.5 text-center text-xs font-medium transition-colors cursor-pointer relative ${
                     isActive
                       ? 'text-[var(--color-text)]'
-                      : 'text-[var(--color-text-3)]'
+                      : 'text-[var(--color-text-4)]'
                   }`}
                 >
                   {tool.mobileLabel}
                   {isActive && (
-                    <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 rounded-full bg-[var(--color-primary-500)]" />
+                    <span className="absolute bottom-0 left-1/4 right-1/4 h-[2px] rounded-full bg-[var(--color-primary-500)]" />
                   )}
                 </button>
               )
