@@ -214,6 +214,39 @@ services:
     networks:
       - camtech-net
 
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  CAMTECH Database (PostgreSQL)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  postgres:
+    image: postgres:15-alpine
+    container_name: camtech-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: camtech
+      POSTGRES_PASSWORD: camtechpassword
+      POSTGRES_DB: camtech
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  AI Orchestrator API
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ai-orchestrator-api:
+    build:
+      context: ./services/ai-orchestrator-api
+      dockerfile: Dockerfile
+    container_name: camtech-ai-orchestrator
+    environment:
+      - DATABASE_URL=postgresql://camtech:camtechpassword@postgres:5432/camtech
+      - OLLAMA_URL=http://ollama:11434
+    depends_on:
+      - postgres
+      - ollama
+    networks:
+      - camtech-net
+
 networks:
   camtech-net:
     driver: bridge
@@ -225,3 +258,4 @@ volumes:
   kokoro-voices:
   kokoro-temp:
   ollama-data:
+  postgres-data:
