@@ -1,3 +1,5 @@
+import CamtechLogo from './CamtechLogo'
+
 export default function Footer() {
   return (
     <footer className="w-full mt-auto border-t border-[var(--color-border)]">
@@ -5,9 +7,8 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           {/* Brand */}
           <div className="flex items-center gap-5">
-            <div className="flex items-center gap-2.5">
-              <img src="/favicon.svg" alt="" className="w-5 h-5 opacity-60" width="20" height="20" />
-              <span className="font-semibold text-[var(--color-text-2)] text-sm tracking-tight">CamTech</span>
+            <div className="flex items-center">
+              <CamtechLogo variant="full" theme="color" width={110} />
             </div>
             <span className="text-[12px] text-[var(--color-text-4)] hidden sm:block border-l border-[var(--color-border-2)] pl-5">
               Free & private media tools
@@ -16,14 +17,6 @@ export default function Footer() {
 
           {/* Links */}
           <div className="flex items-center gap-5">
-            <a
-              href="https://t.me/CamTechLyricBot"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[12px] text-[var(--color-text-4)] hover:text-[var(--color-text-2)] transition-colors"
-            >
-              Telegram Bots
-            </a>
             <a
               href="https://camtech.cam"
               className="text-[12px] text-[var(--color-text-4)] hover:text-[var(--color-text-2)] transition-colors"

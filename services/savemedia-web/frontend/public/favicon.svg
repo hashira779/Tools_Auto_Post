@@ -1,41 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg viewBox="80 110 336 292" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#06b6d4" />
-      <stop offset="50%" stop-color="#2563eb" />
-      <stop offset="100%" stop-color="#0f172a" />
+    <linearGradient id="gradTop" x1="150" y1="110" x2="346" y2="190" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#2563eb" />
     </linearGradient>
-    <linearGradient id="pixel-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+    <linearGradient id="gradBottom" x1="150" y1="402" x2="346" y2="322" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#2563eb" />
-      <stop offset="100%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#1d4ed8" />
     </linearGradient>
   </defs>
 
-  <!-- Main C Shape (Right Side) -->
-  <path d="M 280 80
-           A 176 176 0 0 1 280 432
-           L 190 432
-           A 266 266 0 0 0 456 256
-           A 266 266 0 0 0 190 80
-           Z" fill="url(#blue-grad)" />
-           
-  <!-- Top Diagonal Cut -->
-  <polygon points="190,80 280,80 230,170 140,170" fill="url(#pixel-grad)" opacity="0.9" />
+  <!-- Back Curve -->
+  <path d="M 230 110 A 146 146 0 0 1 376 256 A 146 146 0 0 1 230 402 L 200 402 A 176 176 0 0 0 416 256 A 176 176 0 0 0 200 110 Z" fill="#0f172a" />
   
-  <!-- Bottom Diagonal Cut -->
-  <polygon points="190,432 280,432 230,342 140,342" fill="#1e40af" />
+  <!-- Top front ribbon -->
+  <path d="M 150 110 L 230 110 A 146 146 0 0 1 346 190 L 260 190 A 70 70 0 0 0 230 170 L 150 170 Z" fill="url(#gradTop)" />
+  <polygon points="346,190 290,260 204,260 260,190" fill="#38bdf8" />
   
-  <!-- Digital Pixels (Left Side) -->
-  <rect x="60" y="160" width="40" height="40" fill="#0ea5e9" />
-  <rect x="110" y="210" width="40" height="40" fill="#38bdf8" />
-  <rect x="60" y="260" width="40" height="40" fill="#2563eb" />
-  <rect x="110" y="310" width="40" height="40" fill="#1d4ed8" />
-  <rect x="160" y="260" width="40" height="40" fill="#1e40af" />
+  <!-- Bottom front ribbon -->
+  <path d="M 150 402 L 230 402 A 146 146 0 0 0 346 322 L 260 322 A 70 70 0 0 1 230 342 L 150 342 Z" fill="url(#gradBottom)" />
+  <polygon points="346,322 290,252 204,252 260,322" fill="#2563eb" />
   
-  <!-- Smaller pixels -->
-  <rect x="110" y="140" width="20" height="20" fill="#0ea5e9" />
-  <rect x="80" y="220" width="20" height="20" fill="#bae6fd" />
-  <rect x="170" y="210" width="20" height="20" fill="#2563eb" />
-  <rect x="80" y="320" width="20" height="20" fill="#1e3a8a" />
-  <rect x="160" y="350" width="20" height="20" fill="#1e40af" />
+  <!-- Digital Pixels -->
+  <rect x="130" y="220" width="36" height="36" fill="#2563eb" />
+  <rect x="80" y="270" width="36" height="36" fill="#38bdf8" />
+  <rect x="140" y="310" width="30" height="30" fill="#2563eb" />
+  <rect x="90" y="180" width="22" height="22" fill="#38bdf8" />
+  <rect x="110" y="240" width="16" height="16" fill="#0f172a" />
 </svg>
