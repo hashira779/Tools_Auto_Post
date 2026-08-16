@@ -1,8 +1,24 @@
-import { useRef } from 'react'
+import { useRef, useMemo } from 'react'
 import Icon from '../constants/icons'
+import { PLATFORMS } from '../constants/platforms'
+
+// Detect which platform a URL belongs to
+function detectPlatform(url) {
+  if (!url) return null
+  const lower = url.toLowerCase()
+  if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'youtube'
+  if (lower.includes('tiktok.com')) return 'tiktok'
+  if (lower.includes('douyin.com')) return 'douyin'
+  if (lower.includes('instagram.com')) return 'instagram'
+  if (lower.includes('facebook.com') || lower.includes('fb.watch')) return 'facebook'
+  return null
+}
 
 export default function SearchCard({ url, onUrlChange, onFetch, loading, error }) {
   const inputRef = useRef(null)
+
+  const detectedPlatform = useMemo(() => detectPlatform(url), [url])
+  const matchedPlatform = PLATFORMS.find((p) => p.key === detectedPlatform)
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !loading) onFetch()
@@ -16,41 +32,49 @@ export default function SearchCard({ url, onUrlChange, onFetch, loading, error }
   }
 
   return (
-    <div
-      id="search-card"
-      className="w-full max-w-[760px] glass-card p-4 sm:p-6 mb-8 animate-fade-in"
-    >
+    <div id="search-card" className="w-full card p-4 sm:p-5 mb-8 animate-fade-in">
       {/* Input Row */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-            </svg>
+        <div className={`relative flex-1 rounded-xl border transition-all duration-200 ${
+          detectedPlatform
+            ? 'border-[var(--color-primary-500)]/40'
+            : 'border-[var(--color-border)]'
+        } bg-[var(--color-surface)]`}>
+          {/* Left Icon */}
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+            {matchedPlatform ? (
+              <span style={{ color: matchedPlatform.color }} className="block">
+                {matchedPlatform.icon}
+              </span>
+            ) : (
+              <svg className="text-[var(--color-text-4)]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+            )}
           </div>
+
           <input
             ref={inputRef}
             id="url-input"
             type="url"
-            className="w-full bg-slate-950/70 border border-white/10 rounded-xl
-                       pl-12 pr-4 py-3.5 text-sm sm:text-base text-white font-medium
-                       placeholder:text-slate-500
-                       focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20
-                       outline-none transition-all duration-200"
-            placeholder="Paste link from YouTube, TikTok, Instagram..."
+            className="w-full bg-transparent pl-11 pr-10 py-3.5 text-sm sm:text-[15px] text-[var(--color-text)] font-medium placeholder:text-[var(--color-text-4)] outline-none rounded-xl"
+            placeholder="Paste a video link from YouTube, TikTok, Instagram..."
             value={url}
             onChange={(e) => onUrlChange(e.target.value)}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
             autoFocus
           />
+
+          {/* Clear button */}
           {url && (
             <button
               onClick={() => onUrlChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-4)] hover:text-[var(--color-text-2)] p-1 rounded-md hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
+              aria-label="Clear input"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -59,9 +83,7 @@ export default function SearchCard({ url, onUrlChange, onFetch, loading, error }
 
         <button
           id="fetch-btn"
-          className="flex items-center justify-center gap-2 px-7 py-3.5
-                     btn-pro rounded-xl text-sm font-bold uppercase tracking-wider
-                     cursor-pointer select-none"
+          className="flex items-center justify-center gap-2 px-6 py-3.5 btn-primary text-sm font-semibold"
           onClick={onFetch}
           disabled={loading || !url.trim()}
         >
@@ -79,15 +101,31 @@ export default function SearchCard({ url, onUrlChange, onFetch, loading, error }
         </button>
       </div>
 
-      {/* Error Message */}
+      {/* Platform Detection */}
+      {detectedPlatform && matchedPlatform && (
+        <div className="mt-3 animate-fade-in">
+          <span
+            className="badge text-[11px]"
+            style={{
+              color: matchedPlatform.color,
+              backgroundColor: `${matchedPlatform.color}10`,
+              borderColor: `${matchedPlatform.color}20`,
+            }}
+          >
+            {matchedPlatform.icon}
+            <span>{matchedPlatform.name} detected</span>
+          </span>
+        </div>
+      )}
+
+      {/* Error */}
       {error && (
         <div
           id="error-msg"
-          className="mt-4 px-4 py-3 bg-rose-500/10 border border-rose-500/20
-                     rounded-xl text-rose-300 text-xs sm:text-sm font-medium flex items-center gap-2.5
-                     animate-fade-in"
+          className="mt-4 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2.5 animate-fade-in"
+          style={{ background: 'var(--color-error-dim)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.15)' }}
         >
-          <svg className="w-4 h-4 shrink-0 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />

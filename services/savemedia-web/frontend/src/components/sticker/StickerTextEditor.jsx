@@ -28,17 +28,17 @@ const FONTS = [
 ]
 
 const TEXT_STYLES = [
-  { id: 'meme', name: '💥 Meme Stroke', desc: 'White with bold black outline' },
-  { id: 'gold', name: '🟡 Gold Glow', desc: 'Bright gold with dark outline' },
-  { id: 'bubble', name: '💬 Comic Bubble', desc: 'White badge background' },
-  { id: 'stamp', name: '🔴 Red Stamp', desc: 'Vibrant red alert box' },
-  { id: 'neon', name: '🟢 Neon Cyan', desc: 'Glowing cyber text' },
+  { id: 'meme', name: 'Meme Stroke', desc: 'White with bold black outline' },
+  { id: 'gold', name: 'Gold Glow', desc: 'Bright gold with dark outline' },
+  { id: 'bubble', name: 'Comic Bubble', desc: 'White badge background' },
+  { id: 'stamp', name: 'Red Stamp', desc: 'Vibrant red alert box' },
+  { id: 'neon', name: 'Neon Cyan', desc: 'Glowing cyber text' },
 ]
 
 const POSITIONS = [
-  { id: 'bottom', name: '⬇️ Bottom' },
-  { id: 'top', name: '⬆️ Top' },
-  { id: 'center', name: '🎯 Center' },
+  { id: 'bottom', name: 'Bottom' },
+  { id: 'top', name: 'Top' },
+  { id: 'center', name: 'Center' },
 ]
 
 export default function StickerTextEditor({ baseStickerData, onStickerUpdated }) {
@@ -124,7 +124,6 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
 
     // Style Specific Rendering
     if (style === 'bubble') {
-      // Comic White Bubble
       ctx.save()
       ctx.fillStyle = '#ffffff'
       ctx.strokeStyle = '#0f172a'
@@ -140,7 +139,6 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
       ctx.fillStyle = '#0f172a'
       ctx.fillText(textToDraw, 256, y)
     } else if (style === 'stamp') {
-      // Red Stamp Badge
       ctx.save()
       ctx.fillStyle = '#dc2626'
       ctx.strokeStyle = '#ffffff'
@@ -156,7 +154,6 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
       ctx.fillStyle = '#ffffff'
       ctx.fillText(textToDraw, 256, y)
     } else if (style === 'gold') {
-      // Gold Glow Meme
       ctx.save()
       ctx.strokeStyle = '#451a03'
       ctx.lineWidth = Math.max(5, fontSize / 7)
@@ -169,7 +166,6 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
       ctx.fillText(textToDraw, 256, y)
       ctx.restore()
     } else if (style === 'neon') {
-      // Neon Cyan
       ctx.save()
       ctx.strokeStyle = '#083344'
       ctx.lineWidth = Math.max(6, fontSize / 6)
@@ -224,38 +220,38 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
   }, [renderCanvas])
 
   return (
-    <div className="glass-card p-5 sm:p-6 mb-6">
+    <div className="card p-4 sm:p-5 mb-4">
       {/* Hidden processing canvas */}
       <canvas ref={canvasRef} className="hidden" width={512} height={512} />
 
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-        <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-          <span>💬</span> Add Funny Text &amp; Khmer Memes
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border)]">
+        <h3 className="text-base font-semibold text-[var(--color-text)]">
+          Add Text & Memes
         </h3>
         {text && (
           <button
             onClick={() => setText('')}
-            className="text-xs text-rose-400 hover:text-rose-300 font-semibold px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/20 transition-colors"
+            className="text-xs text-[var(--color-error)] hover:text-red-300 font-medium px-2 py-1 rounded-md hover:bg-[var(--color-error-dim)] transition-colors cursor-pointer"
           >
-            ✕ Clear Text
+            Clear Text
           </button>
         )}
       </div>
 
-      {/* Quick Khmer Preset Chips */}
+      {/* Khmer Presets */}
       <div className="mb-4">
-        <div className="text-xs font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
-          <span>🇰🇭</span> <span>Popular Khmer Memes (ចុចដើម្បីដាក់):</span>
+        <div className="text-xs font-medium text-[var(--color-text-3)] mb-2">
+          Khmer Memes
         </div>
         <div className="flex flex-wrap gap-1.5">
           {KHMER_MEME_PRESETS.map((p) => (
             <button
               key={p.text}
               onClick={() => setText(p.text)}
-              className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer border ${
+              className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer border focus-ring ${
                 text === p.text
-                  ? 'bg-indigo-600 text-white border-indigo-400 shadow-md'
-                  : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border-white/10'
+                  ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-400)]'
+                  : 'bg-[var(--color-surface)] text-[var(--color-text-2)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] border-[var(--color-border)]'
               }`}
             >
               {p.label}
@@ -264,20 +260,20 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
         </div>
       </div>
 
-      {/* Quick English Preset Chips */}
+      {/* English Presets */}
       <div className="mb-4">
-        <div className="text-xs font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
-          <span>🇺🇸</span> <span>English Meme Captions:</span>
+        <div className="text-xs font-medium text-[var(--color-text-3)] mb-2">
+          English Memes
         </div>
         <div className="flex flex-wrap gap-1.5">
           {ENGLISH_MEME_PRESETS.map((p) => (
             <button
               key={p.text}
               onClick={() => setText(p.text)}
-              className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer border ${
+              className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer border focus-ring ${
                 text === p.text
-                  ? 'bg-indigo-600 text-white border-indigo-400 shadow-md'
-                  : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border-white/10'
+                  ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-400)]'
+                  : 'bg-[var(--color-surface)] text-[var(--color-text-2)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] border-[var(--color-border)]'
               }`}
             >
               {p.label}
@@ -286,74 +282,62 @@ export default function StickerTextEditor({ baseStickerData, onStickerUpdated })
         </div>
       </div>
 
-      {/* Custom Text Input */}
+      {/* Custom Text */}
       <div className="mb-4">
-        <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-          ✍️ Type Your Own Text (Supports Khmer, English, Emojis):
+        <label className="block text-xs font-medium text-[var(--color-text-2)] mb-1.5">
+          Custom Text (Khmer, English, Emojis)
         </label>
-        <div className="relative">
-          <input
-            type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="e.g. សើចឡើងរឹងថ្គាម, Wow, LOL, OMG..."
-            className="w-full bg-slate-900/80 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-          />
-        </div>
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="e.g. សើចឡើងរឹងថ្គាម, LOL, OMG..."
+          className="input-field w-full px-4 py-3 text-sm"
+        />
       </div>
 
-      {/* Text Customization Controls */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-white/10">
-        {/* Style Selector */}
+      {/* Controls */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-[var(--color-border)]">
+        {/* Style */}
         <div>
-          <label className="block text-xs font-semibold text-slate-400 mb-1">
-            🎨 Text Style:
-          </label>
+          <label className="block text-xs font-medium text-[var(--color-text-3)] mb-1.5">Text Style</label>
           <select
             value={style}
             onChange={(e) => setStyle(e.target.value)}
-            className="w-full bg-slate-900 border border-white/15 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+            className="input-field w-full px-3 py-2 text-xs cursor-pointer"
           >
             {TEXT_STYLES.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
+              <option key={s.id} value={s.id}>{s.name}</option>
             ))}
           </select>
         </div>
 
-        {/* Font Selector */}
+        {/* Font */}
         <div>
-          <label className="block text-xs font-semibold text-slate-400 mb-1">
-            🔤 Font Family:
-          </label>
+          <label className="block text-xs font-medium text-[var(--color-text-3)] mb-1.5">Font</label>
           <select
             value={font}
             onChange={(e) => setFont(e.target.value)}
-            className="w-full bg-slate-900 border border-white/15 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+            className="input-field w-full px-3 py-2 text-xs cursor-pointer"
           >
             {FONTS.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
+              <option key={f.id} value={f.id}>{f.name}</option>
             ))}
           </select>
         </div>
 
-        {/* Position Selector */}
+        {/* Position */}
         <div>
-          <label className="block text-xs font-semibold text-slate-400 mb-1">
-            📍 Position:
-          </label>
+          <label className="block text-xs font-medium text-[var(--color-text-3)] mb-1.5">Position</label>
           <div className="flex gap-1">
             {POSITIONS.map((p) => (
               <button
                 key={p.id}
                 onClick={() => setPosition(p.id)}
-                className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
+                className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors border cursor-pointer focus-ring ${
                   position === p.id
-                    ? 'bg-indigo-600 text-white border-indigo-400'
-                    : 'bg-white/5 text-slate-400 hover:text-white border-white/10'
+                    ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-400)]'
+                    : 'bg-[var(--color-surface)] text-[var(--color-text-3)] hover:text-[var(--color-text)] border-[var(--color-border)]'
                 }`}
               >
                 {p.name}

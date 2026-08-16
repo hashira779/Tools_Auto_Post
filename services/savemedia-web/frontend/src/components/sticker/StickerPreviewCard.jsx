@@ -9,61 +9,64 @@ export default function StickerPreviewCard({ stickerData, onBack }) {
   }
 
   return (
-    <div className="glass-card p-6 sm:p-8 animate-fade-in mb-6">
+    <div className="card p-5 sm:p-6 animate-fade-in mb-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+      <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--color-border)]">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-            <span>✨</span> Step 3: Sticker Preview
+          <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-text)]">
+            Step 3: Preview
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 font-normal">
-            Your 512×512 WebP sticker is processed and optimized
+          <p className="text-sm text-[var(--color-text-3)] mt-0.5">
+            Your 512×512 WebP sticker is ready
           </p>
         </div>
         <button
           onClick={onBack}
-          className="text-xs font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors cursor-pointer border border-white/10"
+          className="btn-ghost text-xs px-3 py-1.5"
         >
           ← Change Style
         </button>
       </div>
 
-      {/* Main Sticker Preview on Checkerboard Canvas */}
-      <div className="flex flex-col items-center justify-center mb-6">
-        <div className="p-2 bg-slate-950 rounded-2xl shadow-2xl border border-white/15 relative group">
-          <div className="checkerboard w-48 h-48 sm:w-60 sm:h-60 rounded-xl flex items-center justify-center overflow-hidden">
+      {/* Sticker Preview */}
+      <div className="flex flex-col items-center justify-center mb-5">
+        <div className="p-2 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
+          <div className="checkerboard w-48 h-48 sm:w-56 sm:h-56 rounded-lg flex items-center justify-center overflow-hidden">
             <img
               src={imgSrc}
               alt="Generated sticker"
-              className="w-full h-full object-contain filter drop-shadow-lg transition-transform duration-200 group-hover:scale-105"
+              className="w-full h-full object-contain"
             />
           </div>
         </div>
 
-        {/* Metadata Badges */}
+        {/* Metadata */}
         <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
-          <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            ✓ {stickerData.dimensions || '512×512'}
+          <span className="badge badge-success text-[11px]">
+            {stickerData.dimensions || '512×512'}
           </span>
-          <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-            💾 {stickerData.size_kb} KB
+          <span className="badge text-[11px]">
+            {stickerData.size_kb} KB
           </span>
-          <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/20">
-            🏷️ WebP
+          <span className="badge text-[11px]">
+            WebP
           </span>
-          <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-white/10">
-            🎨 {stickerData.style || 'Custom'}
+          <span className="badge text-[11px]">
+            {stickerData.style || 'Custom'}
           </span>
         </div>
       </div>
 
-      {/* Download Action */}
+      {/* Download */}
       <div className="flex justify-center">
         <button
           onClick={handleDownload}
-          className="px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition-colors cursor-pointer border border-white/10"
+          className="btn-secondary px-5 py-2.5 text-sm flex items-center gap-2"
         >
-          <span>⬇️</span> Download WebP File
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download WebP
         </button>
       </div>
     </div>

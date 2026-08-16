@@ -6,9 +6,9 @@ const API_BASE = '/api/tts'
 
 // Voice avatar colors — consistent per voice
 const AVATAR_COLORS = [
-  'from-emerald-500 to-teal-600',
-  'from-blue-500 to-indigo-600',
   'from-violet-500 to-purple-600',
+  'from-blue-500 to-indigo-600',
+  'from-emerald-500 to-teal-600',
   'from-amber-500 to-orange-600',
   'from-rose-500 to-pink-600',
   'from-cyan-500 to-sky-600',
@@ -23,18 +23,18 @@ function VoiceAvatar({ name, gender, isSelected, onClick, colorIdx }) {
   return (
     <button
       onClick={onClick}
-      className={`group flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-200 cursor-pointer min-w-[80px] ${
+      className={`group flex flex-col items-center gap-2 p-2.5 rounded-xl transition-all duration-150 cursor-pointer min-w-[72px] focus-ring ${
         isSelected
-          ? 'bg-white/[0.06] ring-1 ring-emerald-500/40 shadow-lg shadow-emerald-500/5'
-          : 'hover:bg-white/[0.03]'
+          ? 'bg-[var(--color-surface-3)] ring-1 ring-[var(--color-primary-500)]/40'
+          : 'hover:bg-[var(--color-surface-2)]'
       }`}
     >
-      <div className={`relative w-11 h-11 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-sm shadow-md transition-transform duration-200 ${
-        isSelected ? 'scale-110' : 'group-hover:scale-105'
+      <div className={`relative w-10 h-10 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-semibold text-sm transition-transform duration-150 ${
+        isSelected ? 'scale-105' : 'group-hover:scale-105'
       }`}>
         {initials}
         {isSelected && (
-          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-900 flex items-center justify-center">
+          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-[var(--color-primary-500)] rounded-full border-2 border-[var(--color-surface-1)] flex items-center justify-center">
             <svg className="w-2 h-2 text-white" viewBox="0 0 12 12" fill="currentColor">
               <path d="M10 3L4.5 8.5 2 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -43,11 +43,11 @@ function VoiceAvatar({ name, gender, isSelected, onClick, colorIdx }) {
       </div>
       <div className="text-center">
         <p className={`text-[11px] font-medium leading-tight transition-colors ${
-          isSelected ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'
+          isSelected ? 'text-[var(--color-text)]' : 'text-[var(--color-text-3)] group-hover:text-[var(--color-text-2)]'
         }`}>
           {name.split(' ')[0]}
         </p>
-        <p className="text-[9px] text-slate-600 mt-0.5">{gender}</p>
+        <p className="text-[9px] text-[var(--color-text-4)] mt-0.5">{gender}</p>
       </div>
     </button>
   )
@@ -63,7 +63,7 @@ function WaveformVisualizer({ isPlaying }) {
           <div
             key={i}
             className={`w-[3px] rounded-full transition-all duration-200 ${
-              isPlaying ? 'bg-emerald-400/80' : 'bg-slate-700'
+              isPlaying ? 'bg-[var(--color-primary-400)]/70' : 'bg-[var(--color-surface-3)]'
             }`}
             style={{
               height: `${isPlaying ? baseH + Math.random() * 8 : 4}px`,
@@ -91,7 +91,6 @@ export default function TtsStudio() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [engineStatus, setEngineStatus] = useState('checking')
   const [showInstallModal, setShowInstallModal] = useState(false)
-  const [copiedCmd, setCopiedCmd] = useState(false)
   const audioRef = useRef(null)
   const textareaRef = useRef(null)
 
@@ -101,7 +100,7 @@ export default function TtsStudio() {
       setEngineStatus(status);
     };
     checkEngine();
-    const interval = setInterval(checkEngine, 5000); // Check more frequently to detect ready state faster
+    const interval = setInterval(checkEngine, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -207,40 +206,38 @@ export default function TtsStudio() {
     <div className="w-full flex flex-col items-center animate-fade-in">
       <TtsHero />
 
-      <div className="w-full max-w-[760px] space-y-5 mb-12">
+      <div className="w-full max-w-[760px] space-y-4 mb-12">
 
         {/* ── Local Engine Status ────────────────────────── */}
-        <div className="flex items-center justify-between rounded-2xl bg-[#0e1117] border border-white/[0.06] p-4">
+        <div className="card flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-             <div className={`w-2.5 h-2.5 rounded-full ${engineStatus === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : (engineStatus === 'checking' || engineStatus === 'starting') ? 'bg-yellow-500 animate-pulse' : 'bg-slate-600'}`}></div>
+             <div className={`w-2 h-2 rounded-full shrink-0 ${engineStatus === 'ready' ? 'bg-[var(--color-success)]' : (engineStatus === 'checking' || engineStatus === 'starting') ? 'bg-[var(--color-warning)] animate-pulse' : 'bg-[var(--color-text-4)]'}`}></div>
              <div>
-               <h3 className="text-sm font-medium text-slate-200">Local GPU Engine</h3>
-               <p className="text-xs text-slate-500">{engineStatus === 'ready' ? 'VoxCPM2-Khmer is connected and ready.' : engineStatus === 'starting' ? 'Connected. Loading model into VRAM...' : 'Offline engine is not installed or running.'}</p>
+               <h3 className="text-sm font-medium text-[var(--color-text)]">Local GPU Engine</h3>
+               <p className="text-xs text-[var(--color-text-3)]">{engineStatus === 'ready' ? 'VoxCPM2-Khmer connected and ready.' : engineStatus === 'starting' ? 'Connected. Loading model...' : 'Offline engine not running.'}</p>
              </div>
           </div>
           {engineStatus === 'offline' && (
              <button
                onClick={() => setShowInstallModal(true)}
-               className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-medium text-emerald-400 rounded-lg transition-colors border border-emerald-500/20 cursor-pointer flex items-center gap-1.5"
+               className="btn-secondary px-3 py-1.5 text-xs flex items-center gap-1.5"
              >
                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                </svg>
-               Install Engine
+               Install
              </button>
           )}
         </div>
 
         {/* ── Text Editor ────────────────────────── */}
-        <div className="rounded-2xl bg-[#0e1117] border border-white/[0.06] overflow-hidden">
+        <div className="card overflow-hidden">
           {/* Toolbar */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.04]">
-            <div className="flex items-center gap-3">
-              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Script</span>
-            </div>
-            <div className="flex items-center gap-3 text-[11px] text-slate-600">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--color-border)]">
+            <span className="text-[11px] font-medium text-[var(--color-text-4)] uppercase tracking-wider">Script</span>
+            <div className="flex items-center gap-3 text-[11px] text-[var(--color-text-4)]">
               <span>{wordCount} words</span>
-              <span className="w-px h-3 bg-slate-800" />
+              <span className="w-px h-3 bg-[var(--color-border)]" />
               <span>{charCount} / 5,000</span>
             </div>
           </div>
@@ -254,29 +251,28 @@ export default function TtsStudio() {
             placeholder="Start typing or paste your script here..."
             maxLength={5000}
             rows={7}
-            className="w-full bg-transparent px-5 py-4 text-[15px] leading-relaxed text-slate-200 placeholder-slate-600 focus:outline-none resize-none font-[system-ui,-apple-system,sans-serif]"
+            className="w-full bg-transparent px-5 py-4 text-[15px] leading-relaxed text-[var(--color-text)] placeholder-[var(--color-text-4)] focus:outline-none resize-none"
             style={{ minHeight: '180px' }}
           />
 
           {/* Bottom hint */}
-          <div className="px-4 py-2 border-t border-white/[0.04] flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
-              Tip: Use commas (,) or periods (.) to add natural breathing pauses
+          <div className="px-4 py-2.5 border-t border-[var(--color-border)] flex items-center justify-between">
+            <span className="text-[11px] text-[var(--color-text-4)]">
+              Tip: Use commas or periods for natural pauses
             </span>
-            <span className="text-[10px] text-slate-600 hidden sm:block">
-              Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-500 text-[9px] font-mono">Ctrl+Enter</kbd> to generate
+            <span className="text-[11px] text-[var(--color-text-4)] hidden sm:block">
+              <kbd className="px-1.5 py-0.5 rounded bg-[var(--color-surface-2)] text-[var(--color-text-3)] text-[10px] font-mono border border-[var(--color-border)]">Ctrl+Enter</kbd> to generate
             </span>
             {error && (
-              <span className="text-[11px] text-red-400">{error}</span>
+              <span className="text-[11px] text-[var(--color-error)]">{error}</span>
             )}
           </div>
         </div>
 
         {/* ── Language Tabs ───────────────────────── */}
-        <div className="rounded-2xl bg-[#0e1117] border border-white/[0.06] overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.04]">
-            <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Language</span>
+        <div className="card overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-[var(--color-border)]">
+            <span className="text-[11px] font-medium text-[var(--color-text-4)] uppercase tracking-wider">Language</span>
           </div>
           <div className="flex flex-wrap gap-1.5 px-4 py-3">
             {Object.keys(languages).map(lang => (
@@ -287,10 +283,10 @@ export default function TtsStudio() {
                   const lv = languages[lang]
                   if (lv?.length) setSelectedVoice(lv[0].id)
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer focus-ring ${
                   selectedLang === lang
-                    ? 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30'
-                    : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
+                    ? 'bg-[rgba(134,59,255,0.1)] text-[var(--color-primary-300)] ring-1 ring-[var(--color-primary-500)]/30'
+                    : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-2)]'
                 }`}
               >
                 {lang}
@@ -300,12 +296,12 @@ export default function TtsStudio() {
         </div>
 
         {/* ── Voice Selector ─────────────────────── */}
-        <div className="rounded-2xl bg-[#0e1117] border border-white/[0.06] overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.04] flex items-center justify-between">
-            <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Voice</span>
-            <span className="text-[10px] text-slate-600">{filteredVoices.length} available</span>
+        <div className="card overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-[var(--color-border)] flex items-center justify-between">
+            <span className="text-[11px] font-medium text-[var(--color-text-4)] uppercase tracking-wider">Voice</span>
+            <span className="text-[11px] text-[var(--color-text-4)]">{filteredVoices.length} available</span>
           </div>
-          <div className="flex gap-1 px-3 py-3 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-1 px-3 py-3 overflow-x-auto">
             {filteredVoices.map((v, i) => (
               <VoiceAvatar
                 key={v.id}
@@ -317,7 +313,7 @@ export default function TtsStudio() {
               />
             ))}
             {filteredVoices.length === 0 && (
-              <p className="text-xs text-slate-600 px-2 py-4">Select a language above</p>
+              <p className="text-xs text-[var(--color-text-4)] px-2 py-4">Select a language above</p>
             )}
           </div>
         </div>
@@ -325,8 +321,8 @@ export default function TtsStudio() {
         {/* ── Controls Row ────────────────────────── */}
         <div className="flex flex-col sm:flex-row items-stretch gap-3">
           {/* Speed */}
-          <div className="flex-1 rounded-2xl bg-[#0e1117] border border-white/[0.06] px-4 py-3">
-            <label className="text-[10px] text-slate-600 uppercase tracking-wider font-medium block mb-1.5">Speed</label>
+          <div className="flex-1 card px-4 py-3">
+            <label className="text-[11px] text-[var(--color-text-4)] uppercase tracking-wider font-medium block mb-2">Speed</label>
             <div className="flex gap-1.5">
               {[
                 { label: '0.75×', value: '-25%' },
@@ -337,10 +333,10 @@ export default function TtsStudio() {
                 <button
                   key={opt.value}
                   onClick={() => setRate(opt.value)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer focus-ring ${
                     rate === opt.value
-                      ? 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30'
-                      : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
+                      ? 'bg-[rgba(134,59,255,0.1)] text-[var(--color-primary-300)] ring-1 ring-[var(--color-primary-500)]/30'
+                      : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-2)]'
                   }`}
                 >
                   {opt.label}
@@ -350,8 +346,8 @@ export default function TtsStudio() {
           </div>
 
           {/* Pitch */}
-          <div className="flex-1 rounded-2xl bg-[#0e1117] border border-white/[0.06] px-4 py-3">
-            <label className="text-[10px] text-slate-600 uppercase tracking-wider font-medium block mb-1.5">Voice Pitch</label>
+          <div className="flex-1 card px-4 py-3">
+            <label className="text-[11px] text-[var(--color-text-4)] uppercase tracking-wider font-medium block mb-2">Pitch</label>
             <div className="flex gap-1.5">
               {[
                 { label: 'Deep', value: '-15Hz' },
@@ -361,10 +357,10 @@ export default function TtsStudio() {
                 <button
                   key={opt.value}
                   onClick={() => setPitch(opt.value)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer focus-ring ${
                     pitch === opt.value
-                      ? 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30'
-                      : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
+                      ? 'bg-[rgba(134,59,255,0.1)] text-[var(--color-primary-300)] ring-1 ring-[var(--color-primary-500)]/30'
+                      : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-2)]'
                   }`}
                 >
                   {opt.label}
@@ -377,12 +373,12 @@ export default function TtsStudio() {
           <button
             onClick={handleGenerate}
             disabled={loading || !text.trim()}
-            className={`h-[72px] px-8 rounded-2xl font-semibold text-sm transition-all duration-200 flex items-center gap-2.5 cursor-pointer ${
+            className={`h-auto sm:h-[unset] px-8 py-3 sm:py-0 rounded-xl font-semibold text-sm transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer focus-ring ${
               loading
-                ? 'bg-emerald-900/40 text-emerald-600 cursor-wait'
+                ? 'bg-[var(--color-surface-3)] text-[var(--color-text-3)] cursor-wait'
                 : text.trim()
-                  ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg shadow-emerald-500/20 hover:shadow-emerald-400/30 active:scale-[0.97]'
-                  : 'bg-slate-800/50 text-slate-600 cursor-not-allowed'
+                  ? 'btn-primary'
+                  : 'bg-[var(--color-surface-2)] text-[var(--color-text-4)] cursor-not-allowed'
             }`}
           >
             {loading ? (
@@ -401,7 +397,7 @@ export default function TtsStudio() {
 
         {/* ── Audio Result ────────────────────────── */}
         {audioUrl && (
-          <div className="rounded-2xl bg-[#0e1117] border border-emerald-500/15 overflow-hidden animate-fade-in">
+          <div className="card overflow-hidden border-[var(--color-primary-500)]/20 animate-fade-in">
             {/* Waveform */}
             <div className="px-5 pt-5 pb-3">
               <WaveformVisualizer isPlaying={isPlaying} />
@@ -419,16 +415,13 @@ export default function TtsStudio() {
             </div>
 
             {/* Download bar */}
-            <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.04] bg-emerald-500/[0.03]">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[11px] text-slate-400">
-                  {audioBlob ? `${(audioBlob.size / 1024).toFixed(0)} KB` : ''} • MP3
-                </span>
-              </div>
+            <div className="flex items-center justify-between px-5 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
+              <span className="text-[11px] text-[var(--color-text-3)]">
+                {audioBlob ? `${(audioBlob.size / 1024).toFixed(0)} KB` : ''} · MP3
+              </span>
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-medium transition-all cursor-pointer border border-emerald-500/20"
+                className="btn-secondary flex items-center gap-1.5 px-3 py-1.5 text-xs"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -441,48 +434,46 @@ export default function TtsStudio() {
 
         {/* ── Install Engine Modal ────────────────── */}
         {showInstallModal && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-[#0e1117] border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5 relative">
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+            <div className="card p-6 max-w-md w-full space-y-5 relative border-[var(--color-border-2)]">
               <button
                 onClick={() => setShowInstallModal(false)}
-                className="absolute top-4 right-4 text-slate-500 hover:text-white text-lg transition-colors cursor-pointer"
+                className="absolute top-4 right-4 text-[var(--color-text-3)] hover:text-[var(--color-text)] transition-colors cursor-pointer focus-ring rounded-lg p-1"
+                aria-label="Close dialog"
               >
-                ✕
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
 
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                  ⚡
-                </div>
-                <div>
-                  <h3 className="text-base font-semibold text-white">Install Local GPU Engine</h3>
-                  <p className="text-xs text-slate-400">Run VoxCPM2-Khmer offline on your PC GPU</p>
-                </div>
+              <div>
+                <h3 className="text-base font-semibold text-[var(--color-text)]">Install Local GPU Engine</h3>
+                <p className="text-xs text-[var(--color-text-3)] mt-1">Run VoxCPM2-Khmer offline on your PC GPU</p>
               </div>
 
               <div className="space-y-3">
-                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl mb-4">
-                  <p className="text-xs text-emerald-400 font-medium">🔒 Safe & Secure</p>
-                  <p className="text-[11px] text-emerald-500/80 mt-1">
-                    No installation required. Extract the ZIP and run the app. It runs 100% locally on your machine — no data leaves your computer. CORS-secured to only accept requests from https://camtech.cam.
+                <div className="badge-success p-3 rounded-xl" style={{ background: 'var(--color-success-dim)', borderColor: 'rgba(34, 197, 94, 0.2)' }}>
+                  <p className="text-xs text-[var(--color-success)] font-medium">Safe & Secure</p>
+                  <p className="text-[11px] text-[var(--color-text-3)] mt-1">
+                    No installation required. Extract the ZIP and run. 100% local — no data leaves your computer. CORS-secured to camtech.cam.
                   </p>
                 </div>
 
                 <a
                   href="https://camtech.cam/VoxCPM2-Khmer-Engine.zip"
                   download="VoxCPM2-Khmer-Engine.zip"
-                  className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+                  className="w-full py-3 btn-primary rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Download Engine (ZIP)
                 </a>
               </div>
 
-              <div className="border-t border-white/5 pt-3 text-[11px] text-slate-500 space-y-1">
+              <div className="border-t border-[var(--color-border)] pt-3 text-[11px] text-[var(--color-text-4)] space-y-1">
                 <p>• Extract ZIP → double-click VoxCPM2-Khmer-Engine.exe</p>
-                <p>• Connects securely to https://camtech.cam via CORS</p>
+                <p>• Connects securely via CORS to camtech.cam</p>
                 <p>• Requires NVIDIA GPU with CUDA support</p>
               </div>
             </div>

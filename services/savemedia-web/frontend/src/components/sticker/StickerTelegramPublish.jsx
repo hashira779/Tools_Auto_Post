@@ -1,11 +1,6 @@
 import { useState } from 'react'
 
-export default function StickerTelegramPublish({
-  stickerData,
-  emoji,
-  onReset,
-  onBack,
-}) {
+export default function StickerTelegramPublish({ stickerData, emoji, onReset, onBack }) {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
@@ -45,7 +40,7 @@ export default function StickerTelegramPublish({
       try {
         data = JSON.parse(text)
       } catch {
-        throw new Error(`Server returned error (${res.status}). Please try again in a moment.`)
+        throw new Error(`Server returned error (${res.status}). Please try again.`)
       }
 
       if (!res.ok) {
@@ -70,164 +65,164 @@ export default function StickerTelegramPublish({
   // ── Success State ───────────────────────────────────────────────
   if (result) {
     return (
-      <div className="glass-card p-8 sm:p-12 text-center animate-fade-in">
-        <div className="w-16 h-16 bg-emerald-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 border border-emerald-500/30">
-          🎉
+      <div className="card p-6 sm:p-10 text-center animate-fade-in">
+        <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4 border border-[var(--color-border)]" style={{ background: 'var(--color-success-dim)' }}>
+          ✓
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-          Sticker Pack Ready!
+        <h2 className="text-xl sm:text-2xl font-bold text-[var(--color-text)] mb-2">
+          Sticker Pack Ready
         </h2>
 
-        <p className="text-xs sm:text-sm text-slate-400 font-normal max-w-md mx-auto mb-6">
-          Your sticker is processed and live. Click below to add it straight to your Telegram app.
+        <p className="text-sm text-[var(--color-text-3)] max-w-md mx-auto mb-6">
+          Your sticker is live. Click below to add it to your Telegram app.
         </p>
 
         {result.url && (
           <div className="mb-6 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href={result.deeplink_app || result.url}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 btn-pro text-white rounded-xl font-bold text-base shadow-xl"
+              className="w-full sm:w-auto px-6 py-3.5 btn-primary text-sm font-semibold inline-flex items-center justify-center gap-2"
             >
-              <span>📦</span> Open &amp; Add in Telegram App
+              Open in Telegram
             </a>
             <button
               onClick={handleDownload}
-              className="w-full sm:w-auto px-6 py-4 bg-white/10 hover:bg-white/15 text-white rounded-xl text-sm font-semibold transition-colors cursor-pointer border border-white/10"
+              className="w-full sm:w-auto btn-secondary px-6 py-3.5 text-sm font-medium flex items-center justify-center gap-2"
             >
-              <span>💾</span> Save WebP File
+              Save WebP File
             </button>
           </div>
         )}
 
-        <div className="pt-6 border-t border-white/10 flex items-center justify-center gap-3">
+        <div className="pt-5 border-t border-[var(--color-border)]">
           <button
             onClick={onReset}
-            className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-semibold text-xs rounded-xl transition-colors cursor-pointer border border-white/10"
+            className="btn-ghost text-sm px-4 py-2"
           >
-            ✨ Create Another Sticker
+            Create Another Sticker
           </button>
         </div>
       </div>
     )
   }
 
-  // ── Main 1-Click Form ───────────────────────────────────────────
+  // ── Main Form ───────────────────────────────────────────
   return (
-    <div className="glass-card p-6 sm:p-8 animate-fade-in">
+    <div className="card p-5 sm:p-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+      <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--color-border)]">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-            <span>🚀</span> Step 4: Export to Telegram
+          <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-text)]">
+            Step 4: Export to Telegram
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 font-normal">
-            1-Click instant export to Telegram
+          <p className="text-sm text-[var(--color-text-3)] mt-0.5">
+            1-click export to Telegram
           </p>
         </div>
         <button
           onClick={onBack}
           disabled={loading}
-          className="text-xs font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors cursor-pointer border border-white/10"
+          className="btn-ghost text-xs px-3 py-1.5"
         >
-          ← Change Emoji
+          ← Back
         </button>
       </div>
 
-      {/* 1-Click Fast Actions */}
-      <div className="space-y-4 mb-6">
+      {/* Actions */}
+      <div className="space-y-3 mb-5">
         <button
           onClick={handleInstantPublish}
           disabled={loading}
-          className="w-full py-4 btn-pro rounded-xl font-bold text-base text-white shadow-xl flex items-center justify-center gap-3 cursor-pointer select-none"
+          className="w-full py-3.5 btn-primary font-semibold text-sm flex items-center justify-center gap-2.5"
         >
           {loading ? (
             <>
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Generating Telegram Pack...</span>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Creating Telegram Pack...</span>
             </>
           ) : (
-            <>
-              <span className="text-xl">🚀</span>
-              <span>1-Click Add Sticker to Telegram</span>
-            </>
+            <span>Add Sticker to Telegram</span>
           )}
         </button>
 
         <button
           onClick={handleDownload}
-          className="w-full py-3.5 rounded-xl bg-slate-950/60 hover:bg-slate-900 border border-white/10 hover:border-indigo-500/30 text-center transition-all flex items-center justify-center gap-2.5 cursor-pointer text-slate-300 hover:text-white text-xs font-bold"
+          className="w-full py-3 btn-secondary text-sm font-medium flex items-center justify-center gap-2"
         >
-          <span>💾</span> Download 512×512 WebP File (Direct Save)
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download 512×512 WebP
         </button>
       </div>
 
-      {/* Selected Emoji badge */}
-      <div className="flex items-center gap-2.5 p-3 bg-slate-950/60 rounded-xl border border-white/5 mb-6">
+      {/* Emoji badge */}
+      <div className="flex items-center gap-2.5 p-3 card-elevated rounded-xl mb-5">
         <span className="text-xl">{emoji}</span>
-        <span className="text-xs text-slate-300 font-medium">
-          Sticker reaction emoji: <strong className="text-white">{emoji}</strong>
+        <span className="text-sm text-[var(--color-text-2)]">
+          Reaction emoji: <strong className="text-[var(--color-text)]">{emoji}</strong>
         </span>
       </div>
 
-      {/* Advanced Custom Settings (Optional) */}
-      <div className="pt-4 border-t border-white/10">
+      {/* Advanced */}
+      <div className="pt-4 border-t border-[var(--color-border)]">
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-xs font-semibold text-slate-400 hover:text-slate-200 flex items-center gap-1.5 cursor-pointer select-none"
+          className="text-xs font-medium text-[var(--color-text-3)] hover:text-[var(--color-text-2)] flex items-center gap-1.5 cursor-pointer select-none"
         >
           <span>{showAdvanced ? '▾' : '▸'}</span>
-          <span>Advanced: Custom Pack Name &amp; User ID (Optional)</span>
+          <span>Advanced: Custom Pack Name & User ID</span>
         </button>
 
         {showAdvanced && (
-          <div className="mt-4 space-y-3 p-4 bg-slate-950/70 rounded-xl border border-white/5 animate-fade-in">
+          <div className="mt-4 space-y-3 p-4 card-elevated rounded-xl animate-fade-in">
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                Custom Telegram User ID (Optional)
+              <label className="block text-[11px] font-medium text-[var(--color-text-3)] uppercase tracking-wider mb-1.5">
+                Telegram User ID (Optional)
               </label>
               <input
                 type="text"
                 value={customUserId}
                 onChange={(e) => setCustomUserId(e.target.value)}
-                placeholder="Leave blank for automatic server bot owner"
-                className="w-full bg-slate-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 outline-none focus:border-indigo-500"
+                placeholder="Leave blank for automatic"
+                className="input-field w-full px-3.5 py-2.5 text-xs"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                Custom Pack Short Name (Optional)
+              <label className="block text-[11px] font-medium text-[var(--color-text-3)] uppercase tracking-wider mb-1.5">
+                Pack Short Name (Optional)
               </label>
               <input
                 type="text"
                 value={customPackName}
                 onChange={(e) => setCustomPackName(e.target.value)}
                 placeholder="e.g. my_stickers"
-                className="w-full bg-slate-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 outline-none focus:border-indigo-500"
+                className="input-field w-full px-3.5 py-2.5 text-xs"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                Custom Display Title (Optional)
+              <label className="block text-[11px] font-medium text-[var(--color-text-3)] uppercase tracking-wider mb-1.5">
+                Display Title (Optional)
               </label>
               <input
                 type="text"
                 value={customTitle}
                 onChange={(e) => setCustomTitle(e.target.value)}
                 placeholder="e.g. My Cool Stickers"
-                className="w-full bg-slate-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 outline-none focus:border-indigo-500"
+                className="input-field w-full px-3.5 py-2.5 text-xs"
               />
             </div>
           </div>
         )}
       </div>
 
-      {/* Error message */}
+      {/* Error */}
       {error && (
-        <div className="mt-4 px-4 py-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-300 text-xs sm:text-sm font-medium flex items-center gap-2">
-          <span>❌</span> {error}
+        <div className="mt-4 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2" style={{ background: 'var(--color-error-dim)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
+          {error}
         </div>
       )}
     </div>

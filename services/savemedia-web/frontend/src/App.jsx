@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useDownloader } from './hooks/useDownloader'
 import { FORMAT_VIDEO } from './constants/platforms'
 
-import BackgroundOrbs from './components/BackgroundOrbs'
 import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER } from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
@@ -35,9 +34,7 @@ function App() {
 
   return (
     <>
-      <BackgroundOrbs />
-
-      {/* Slide-out Mobile Menu Drawer */}
+      {/* Mobile Menu Drawer */}
       <AppSidebar
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
@@ -45,8 +42,8 @@ function App() {
         onSelectTool={setActiveTool}
       />
 
-      {/* Main Container */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center px-4 py-4 sm:px-6">
+      {/* Main Layout */}
+      <div className="relative min-h-screen flex flex-col">
         {/* Top Navbar */}
         <AppNavbar
           activeTool={activeTool}
@@ -54,58 +51,61 @@ function App() {
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
         />
 
-        {/* 🎬 Tool 1: Video & Audio Downloader */}
-        {activeTool === TOOL_DOWNLOADER && (
-          <main className="w-full flex flex-col items-center animate-fade-in">
-            <Hero />
+        {/* Content */}
+        <div className="flex-1 w-full max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+          {/* Media Downloader */}
+          {activeTool === TOOL_DOWNLOADER && (
+            <main className="flex flex-col items-center animate-fade-in">
+              <Hero />
 
-            <SearchCard
-              url={url}
-              onUrlChange={setUrl}
-              onFetch={handleFetch}
-              loading={loading}
-              error={error}
-            />
+              <SearchCard
+                url={url}
+                onUrlChange={setUrl}
+                onFetch={handleFetch}
+                loading={loading}
+                error={error}
+              />
 
-            {videoInfo && (
-              <div
-                id="results-card"
-                className="w-full max-w-[760px] glass-card p-6 sm:p-8 animate-fade-in mb-8"
-              >
-                <VideoPreview videoInfo={videoInfo} />
-                <FormatTabs activeTab={formatTab} onSwitch={switchFormatTab} />
-                <QualityGrid
-                  formats={currentFormats}
-                  selectedQuality={selectedQuality}
-                  onSelect={setSelectedQuality}
-                />
-                <DownloadButton
-                  formatTab={formatTab}
-                  selectedQuality={selectedQuality}
-                  downloading={downloading}
-                  downloadStatus={downloadStatus}
-                  downloadSuccess={downloadSuccess}
-                  onDownload={handleDownload}
-                />
-              </div>
-            )}
-          </main>
-        )}
+              {videoInfo && (
+                <div
+                  id="results-card"
+                  className="w-full card p-5 sm:p-6 animate-fade-in mb-8"
+                >
+                  <VideoPreview videoInfo={videoInfo} />
+                  <FormatTabs activeTab={formatTab} onSwitch={switchFormatTab} />
+                  <QualityGrid
+                    formats={currentFormats}
+                    selectedQuality={selectedQuality}
+                    onSelect={setSelectedQuality}
+                  />
+                  <DownloadButton
+                    formatTab={formatTab}
+                    selectedQuality={selectedQuality}
+                    downloading={downloading}
+                    downloadStatus={downloadStatus}
+                    downloadSuccess={downloadSuccess}
+                    onDownload={handleDownload}
+                  />
+                </div>
+              )}
+            </main>
+          )}
 
-        {/* 🎙️ Tool 2: Text-to-Voice Studio */}
-        {activeTool === TOOL_TTS && (
-          <main className="w-full flex flex-col items-center animate-fade-in">
-            <TtsStudio />
-          </main>
-        )}
+          {/* Text-to-Voice Studio */}
+          {activeTool === TOOL_TTS && (
+            <main className="flex flex-col items-center animate-fade-in">
+              <TtsStudio />
+            </main>
+          )}
 
-        {/* 🎨 Tool 3: Telegram Sticker & Khmer Meme Studio */}
-        {activeTool === TOOL_STICKER && (
-          <main className="w-full flex flex-col items-center animate-fade-in">
-            <StickerHero />
-            <StickerStudio />
-          </main>
-        )}
+          {/* Telegram Sticker Studio */}
+          {activeTool === TOOL_STICKER && (
+            <main className="flex flex-col items-center animate-fade-in">
+              <StickerHero />
+              <StickerStudio />
+            </main>
+          )}
+        </div>
 
         <Footer />
       </div>

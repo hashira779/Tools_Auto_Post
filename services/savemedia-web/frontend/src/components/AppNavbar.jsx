@@ -1,207 +1,205 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export const TOOL_DOWNLOADER = 'downloader'
 export const TOOL_TTS = 'tts'
 export const TOOL_STICKER = 'sticker'
 
-export default function AppNavbar({
-  activeTool,
-  onSelectTool,
-  onOpenMobileMenu,
-}) {
+const BOTS = [
+  {
+    name: 'Lyrics / Subtitle Bot',
+    desc: 'Auto video subtitles',
+    url: 'https://t.me/CamTechLyricBot',
+    label: 'Free',
+  },
+  {
+    name: 'Facebook Auto-Post',
+    desc: 'Automated social posting',
+    url: 'https://t.me/CamTechAutoPostBot',
+    label: 'Auto',
+  },
+]
+
+const NAV_TOOLS = [
+  { id: TOOL_DOWNLOADER, label: 'Downloader', mobileLabel: 'Download' },
+  { id: TOOL_TTS, label: 'Text to Voice', mobileLabel: 'Voice' },
+  { id: TOOL_STICKER, label: 'Stickers', mobileLabel: 'Stickers' },
+]
+
+export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }) {
   const [botsMenuOpen, setBotsMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const dropdownRef = useRef(null)
+
+  // Track scroll for navbar border
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 8)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!botsMenuOpen) return
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setBotsMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [botsMenuOpen])
 
   return (
-    <header className="w-full max-w-[960px] sticky top-3 z-30 mb-8 sm:mb-12">
-      <div className="w-full h-14 sm:h-16 px-3 sm:px-5 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 flex items-center justify-between">
-        
-        {/* Left: Brand Logo */}
-        <div
-          onClick={() => onSelectTool(TOOL_DOWNLOADER)}
-          className="flex items-center gap-2.5 sm:gap-3 select-none cursor-pointer group"
-        >
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white font-black text-sm group-hover:scale-105 transition-transform">
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-white text-base sm:text-lg tracking-tight">
-              CamTech
-            </span>
-            <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-              Pro Studio
-            </span>
-          </div>
-        </div>
+    <header className={`sticky top-0 z-40 w-full navbar transition-all duration-200 ${scrolled ? 'border-b border-[var(--color-border)]' : 'border-b border-transparent'}`}>
+      <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="h-14 sm:h-16 flex items-center justify-between">
 
-        {/* Center: Sleek Segmented Switcher (Desktop) */}
-        <div className="hidden md:flex items-center p-1 bg-slate-950/60 border border-white/10 rounded-xl gap-1">
-          {/* 1. Downloader */}
+          {/* ── Left: Logo ────────────────────────────── */}
           <button
             onClick={() => onSelectTool(TOOL_DOWNLOADER)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
-              activeTool === TOOL_DOWNLOADER
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-            }`}
+            className="flex items-center gap-2.5 select-none cursor-pointer group focus-ring rounded-lg"
+            aria-label="CamTech home"
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            <span>Media Downloader</span>
+            <img
+              src="/favicon.svg"
+              alt=""
+              className="w-7 h-7 sm:w-8 sm:h-8 transition-transform duration-200 group-hover:scale-105"
+              width="32"
+              height="32"
+            />
+            <div className="flex items-baseline gap-1">
+              <span className="font-bold text-[var(--color-text)] text-base sm:text-lg tracking-tight">
+                CamTech
+              </span>
+              <span className="text-[var(--color-text-3)] text-xs font-medium">.cam</span>
+            </div>
           </button>
 
-          {/* 2. Text to Voice */}
-          <button
-            onClick={() => onSelectTool(TOOL_TTS)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer relative ${
-              activeTool === TOOL_TTS
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 font-bold'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-            }`}
-          >
-            <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-            </svg>
-            <span>Text to Voice</span>
-            <span className="text-[9px] font-bold px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              NEW
-            </span>
-          </button>
+          {/* ── Center: Nav Tabs (Desktop) ────────────── */}
+          <nav className="hidden md:flex items-center gap-1" role="tablist" aria-label="Tools">
+            {NAV_TOOLS.map((tool) => {
+              const isActive = activeTool === tool.id
+              return (
+                <button
+                  key={tool.id}
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => onSelectTool(tool.id)}
+                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-150 cursor-pointer focus-ring ${
+                    isActive
+                      ? 'text-[var(--color-text)] bg-[var(--color-surface-2)]'
+                      : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-1)]'
+                  }`}
+                >
+                  {tool.label}
+                </button>
+              )
+            })}
+          </nav>
 
-          {/* 3. Telegram Stickers & Memes */}
-          <button
-            onClick={() => onSelectTool(TOOL_STICKER)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer relative ${
-              activeTool === TOOL_STICKER
-                ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-600/30 font-bold'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-            }`}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Stickers</span>
-            <span className="text-[9px] font-bold px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-              HOT
-            </span>
-          </button>
-        </div>
+          {/* ── Right: Bots + Mobile Menu ─────────────── */}
+          <div className="flex items-center gap-2">
 
-        {/* Right: Automation Bots Dropdown & Mobile Menu */}
-        <div className="flex items-center gap-2">
-          {/* Bots Dropdown */}
-          <div className="relative">
+            {/* Bots Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setBotsMenuOpen((p) => !p)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer focus-ring ${
+                  botsMenuOpen
+                    ? 'bg-[var(--color-surface-2)] text-[var(--color-text)]'
+                    : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-1)]'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                </svg>
+                <span className="hidden sm:inline">Bots</span>
+                <svg className={`w-3 h-3 transition-transform duration-150 ${botsMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Dropdown Panel */}
+              {botsMenuOpen && (
+                <div className="absolute right-0 mt-2 w-64 dropdown-panel p-2 z-50 animate-slide-in-down">
+                  <div className="px-2 py-1.5 mb-1">
+                    <span className="text-[11px] font-semibold text-[var(--color-text-3)] uppercase tracking-wider">
+                      Telegram Bots
+                    </span>
+                  </div>
+
+                  {BOTS.map((bot) => (
+                    <a
+                      key={bot.name}
+                      href={bot.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setBotsMenuOpen(false)}
+                      className="flex items-center justify-between px-2.5 py-2.5 rounded-lg text-sm transition-colors hover:bg-[var(--color-surface-3)] group"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-medium text-[var(--color-text)] truncate">{bot.name}</div>
+                        <div className="text-[11px] text-[var(--color-text-3)]">{bot.desc}</div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-3">
+                        <span className="badge text-[10px] py-0.5 px-1.5">{bot.label}</span>
+                        <svg className="w-3.5 h-3.5 text-[var(--color-text-4)] group-hover:text-[var(--color-text-3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </div>
+                    </a>
+                  ))}
+
+                  <div className="mt-1 pt-1.5 border-t border-[var(--color-border)] px-2.5">
+                    <p className="text-[11px] text-[var(--color-text-4)]">
+                      Open in Telegram to get started
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
             <button
-              onClick={() => setBotsMenuOpen((p) => !p)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer border border-white/10"
+              onClick={onOpenMobileMenu}
+              className="md:hidden w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-1)] transition-colors cursor-pointer focus-ring"
+              aria-label="Open menu"
             >
-              <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span className="hidden sm:inline">Bots</span>
-              <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-
-            {botsMenuOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setBotsMenuOpen(false)}
-                />
-                <div className="absolute right-0 mt-2 w-56 p-2 bg-slate-950/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-50 animate-fade-in space-y-1">
-                  <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Telegram Automation
-                  </div>
-                  <a
-                    href="https://t.me/CamTechAutoPostBot"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setBotsMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-200 hover:bg-white/10 hover:text-white transition-colors"
-                  >
-                    <span className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs">
-                      🎤
-                    </span>
-                    <div className="flex-1 text-left">
-                      <div>Lyrics /srt Bot</div>
-                      <div className="text-[10px] text-slate-400 font-normal">Auto video subtitles</div>
-                    </div>
-                  </a>
-                  <a
-                    href="https://t.me/CamTechAutoPostBot"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setBotsMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-200 hover:bg-white/10 hover:text-white transition-colors"
-                  >
-                    <span className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
-                      📢
-                    </span>
-                    <div className="flex-1 text-left">
-                      <div>Facebook Auto-Post</div>
-                      <div className="text-[10px] text-slate-400 font-normal">Automated social posting</div>
-                    </div>
-                  </a>
-                </div>
-              </>
-            )}
           </div>
-
-          {/* Status Indicator */}
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Online</span>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={onOpenMobileMenu}
-            className="md:hidden w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer border border-white/10"
-            title="Open Menu"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
         </div>
       </div>
 
-      {/* Mobile Sub-Switcher */}
-      <div className="grid grid-cols-3 md:hidden gap-1 p-1 mt-3 bg-slate-900/90 border border-white/10 rounded-xl max-w-sm mx-auto shadow-lg">
-        <button
-          onClick={() => onSelectTool(TOOL_DOWNLOADER)}
-          className={`flex items-center justify-center py-2 rounded-lg text-xs font-semibold transition-all ${
-            activeTool === TOOL_DOWNLOADER
-              ? 'bg-indigo-600 text-white shadow'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <span>Downloader</span>
-        </button>
-        <button
-          onClick={() => onSelectTool(TOOL_TTS)}
-          className={`flex items-center justify-center py-2 rounded-lg text-xs font-semibold transition-all ${
-            activeTool === TOOL_TTS
-              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <span>Voice</span>
-        </button>
-        <button
-          onClick={() => onSelectTool(TOOL_STICKER)}
-          className={`flex items-center justify-center py-2 rounded-lg text-xs font-semibold transition-all ${
-            activeTool === TOOL_STICKER
-              ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <span>Stickers</span>
-        </button>
+      {/* ── Mobile Tool Tabs ─────────────────────────── */}
+      <div className="md:hidden border-t border-[var(--color-border)]">
+        <div className="max-w-[800px] mx-auto px-4">
+          <nav className="flex" role="tablist" aria-label="Tools">
+            {NAV_TOOLS.map((tool) => {
+              const isActive = activeTool === tool.id
+              return (
+                <button
+                  key={tool.id}
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => onSelectTool(tool.id)}
+                  className={`flex-1 py-3 text-center text-xs font-medium transition-colors cursor-pointer relative ${
+                    isActive
+                      ? 'text-[var(--color-text)]'
+                      : 'text-[var(--color-text-3)]'
+                  }`}
+                >
+                  {tool.mobileLabel}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 rounded-full bg-[var(--color-primary-500)]" />
+                  )}
+                </button>
+              )
+            })}
+          </nav>
+        </div>
       </div>
     </header>
   )

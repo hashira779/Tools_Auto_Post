@@ -1,48 +1,47 @@
 const EMOJI_CATEGORIES = [
   {
-    name: 'Reactions & Faces',
+    name: 'Reactions',
     emojis: ['😀', '😂', '😍', '🥰', '😎', '🤩', '😇', '🥺', '😜', '🥳', '🤔', '😴'],
   },
   {
-    name: 'Vibes & Gestures',
+    name: 'Vibes',
     emojis: ['❤️', '🔥', '⭐', '✨', '🎉', '👍', '💪', '🙌', '💯', '💥', '🚀', '🌈'],
   },
   {
-    name: 'Icons & Elements',
+    name: 'Characters',
     emojis: ['🐱', '🐶', '🦊', '🐼', '🦁', '🦄', '🐸', '🌸', '👑', '🏆', '🎯', '🎵'],
   },
 ]
 
 export default function StickerEmojiPicker({ selected, onSelect, onContinue }) {
   return (
-    <div className="glass-card p-6 sm:p-8 animate-fade-in">
-      <div className="text-center mb-6">
-        <h3 className="text-lg sm:text-xl font-bold text-white flex items-center justify-center gap-2">
-          <span>😀</span> Pick Associated Emoji
+    <div className="card p-5 sm:p-6 animate-fade-in">
+      <div className="mb-5">
+        <h3 className="text-base font-semibold text-[var(--color-text)]">
+          Pick Emoji
         </h3>
-        <p className="text-xs sm:text-sm text-slate-400 font-normal mt-0.5">
+        <p className="text-sm text-[var(--color-text-3)] mt-0.5">
           Telegram uses this emoji when suggesting stickers in chat
         </p>
       </div>
 
-      <div className="space-y-3 mb-6">
+      <div className="space-y-3 mb-5">
         {EMOJI_CATEGORIES.map((cat) => (
-          <div key={cat.name} className="bg-slate-950/60 p-3 rounded-xl border border-white/5">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">
+          <div key={cat.name} className="card-elevated p-3 rounded-xl">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-4)] mb-2 px-1">
               {cat.name}
             </div>
             <div className="grid grid-cols-6 sm:grid-cols-12 gap-1.5">
               {cat.emojis.map((emoji) => {
                 const isSelected = selected === emoji
-
                 return (
                   <button
                     key={emoji}
                     onClick={() => onSelect(emoji)}
-                    className={`h-10 sm:h-11 rounded-lg text-xl flex items-center justify-center transition-all duration-150 cursor-pointer select-none ${
+                    className={`h-10 sm:h-11 rounded-lg text-xl flex items-center justify-center transition-all duration-100 cursor-pointer select-none focus-ring ${
                       isSelected
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30 scale-110 border border-white/30'
-                        : 'bg-slate-900 hover:bg-slate-800 border border-white/5'
+                        ? 'bg-[var(--color-primary-500)] scale-110 ring-1 ring-white/20'
+                        : 'bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border)]'
                     }`}
                   >
                     {emoji}
@@ -54,20 +53,20 @@ export default function StickerEmojiPicker({ selected, onSelect, onContinue }) {
         ))}
       </div>
 
-      {/* Selected Preview & Continue */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
+      {/* Selected & Continue */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[var(--color-border)]">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-slate-400">Selected Emoji:</span>
-          <div className="w-10 h-10 bg-slate-900 border border-white/15 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+          <span className="text-xs text-[var(--color-text-3)]">Selected:</span>
+          <div className="w-10 h-10 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg flex items-center justify-center text-2xl">
             {selected}
           </div>
         </div>
 
         <button
           onClick={onContinue}
-          className="w-full sm:w-auto px-7 py-3.5 btn-pro rounded-xl text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full sm:w-auto px-6 py-3 btn-primary text-sm font-semibold flex items-center justify-center gap-2"
         >
-          <span>🚀</span> Export to Telegram →
+          Export to Telegram →
         </button>
       </div>
     </div>
