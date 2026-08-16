@@ -24,4 +24,4 @@ RUN python -c "from transformers import VitsModel, AutoTokenizer; VitsModel.from
 
 EXPOSE 8002
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8002"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8002", "--workers", "2"]
