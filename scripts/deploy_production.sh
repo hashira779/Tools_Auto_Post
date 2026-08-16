@@ -23,7 +23,7 @@ fi
 # 2. Sync new code to APP_DIR
 echo "🔄 Syncing new files to $APP_DIR..."
 mkdir -p "$APP_DIR"
-rsync -a --exclude '.git' --exclude '.venv' ./ "$APP_DIR/"
+rsync -a --delete --exclude '.git' --exclude '.venv' --exclude 'node_modules' --exclude '.env' --exclude 'savemedia-downloads' ./ "$APP_DIR/"
 
 cd "$APP_DIR"
 
