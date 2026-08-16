@@ -1,15 +1,9 @@
 # ══════════════════════════════════════════════════════════════════
-#  CamTech — ORS Worker Node (AI Only)
+#  CamTech — ORS Worker Node
 # ══════════════════════════════════════════════════════════════════
-#  This lightweight compose file runs ONLY the AI services:
-#    - AI Orchestrator API (FastAPI)
-#    - Ollama (Local LLM)
-#
-#  It connects to the MAIN server's PostgreSQL over the network.
-#  Deploy this on ORS worker servers (10.2.7.251, 10.2.7.252).
-#
-#  Usage:
-#    docker compose -f docker-compose.ors-worker.yml up -d --build
+#  This compose file runs all clustered services on ORS workers.
+#  It connects to the MAIN server's PostgreSQL & Redis over the network,
+#  and maps storage to the shared NFS mount (/mnt/nfs_camtech).
 # ══════════════════════════════════════════════════════════════════
 
 services:
@@ -35,7 +29,6 @@ services:
       dockerfile: Dockerfile
     container_name: ors-ai-orchestrator
     environment:
-      # ── Points to MAIN server's PostgreSQL over the LAN ──
       - DATABASE_URL=postgresql://camtech:camtechpassword@10.1.0.11:5432/camtech
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
@@ -43,7 +36,6 @@ services:
     depends_on:
       - ollama
     ports:
-      # Expose on port 8100 so Nginx on the main server can reach it
       - "8100:8000"
     volumes:
       - ai-uploads:/app/uploads
@@ -54,6 +46,120 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
+    networks:
+      - ors-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  SaveMedia API (FastAPI) & Celery Worker
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  savemedia-api:
+    build:
+      context: ./services/savemedia-web/media-api
+      dockerfile: Dockerfile
+    container_name: ors-savemedia-api
+    environment:
+      - DOWNLOAD_DIR=/tmp/savemedia_downloads
+      - COOKIES_FILE=${COOKIES_FILE:-}
+      - REDIS_URL=redis://10.1.0.11:6379/0
+    volumes:
+      - /mnt/nfs_camtech/savemedia_downloads:/tmp/savemedia_downloads
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - ors-net
+
+  savemedia-worker:
+    build:
+      context: ./services/savemedia-web/media-api
+      dockerfile: Dockerfile
+    container_name: ors-savemedia-worker
+    command: celery -A app.celery_worker.celery_app worker --concurrency=8 --loglevel=info
+    environment:
+      - DOWNLOAD_DIR=/tmp/savemedia_downloads
+      - COOKIES_FILE=${COOKIES_FILE:-}
+      - REDIS_URL=redis://10.1.0.11:6379/0
+    volumes:
+      - /mnt/nfs_camtech/savemedia_downloads:/tmp/savemedia_downloads
+    restart: unless-stopped
+    networks:
+      - ors-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Sticker Maker API — Microservice for Telegram Stickers
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  sticker-api:
+    build:
+      context: ./services/sticker-maker/sticker-api
+      dockerfile: Dockerfile
+    container_name: ors-sticker-api
+    environment:
+      - STICKER_BOT_TOKEN=${STICKER_BOT_TOKEN:-${TELEGRAM_BOT_TOKEN:-}}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - ALLOWED_USERS=${ALLOWED_USERS:-}
+      - STICKER_BOT_OWNER_ID=${STICKER_BOT_OWNER_ID:-}
+      - DEFAULT_STICKER_USER_ID=${DEFAULT_STICKER_USER_ID:-}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/google_credentials.json
+    volumes:
+      - ./credentials:/app/credentials:ro
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/health')" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - ors-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  MMS-TTS — Offline Khmer Voice (CPU Optimized)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  mms-tts:
+    build:
+      context: ./services/mms-tts
+      dockerfile: Dockerfile
+    container_name: ors-mms-tts
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+    networks:
+      - ors-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Kokoro-82M TTS — Premium Voice AI (CPU Optimized)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  kokoro-tts:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    container_name: ors-kokoro-tts
+    restart: unless-stopped
+    ports:
+      - "8880:8880"
+    environment:
+      - DEVICE=cpu
+      - ONNX_NUM_THREADS=8
+      - ONNX_INTER_OP_THREADS=4
+      - PYTORCH_NUM_THREADS=8
+    volumes:
+      - /mnt/nfs_camtech/kokoro-models:/app/api/src/models
+      - /mnt/nfs_camtech/kokoro-voices:/app/api/src/voices
+      - /mnt/nfs_camtech/kokoro-temp:/tmp/kokoro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8880/health"]
+      interval: 30s
+      timeout: 10s
     networks:
       - ors-net
 
