@@ -122,6 +122,24 @@ async def upload_file(file: UploadFile = File(...), user = Depends(get_current_u
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not save file: {str(e)}")
 
+from fastapi.responses import Response
+
+@app.get("/api/chat/download/{file_id}")
+def download_document(file_id: str, db: Session = Depends(get_db)):
+    """Downloads a generated document from the database."""
+    try:
+        doc = db.query(models.GeneratedDocument).filter(models.GeneratedDocument.id == file_id).first()
+        if not doc:
+            raise HTTPException(status_code=404, detail="Document not found")
+            
+        return Response(
+            content=doc.content,
+            media_type=doc.content_type,
+            headers={"Content-Disposition": f'attachment; filename="{doc.filename}"'}
+        )
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid file ID format")
+
 # --- Chat History Endpoints ---
 
 @app.get("/api/conversations")

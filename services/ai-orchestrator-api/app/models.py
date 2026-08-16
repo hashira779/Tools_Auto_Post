@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, JSON, Integer
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, JSON, Integer, LargeBinary
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -17,6 +17,7 @@ class User(Base):
     status = Column(String(50), default="active")
     
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
+    generated_documents = relationship("GeneratedDocument", back_populates="user", cascade="all, delete-orphan")
 
 class Conversation(Base):
     __tablename__ = "conversations"
@@ -55,3 +56,14 @@ class AIUsage(Base):
     tool_calls = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
+class GeneratedDocument(Base):
+    __tablename__ = "generated_documents"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    filename = Column(String(255), nullable=False)
+    content_type = Column(String(100), nullable=False)
+    content = Column(LargeBinary, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", back_populates="generated_documents")
