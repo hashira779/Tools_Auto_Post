@@ -3,11 +3,13 @@ import CamtechLogo from './CamtechLogo'
 export const TOOL_DOWNLOADER = 'downloader'
 export const TOOL_TTS = 'tts'
 export const TOOL_STICKER = 'sticker'
+export const TOOL_LLM = 'llm'
 
 const NAV_TOOLS = [
   { id: TOOL_DOWNLOADER, label: 'Downloader', mobileLabel: 'Download' },
   { id: TOOL_TTS, label: 'Text to Voice', mobileLabel: 'Voice' },
   { id: TOOL_STICKER, label: 'Stickers', mobileLabel: 'Stickers' },
+  { id: TOOL_LLM, label: 'AI Chat', mobileLabel: 'Chat' },
 ]
 
 export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }) {

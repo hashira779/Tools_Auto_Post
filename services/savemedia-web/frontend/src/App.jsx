@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useDownloader } from './hooks/useDownloader'
 import { FORMAT_VIDEO } from './constants/platforms'
 
-import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER } from './components/AppNavbar'
+import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM } from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
 import SearchCard from './components/SearchCard'
@@ -13,6 +13,7 @@ import DownloadButton from './components/DownloadButton'
 import TtsStudio from './components/tts/TtsStudio'
 import StickerHero from './components/sticker/StickerHero'
 import StickerStudio from './components/sticker/StickerStudio'
+import AIChatStudio from './components/chat/AIChatStudio'
 import Footer from './components/Footer'
 
 function App() {
@@ -130,6 +131,13 @@ function App() {
             <main className="flex flex-col items-center animate-fade-in">
               <StickerHero />
               <StickerStudio />
+            </main>
+          )}
+
+          {/* AI Chat Studio */}
+          {activeTool === TOOL_LLM && (
+            <main className="flex flex-col items-center animate-fade-in">
+              <AIChatStudio />
             </main>
           )}
         </div>

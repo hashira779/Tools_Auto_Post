@@ -191,6 +191,29 @@ services:
     networks:
       - camtech-net
 
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Ollama — Local LLM API (Optimized for 3B–8B Quantized Models)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: camtech-ollama
+    restart: unless-stopped
+    # If your Ubuntu server has an NVIDIA GPU, uncomment the deploy section below:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - camtech-net
+
 networks:
   camtech-net:
     driver: bridge
@@ -201,3 +224,4 @@ volumes:
   kokoro-models:
   kokoro-voices:
   kokoro-temp:
+  ollama-data:
