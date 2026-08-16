@@ -18,22 +18,64 @@
   --color-primary-800: #1e3a8a;
   --color-primary-900: #0f172a; /* deep navy */
 
-  /* ── Neutral Palette (Warm Zinc Dark) ──────────────────────── */
-  --color-surface:     #09090b;
-  --color-surface-1:   #0f0f12;
-  --color-surface-2:   #18181b;
-  --color-surface-3:   #1f1f23;
-  --color-surface-4:   #27272a;
+  /* ── Neutral Palette (Dynamic Light/Dark) ──────────────────────── */
+  --color-surface:     var(--bg-surface);
+  --color-surface-1:   var(--bg-surface-1);
+  --color-surface-2:   var(--bg-surface-2);
+  --color-surface-3:   var(--bg-surface-3);
+  --color-surface-4:   var(--bg-surface-4);
 
-  --color-text:        #fafafa;
-  --color-text-2:      #a1a1aa;
-  --color-text-3:      #71717a;
-  --color-text-4:      #52525b;
+  --color-text:        var(--text-main);
+  --color-text-2:      var(--text-2);
+  --color-text-3:      var(--text-3);
+  --color-text-4:      var(--text-4);
 
-  --color-border:      rgba(255, 255, 255, 0.06);
-  --color-border-2:    rgba(255, 255, 255, 0.10);
-  --color-border-3:    rgba(255, 255, 255, 0.14);
+  --color-border:      var(--border-main);
+  --color-border-2:    var(--border-2);
+  --color-border-3:    var(--border-3);
+}
 
+@layer base {
+  :root {
+    --bg-surface:     #ffffff;
+    --bg-surface-1:   #f8fafc;
+    --bg-surface-2:   #f1f5f9;
+    --bg-surface-3:   #e2e8f0;
+    --bg-surface-4:   #cbd5e1;
+    
+    --text-main:      #0f172a;
+    --text-2:         #334155;
+    --text-3:         #475569;
+    --text-4:         #64748b;
+    
+    --border-main:    rgba(0, 0, 0, 0.08);
+    --border-2:       rgba(0, 0, 0, 0.12);
+    --border-3:       rgba(0, 0, 0, 0.16);
+
+    --navbar-bg:      rgba(255, 255, 255, 0.85);
+  }
+
+  .dark {
+    --bg-surface:     #09090b;
+    --bg-surface-1:   #0f0f12;
+    --bg-surface-2:   #18181b;
+    --bg-surface-3:   #1f1f23;
+    --bg-surface-4:   #27272a;
+    
+    --text-main:      #fafafa;
+    --text-2:         #a1a1aa;
+    --text-3:         #71717a;
+    --text-4:         #52525b;
+    
+    --border-main:    rgba(255, 255, 255, 0.06);
+    --border-2:       rgba(255, 255, 255, 0.10);
+    --border-3:       rgba(255, 255, 255, 0.14);
+
+    --navbar-bg:      rgba(9, 9, 11, 0.8);
+  }
+}
+
+@theme {
   /* ── Semantic Colors ──────────────────────────────────────── */
   --color-success:     #34D399;
   --color-success-dim: rgba(52, 211, 153, 0.08);
@@ -185,7 +227,7 @@ body {
    ══════════════════════════════════════════════════════════════ */
 
 .navbar {
-  background: rgba(9, 9, 11, 0.8);
+  background: var(--navbar-bg);
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
 }
