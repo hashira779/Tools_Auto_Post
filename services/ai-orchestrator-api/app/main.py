@@ -33,8 +33,9 @@ def get_ollama_models():
 
 from pydantic import BaseModel
 from typing import List, Dict, Optional
-from fastapi import Depends
+from fastapi import Depends, UploadFile, File
 from fastapi.responses import StreamingResponse
+import uuid
 from .agent import Agent
 from .auth import get_current_user
 import json
@@ -102,6 +103,24 @@ def chat_stream(request: ChatRequest, user = Depends(get_current_user), db: Sess
         stream_and_save(agent_gen, db, user, request.conversation_id, new_user_msg, request.model),
         media_type="text/event-stream"
     )
+
+@app.post("/api/chat/upload")
+async def upload_file(file: UploadFile = File(...), user = Depends(get_current_user)):
+    """Uploads a file to be processed by the AI Agent"""
+    os.makedirs("/app/uploads", exist_ok=True)
+    
+    # Generate unique filename to prevent collisions
+    ext = file.filename.split(".")[-1]
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    file_path = os.path.join("/app/uploads", unique_filename)
+    
+    try:
+        with open(file_path, "wb") as f:
+            content = await file.read()
+            f.write(content)
+        return {"filepath": file_path, "filename": file.filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Could not save file: {str(e)}")
 
 # --- Chat History Endpoints ---
 

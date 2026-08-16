@@ -248,6 +248,8 @@ services:
     depends_on:
       - postgres
       - ollama
+    volumes:
+      - ai-uploads:/app/uploads
     networks:
       - camtech-net
 
@@ -263,3 +265,4 @@ volumes:
   kokoro-temp:
   ollama-data:
   postgres-data:
+  ai-uploads:

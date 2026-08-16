@@ -11,6 +11,8 @@ export default function AIChatStudio() {
   const [aiMode, setAiMode] = useState('chat')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [conversations, setConversations] = useState([])
+  const [attachedFile, setAttachedFile] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
   
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
@@ -44,17 +46,32 @@ export default function AIChatStudio() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (input.trim() && !loading) {
-      // In a real app, we would pass aiMode and uploaded files to the backend too
-      sendMessage(input, model)
+    if (input.trim() && !loading && !isUploading) {
+      let finalInput = input;
+      if (attachedFile) {
+        finalInput = `[Attached File: ${attachedFile.filepath}]\n\n${input}`;
+        setAttachedFile(null); // Clear attachment after sending
+      }
+      sendMessage(finalInput, model)
       setInput('')
     }
   }
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0]
     if (file) {
-      alert(`File attached: ${file.name}\n\n(Document parsing backend logic ready, waiting for UI connection)`)
+      setIsUploading(true)
+      try {
+        const result = await uploadFile(file)
+        setAttachedFile(result)
+      } catch (err) {
+        alert("Failed to upload file: " + err.message)
+      } finally {
+        setIsUploading(false)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+      }
     }
   }
 
@@ -245,10 +262,38 @@ export default function AIChatStudio() {
       {/* Floating Input Area */}
       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent pt-10">
         <div className="max-w-3xl mx-auto relative">
+          {/* File Attachment Pill */}
+          {attachedFile && (
+            <div className="absolute -top-12 left-2 flex items-center gap-2 bg-white border border-gray-200 shadow-sm px-3 py-1.5 rounded-full text-sm animate-fade-in">
+              <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="text-gray-700 font-medium truncate max-w-[200px]">{attachedFile.filename}</span>
+              <button 
+                onClick={() => setAttachedFile(null)}
+                className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
+          {isUploading && (
+            <div className="absolute -top-12 left-2 flex items-center gap-2 bg-white border border-gray-200 shadow-sm px-3 py-1.5 rounded-full text-sm animate-fade-in">
+              <svg className="w-4 h-4 text-blue-500 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span className="text-gray-700 font-medium">Uploading...</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="relative flex items-center bg-gray-50 border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow px-2">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
               className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-1"
               title="Attach File"
             >
@@ -281,9 +326,9 @@ export default function AIChatStudio() {
             
             <button
               type="submit"
-              disabled={!input.trim() || loading}
+              disabled={!input.trim() || loading || isUploading}
               className={`p-2 rounded-full flex items-center justify-center transition-all duration-200 z-10 mr-1
-                ${!input.trim() || loading 
+                ${!input.trim() || loading || isUploading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
                   : 'bg-black text-white hover:bg-gray-800 shadow-sm active:scale-95'
                 }`}

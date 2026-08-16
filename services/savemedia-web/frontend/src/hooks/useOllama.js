@@ -179,6 +179,34 @@ export function useOllama(accessToken = null) {
     }
   }, [accessToken, conversationId, clearChat]);
 
+  const uploadFile = useCallback(async (file) => {
+    if (!accessToken) throw new Error("Must be logged in to upload files.");
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    setLoading(true);
+    try {
+      const response = await fetch('/api/ai/chat/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
+      
+      return await response.json();
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken]);
+
   return {
     messages,
     conversationId,
@@ -188,6 +216,7 @@ export function useOllama(accessToken = null) {
     clearChat,
     loadConversation,
     fetchConversations,
-    deleteConversation
+    deleteConversation,
+    uploadFile
   }
 }
