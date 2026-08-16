@@ -121,7 +121,7 @@ export function useOllama(accessToken = null) {
     } finally {
       setLoading(false)
     }
-  }, [messages])
+  }, [messages, accessToken, conversationId])
 
   const clearChat = useCallback(() => {
     setMessages([])
