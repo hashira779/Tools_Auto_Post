@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDownloader } from './hooks/useDownloader'
+import { useAuth } from './hooks/useAuth'
 import { FORMAT_VIDEO } from './constants/platforms'
 
 import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM } from './components/AppNavbar'
@@ -19,6 +20,17 @@ import Footer from './components/Footer'
 function App() {
   const [activeTool, setActiveTool] = useState(TOOL_DOWNLOADER)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Initialize Auth at the root so OAuth redirects are caught regardless of active tab
+  const { session } = useAuth()
+
+  // Automatically switch to Chat AI if returning from Google Login (URL contains access_token)
+  useEffect(() => {
+    if (window.location.hash && window.location.hash.includes('access_token=')) {
+      setActiveTool(TOOL_LLM)
+      // Supabase will automatically parse the hash and clear it, so we just switch the tab.
+    }
+  }, [])
 
   const {
     url, loading, error, videoInfo,
