@@ -50,14 +50,14 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
   }, [botsMenuOpen])
 
   return (
-    <header className={`sticky top-0 z-40 w-full navbar transition-all duration-200 ${scrolled ? 'border-b border-[var(--color-border)]' : 'border-b border-transparent'}`}>
-      <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="h-14 sm:h-16 flex items-center justify-between">
+    <header className={`sticky top-0 z-40 w-full navbar transition-all duration-300 ${scrolled ? 'border-b border-[var(--color-border)] shadow-sm' : 'border-b border-transparent'}`}>
+      <div className="max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="h-16 flex items-center justify-between">
 
           {/* ── Left: Logo ────────────────────────────── */}
           <button
             onClick={() => onSelectTool(TOOL_DOWNLOADER)}
-            className="flex items-center gap-2.5 select-none cursor-pointer group focus-ring rounded-lg"
+            className="flex items-center gap-3 select-none cursor-pointer group focus-ring rounded-lg py-1 px-2 -ml-2"
             aria-label="CamTech home"
           >
             <img

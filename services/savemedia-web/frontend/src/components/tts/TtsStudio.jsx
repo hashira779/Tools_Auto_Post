@@ -23,10 +23,10 @@ function VoiceAvatar({ name, gender, isSelected, onClick, colorIdx }) {
   return (
     <button
       onClick={onClick}
-      className={`group flex flex-col items-center gap-2 p-2.5 rounded-xl transition-all duration-150 cursor-pointer min-w-[72px] focus-ring ${
+      className={`group flex flex-col items-center gap-2 p-2.5 rounded-2xl transition-all duration-300 cursor-pointer min-w-[72px] focus-ring shadow-sm ${
         isSelected
-          ? 'bg-[var(--color-surface-3)] ring-1 ring-[var(--color-primary-500)]/40'
-          : 'hover:bg-[var(--color-surface-2)]'
+          ? 'bg-[var(--color-surface-2)] ring-1 ring-[var(--color-primary-500)]/50 shadow-md transform scale-[1.02]'
+          : 'hover:bg-[var(--color-surface-2)] border border-transparent hover:border-[var(--color-border)]'
       }`}
     >
       <div className={`relative w-10 h-10 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-semibold text-sm transition-transform duration-150 ${

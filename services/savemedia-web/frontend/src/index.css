@@ -2,7 +2,7 @@
 
 /* ══════════════════════════════════════════════════════════════
    CAMTECH DESIGN SYSTEM — 2026
-   Premium, minimal, professional tool platform
+   Premium, minimal, professional technology platform
    ══════════════════════════════════════════════════════════════ */
 
 @theme {
@@ -18,36 +18,39 @@
   --color-primary-800: #451c8a;
   --color-primary-900: #31155e;
 
-  /* ── Neutral Palette ──────────────────────────────────────── */
-  --color-surface:     #09090f;
-  --color-surface-1:   #111118;
-  --color-surface-2:   #18181f;
-  --color-surface-3:   #222230;
-  --color-surface-4:   #2a2a3a;
+  /* ── Neutral Palette (Premium Dark Mode) ─────────────────── */
+  --color-surface:     #000000;
+  --color-surface-1:   #0A0A0A;
+  --color-surface-2:   #111111;
+  --color-surface-3:   #171717;
+  --color-surface-4:   #262626;
 
-  --color-text:        #f0f0f5;
-  --color-text-2:      #a0a0b0;
-  --color-text-3:      #606078;
-  --color-text-4:      #3a3a4a;
+  --color-text:        #EDEDED;
+  --color-text-2:      #A1A1AA;
+  --color-text-3:      #71717A;
+  --color-text-4:      #52525B;
 
-  --color-border:      #1e1e2e;
-  --color-border-2:    #2a2a3a;
-  --color-border-3:    #363648;
+  --color-border:      rgba(255, 255, 255, 0.08);
+  --color-border-2:    rgba(255, 255, 255, 0.12);
+  --color-border-3:    rgba(255, 255, 255, 0.16);
 
   /* ── Semantic Colors ──────────────────────────────────────── */
-  --color-success:     #22c55e;
-  --color-success-dim: rgba(34, 197, 94, 0.12);
-  --color-warning:     #eab308;
-  --color-warning-dim: rgba(234, 179, 8, 0.12);
-  --color-error:       #ef4444;
-  --color-error-dim:   rgba(239, 68, 68, 0.10);
+  --color-success:     #34D399;
+  --color-success-dim: rgba(52, 211, 153, 0.1);
+  --color-warning:     #FBBF24;
+  --color-warning-dim: rgba(251, 191, 36, 0.1);
+  --color-error:       #F87171;
+  --color-error-dim:   rgba(248, 113, 113, 0.1);
 
   /* ── Platform Colors ──────────────────────────────────────── */
-  --color-yt: #ff0033;
-  --color-tt: #00f2ea;
-  --color-dy: #fe2c55;
-  --color-ig: #e1306c;
-  --color-fb: #1877f2;
+  --color-yt: #FF0000;
+  --color-tt: #00F2EA;
+  --color-dy: #FE2C55;
+  --color-ig: #E1306C;
+  --color-fb: #1877F2;
+
+  /* ── Spacing overrides if needed (Tailwind v4 handles most) ─ */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -62,12 +65,13 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   background: var(--color-surface);
   color: var(--color-text);
   min-height: 100vh;
   overflow-x: hidden;
   line-height: 1.6;
+  letter-spacing: -0.01em;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -77,20 +81,22 @@ body {
 .card {
   background: var(--color-surface-1);
   border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.5);
 }
 
 .card-elevated {
   background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px -12px rgba(0, 0, 0, 0.8);
 }
 
 .card-interactive {
   background: var(--color-surface-1);
   border: 1px solid var(--color-border);
-  border-radius: 16px;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-interactive:hover {
@@ -103,72 +109,78 @@ body {
    ══════════════════════════════════════════════════════════════ */
 
 .btn-primary {
-  background: var(--color-primary-500);
+  background: var(--color-primary-600);
   color: #ffffff;
-  border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   user-select: none;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 2px 8px -2px rgba(134, 59, 255, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-primary-400);
-  box-shadow: 0 4px 20px rgba(134, 59, 255, 0.25);
+  background: var(--color-primary-500);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px -2px rgba(134, 59, 255, 0.4);
 }
 
 .btn-primary:active:not(:disabled) {
-  background: var(--color-primary-600);
-  transform: scale(0.98);
+  background: var(--color-primary-700);
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
 .btn-primary:disabled {
   background: var(--color-surface-3);
-  color: var(--color-text-3);
+  color: var(--color-text-4);
+  border-color: var(--color-border);
   cursor: not-allowed;
   box-shadow: none;
 }
 
 .btn-primary:focus-visible {
-  outline: 2px solid var(--color-primary-400);
+  outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
 }
 
 .btn-secondary {
-  background: transparent;
+  background: var(--color-surface-2);
   color: var(--color-text);
-  border: 1px solid var(--color-border-2);
-  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--color-surface-2);
-  border-color: var(--color-border-3);
+  background: var(--color-surface-3);
+  border-color: var(--color-border-2);
 }
 
 .btn-secondary:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: translateY(1px);
 }
 
 .btn-secondary:disabled {
   color: var(--color-text-4);
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .btn-secondary:focus-visible {
-  outline: 2px solid var(--color-primary-400);
+  outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
 }
 
 .btn-ghost {
   background: transparent;
   color: var(--color-text-2);
-  border: none;
+  border: 1px solid transparent;
   border-radius: 8px;
   font-weight: 500;
   transition: all 0.15s ease;
@@ -179,10 +191,11 @@ body {
 .btn-ghost:hover {
   color: var(--color-text);
   background: var(--color-surface-2);
+  border-color: var(--color-border);
 }
 
 .btn-ghost:focus-visible {
-  outline: 2px solid var(--color-primary-400);
+  outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
 }
 
@@ -191,9 +204,9 @@ body {
    ══════════════════════════════════════════════════════════════ */
 
 .navbar {
-  background: rgba(9, 9, 15, 0.85);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -204,10 +217,11 @@ body {
 .input-field {
   background: var(--color-surface-1);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: 8px;
   color: var(--color-text);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.2s ease;
   outline: none;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .input-field::placeholder {
@@ -216,7 +230,7 @@ body {
 
 .input-field:focus {
   border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(134, 59, 255, 0.12);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 0 0 1px var(--color-primary-500);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -227,7 +241,8 @@ body {
   background: var(--color-surface-2);
   border: 1px solid var(--color-border-2);
   border-radius: 12px;
-  box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(12px);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -236,10 +251,10 @@ body {
 
 .checkerboard {
   background-image:
-    linear-gradient(45deg, var(--color-surface-3) 25%, transparent 25%),
-    linear-gradient(-45deg, var(--color-surface-3) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, var(--color-surface-3) 75%),
-    linear-gradient(-45deg, transparent 75%, var(--color-surface-3) 75%);
+    linear-gradient(45deg, var(--color-surface-2) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-surface-2) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-surface-2) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-surface-2) 75%);
   background-size: 16px 16px;
   background-position: 0 0, 0 8px, 8px -8px, -8px 0;
   background-color: var(--color-surface-1);
@@ -254,9 +269,9 @@ body {
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: 9999px; /* Pill shape is more premium */
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.02em;
   background: var(--color-surface-2);
   color: var(--color-text-2);
@@ -264,15 +279,15 @@ body {
 }
 
 .badge-primary {
-  background: rgba(134, 59, 255, 0.1);
-  color: var(--color-primary-300);
-  border-color: rgba(134, 59, 255, 0.2);
+  background: var(--color-primary-900);
+  color: var(--color-primary-200);
+  border-color: rgba(134, 59, 255, 0.3);
 }
 
 .badge-success {
   background: var(--color-success-dim);
   color: var(--color-success);
-  border-color: rgba(34, 197, 94, 0.2);
+  border-color: rgba(52, 211, 153, 0.2);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -280,48 +295,48 @@ body {
    ══════════════════════════════════════════════════════════════ */
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-slide-up {
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from { transform: translateX(10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 .animate-slide-in-right {
-  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideInDown {
-  from { opacity: 0; transform: translateY(-6px); }
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-slide-in-down {
-  animation: slideInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes popIn {
-  from { opacity: 0; transform: scale(0.97); }
+  from { opacity: 0; transform: scale(0.98); }
   to { opacity: 1; transform: scale(1); }
 }
 
 .animate-pop-in {
-  animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* ── Respect reduced motion ───────────────────────────────── */
@@ -341,7 +356,7 @@ body {
    ══════════════════════════════════════════════════════════════ */
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -349,12 +364,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-surface-3);
-  border-radius: 3px;
+  background: var(--color-surface-4);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-surface-4);
+  background: var(--color-text-4);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -362,7 +377,7 @@ body {
    ══════════════════════════════════════════════════════════════ */
 
 .focus-ring:focus-visible {
-  outline: 2px solid var(--color-primary-400);
+  outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
 }
 
@@ -371,6 +386,6 @@ body {
    ══════════════════════════════════════════════════════════════ */
 
 ::selection {
-  background: rgba(134, 59, 255, 0.3);
-  color: #ffffff;
+  background: var(--color-primary-900);
+  color: var(--color-text);
 }

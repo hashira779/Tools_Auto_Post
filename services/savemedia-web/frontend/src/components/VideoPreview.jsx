@@ -5,16 +5,16 @@ export default function VideoPreview({ videoInfo }) {
     <div className="flex flex-col sm:flex-row gap-4 mb-5 pb-5 border-b border-[var(--color-border)]">
       {/* Thumbnail */}
       {videoInfo.thumbnail && (
-        <div className="relative overflow-hidden rounded-xl shrink-0 w-full sm:w-[200px] h-[140px] sm:h-[120px] bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <div className="relative overflow-hidden rounded-xl shrink-0 w-full sm:w-[220px] h-[150px] sm:h-[130px] bg-[var(--color-surface-2)] shadow-md border border-[var(--color-border-2)]">
           <img
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             src={videoInfo.thumbnail}
             alt={videoInfo.title}
             loading="lazy"
             onError={(e) => { e.target.style.display = 'none' }}
           />
           {videoInfo.duration_str && (
-            <span className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 backdrop-blur-sm rounded-md text-[11px] font-semibold text-white tabular-nums">
+            <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-black/80 backdrop-blur-md rounded-md text-[11px] font-semibold text-white/90 tabular-nums shadow-sm border border-white/10">
               {videoInfo.duration_str}
             </span>
           )}

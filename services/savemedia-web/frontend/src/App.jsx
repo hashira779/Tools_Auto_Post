@@ -52,7 +52,7 @@ function App() {
         />
 
         {/* Content */}
-        <div className="flex-1 w-full max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+        <div className="flex-1 w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
           {/* Media Downloader */}
           {activeTool === TOOL_DOWNLOADER && (
             <main className="flex flex-col items-center animate-fade-in">
