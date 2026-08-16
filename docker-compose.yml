@@ -236,6 +236,11 @@ services:
       postgres
         -c listen_addresses='*'
         -c hba_file=/etc/postgresql/pg_hba.conf
+        -c max_connections=300
+        -c shared_buffers=1GB
+        -c work_mem=16MB
+        -c maintenance_work_mem=256MB
+        -c effective_cache_size=4GB
     networks:
       - camtech-net
 
