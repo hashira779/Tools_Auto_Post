@@ -41,4 +41,5 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Security(securi
             
         return local_user
     except Exception as e:
+        print(f"Auth error in get_current_user: {str(e)}", flush=True)
         raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
