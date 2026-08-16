@@ -16,6 +16,8 @@ files_to_sync = {
     "services/ai-orchestrator-api/app/main.py": "CamTech/services/ai-orchestrator-api/app/main.py",
     "services/ai-orchestrator-api/app/database.py": "CamTech/services/ai-orchestrator-api/app/database.py",
     "services/ai-orchestrator-api/app/models.py": "CamTech/services/ai-orchestrator-api/app/models.py",
+    "services/ai-orchestrator-api/app/agent.py": "CamTech/services/ai-orchestrator-api/app/agent.py",
+    "services/ai-orchestrator-api/app/tools.py": "CamTech/services/ai-orchestrator-api/app/tools.py",
 }
 
 try:

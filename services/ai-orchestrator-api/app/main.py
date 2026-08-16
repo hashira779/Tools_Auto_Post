@@ -31,5 +31,21 @@ def get_ollama_models():
     except requests.RequestException as e:
         raise HTTPException(status_code=503, detail=f"Ollama connection failed: {str(e)}")
 
-# TODO: Add auth endpoints
-# TODO: Add chat streaming endpoints and tool orchestration loop
+from pydantic import BaseModel
+from typing import List, Dict
+from fastapi.responses import StreamingResponse
+from .agent import Agent
+
+class ChatRequest(BaseModel):
+    messages: List[Dict[str, str]]
+    model: str = "llama3.2"
+
+@app.post("/api/chat/stream")
+def chat_stream(request: ChatRequest):
+    agent = Agent(ollama_url=OLLAMA_URL, model=request.model)
+    return StreamingResponse(
+        agent.chat(request.messages),
+        media_type="text/event-stream"
+    )
+
+# TODO: Add Auth endpoints
