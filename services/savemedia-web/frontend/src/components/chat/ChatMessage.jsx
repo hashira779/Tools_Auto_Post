@@ -22,12 +22,30 @@ export default function ChatMessage({ message }) {
                 : 'py-1 text-gray-800'
             }`}
         >
-          <div className="whitespace-pre-wrap font-[400]">
-            {message.content}
-            {message.isStreaming && (
-              <span className="inline-block w-2 h-4 ml-1 bg-black opacity-40 animate-pulse rounded-sm align-middle"></span>
+          {isUser ? (
+              <p className="whitespace-pre-wrap">{message.content}</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {/* Tool Progress Indicators */}
+                {message.toolProgress && message.toolProgress.map((prog, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-400 font-mono animate-fade-in">
+                    <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin"></span>
+                    {prog}
+                  </div>
+                ))}
+                
+                {/* Actual Content */}
+                {message.content ? (
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                ) : message.isStreaming ? (
+                  <div className="flex items-center gap-1 h-6">
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                  </div>
+                ) : null}
+              </div>
             )}
-          </div>
         </div>
       </div>
 

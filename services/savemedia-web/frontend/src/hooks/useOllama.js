@@ -13,15 +13,14 @@ export function useOllama() {
     setMessages(prev => [...prev, userMsg])
     
     // Add an empty assistant message that we will stream into
-    const assistantMsgIndex = messages.length + 1
-    setMessages(prev => [...prev, { role: 'assistant', content: '', isStreaming: true }])
+    setMessages(prev => [...prev, { role: 'assistant', content: '', isStreaming: true, toolProgress: [] }])
     
     setLoading(true)
     setError(null)
 
     try {
-      // The API endpoint is proxied by Nginx
-      const response = await fetch('/api/ollama/chat', {
+      // Connect to the new AI Orchestrator API
+      const response = await fetch('/api/ai/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,8 +30,7 @@ export function useOllama() {
           messages: [...messages, userMsg].map(m => ({
             role: m.role,
             content: m.content
-          })),
-          stream: true,
+          }))
         }),
       })
 
@@ -43,30 +41,51 @@ export function useOllama() {
       const reader = response.body.getReader()
       const decoder = new TextDecoder('utf-8')
       let done = false
+      let buffer = ''
 
       while (!done) {
         const { value, done: readerDone } = await reader.read()
         done = readerDone
         if (value) {
-          const chunk = decoder.decode(value, { stream: true })
-          // Ollama streams JSON-lines
-          const lines = chunk.split('\n').filter(line => line.trim() !== '')
+          buffer += decoder.decode(value, { stream: true })
           
-          for (const line of lines) {
-            try {
-              const data = JSON.parse(line)
-              if (data.message?.content) {
-                setMessages(prev => {
-                  const newMessages = [...prev]
-                  newMessages[newMessages.length - 1] = {
-                    ...newMessages[newMessages.length - 1],
-                    content: newMessages[newMessages.length - 1].content + data.message.content
-                  }
-                  return newMessages
-                })
+          // Split by SSE double newline
+          const parts = buffer.split('\n\n')
+          buffer = parts.pop() // keep the last incomplete part in the buffer
+          
+          for (const part of parts) {
+            if (part.startsWith('data: ')) {
+              const dataStr = part.slice(6)
+              try {
+                const data = JSON.parse(dataStr)
+                
+                if (data.type === 'chunk') {
+                  setMessages(prev => {
+                    const newMessages = [...prev]
+                    newMessages[newMessages.length - 1] = {
+                      ...newMessages[newMessages.length - 1],
+                      content: newMessages[newMessages.length - 1].content + data.content
+                    }
+                    return newMessages
+                  })
+                } else if (data.type === 'progress') {
+                  setMessages(prev => {
+                    const newMessages = [...prev]
+                    const toolProgs = newMessages[newMessages.length - 1].toolProgress || []
+                    newMessages[newMessages.length - 1] = {
+                      ...newMessages[newMessages.length - 1],
+                      toolProgress: [...toolProgs, data.content]
+                    }
+                    return newMessages
+                  })
+                } else if (data.type === 'error') {
+                  throw new Error(data.content)
+                } else if (data.type === 'done') {
+                  // finished
+                }
+              } catch (e) {
+                console.error("Error parsing SSE JSON:", dataStr, e)
               }
-            } catch (e) {
-              console.error("Error parsing JSON line from stream:", line, e)
             }
           }
         }
