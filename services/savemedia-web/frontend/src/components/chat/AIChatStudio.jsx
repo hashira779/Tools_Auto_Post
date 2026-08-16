@@ -5,11 +5,12 @@ import ChatMessage from './ChatMessage'
 
 export default function AIChatStudio() {
   const { user, loginWithGoogle, logout, loading: authLoading, session } = useAuth()
-  const { messages, loading, error, sendMessage, clearChat } = useOllama(session?.access_token)
+  const { messages, conversationId, loading, error, sendMessage, clearChat, loadConversation, fetchConversations, deleteConversation } = useOllama(session?.access_token)
   const [input, setInput] = useState('')
   const [model, setModel] = useState('llama3.2')
   const [aiMode, setAiMode] = useState('chat')
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [conversations, setConversations] = useState([])
   
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
@@ -21,6 +22,25 @@ export default function AIChatStudio() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Load chat history when authenticated or when conversation ID changes (new chat created)
+  useEffect(() => {
+    if (session?.access_token) {
+      fetchConversations().then(setConversations)
+    }
+  }, [session, conversationId, fetchConversations])
+
+  const handleConversationClick = (id) => {
+    loadConversation(id)
+  }
+
+  const handleDeleteConversation = async (e, id) => {
+    e.stopPropagation()
+    const success = await deleteConversation(id)
+    if (success) {
+      setConversations(prev => prev.filter(c => c.id !== id))
+    }
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -102,15 +122,32 @@ export default function AIChatStudio() {
           </button>
         </div>
         
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-4">
+        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-4 scrollbar-hide">
           <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">Today</h3>
-            <button className="w-full text-left px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-200 rounded-md truncate transition-colors">
-              SQL Analysis query
-            </button>
-            <button className="w-full text-left px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-200 rounded-md truncate transition-colors">
-              How does DuckDuckGo work?
-            </button>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">Your Conversations</h3>
+            {conversations.length === 0 ? (
+               <div className="text-sm text-gray-500 px-2 italic">No previous chats.</div>
+            ) : (
+               conversations.map(conv => (
+                 <div key={conv.id} className={`group flex items-center justify-between w-full px-2 py-2 text-sm rounded-md transition-colors ${conversationId === conv.id ? 'bg-gray-200 text-gray-900 font-medium' : 'text-gray-700 hover:bg-gray-200'}`}>
+                   <button 
+                     onClick={() => handleConversationClick(conv.id)}
+                     className="flex-1 text-left truncate pr-2"
+                   >
+                     {conv.title || 'New Conversation'}
+                   </button>
+                   <button 
+                     onClick={(e) => handleDeleteConversation(e, conv.id)}
+                     className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 rounded transition-all"
+                     title="Delete Chat"
+                   >
+                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                     </svg>
+                   </button>
+                 </div>
+               ))
+            )}
           </div>
         </div>
         <div className="p-4 flex flex-col gap-2 border-t border-gray-200">

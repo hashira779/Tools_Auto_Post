@@ -32,26 +32,99 @@ def get_ollama_models():
         raise HTTPException(status_code=503, detail=f"Ollama connection failed: {str(e)}")
 
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 from fastapi import Depends
 from fastapi.responses import StreamingResponse
 from .agent import Agent
 from .auth import get_current_user
+import json
 
 class ChatRequest(BaseModel):
+    conversation_id: Optional[str] = None
     messages: List[Dict[str, str]]
     model: str = "llama3.2"
+    
+def stream_and_save(agent_gen, db: Session, user, conversation_id: str, new_user_msg: str, request_model: str):
+    # 1. Ensure conversation exists
+    if conversation_id:
+        conv = db.query(models.Conversation).filter(
+            models.Conversation.id == conversation_id,
+            models.Conversation.user_id == user.id
+        ).first()
+        if not conv:
+            yield f"data: {json.dumps({'type': 'error', 'content': 'Conversation not found or unauthorized'})}\n\n"
+            return
+    else:
+        # Create a new conversation
+        conv = models.Conversation(user_id=user.id, title="New Chat", model=request_model)
+        db.add(conv)
+        db.commit()
+        db.refresh(conv)
+        conversation_id = str(conv.id)
+        # Inform frontend about the new ID immediately
+        yield f"data: {json.dumps({'type': 'meta', 'conversation_id': conversation_id})}\n\n"
+
+    # 2. Save user message
+    user_msg_db = models.Message(conversation_id=conversation_id, role="user", content=new_user_msg)
+    db.add(user_msg_db)
+    db.commit()
+
+    # 3. Stream from agent and capture output
+    full_assistant_response = ""
+    for chunk in agent_gen:
+        # chunk is a string like: data: {"type": "chunk", "content": "..."}\n\n
+        yield chunk
+        if chunk.startswith("data: "):
+            try:
+                data = json.loads(chunk[6:].strip())
+                if data.get("type") == "chunk":
+                    full_assistant_response += data.get("content", "")
+            except json.JSONDecodeError:
+                pass
+
+    # 4. Save assistant message when done
+    if full_assistant_response:
+        assistant_msg_db = models.Message(conversation_id=conversation_id, role="assistant", content=full_assistant_response)
+        db.add(assistant_msg_db)
+        db.commit()
 
 @app.post("/api/chat/stream")
-def chat_stream(request: ChatRequest, user = Depends(get_current_user)):
-    # The 'user' object is populated by Supabase Auth (guaranteed authenticated)
-    # E.g. user.id is the Supabase UUID
+def chat_stream(request: ChatRequest, user = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not request.messages:
+        raise HTTPException(status_code=400, detail="No messages provided")
+        
+    new_user_msg = request.messages[-1].get("content", "")
     
-    # In the future, we will use user.id to isolate conversations here.
     agent = Agent(ollama_url=OLLAMA_URL, model=request.model)
+    agent_gen = agent.chat(request.messages)
+    
     return StreamingResponse(
-        agent.chat(request.messages),
+        stream_and_save(agent_gen, db, user, request.conversation_id, new_user_msg, request.model),
         media_type="text/event-stream"
     )
 
-# TODO: Add more authenticated endpoints (memory, history)
+# --- Chat History Endpoints ---
+
+@app.get("/api/conversations")
+def get_conversations(user = Depends(get_current_user), db: Session = Depends(get_db)):
+    convs = db.query(models.Conversation).filter(models.Conversation.user_id == user.id).order_by(models.Conversation.created_at.desc()).all()
+    return [{"id": str(c.id), "title": c.title, "model": c.model, "created_at": c.created_at} for c in convs]
+
+@app.get("/api/conversations/{conversation_id}/messages")
+def get_messages(conversation_id: str, user = Depends(get_current_user), db: Session = Depends(get_db)):
+    conv = db.query(models.Conversation).filter(models.Conversation.id == conversation_id, models.Conversation.user_id == user.id).first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+        
+    messages = db.query(models.Message).filter(models.Message.conversation_id == conversation_id).order_by(models.Message.created_at.asc()).all()
+    return [{"id": str(m.id), "role": m.role, "content": m.content, "created_at": m.created_at} for m in messages]
+
+@app.delete("/api/conversations/{conversation_id}")
+def delete_conversation(conversation_id: str, user = Depends(get_current_user), db: Session = Depends(get_db)):
+    conv = db.query(models.Conversation).filter(models.Conversation.id == conversation_id, models.Conversation.user_id == user.id).first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+        
+    db.delete(conv)
+    db.commit()
+    return {"status": "success"}

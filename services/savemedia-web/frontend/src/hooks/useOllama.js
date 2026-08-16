@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 
 export function useOllama(accessToken = null) {
   const [messages, setMessages] = useState([])
+  const [conversationId, setConversationId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -28,6 +29,7 @@ export function useOllama(accessToken = null) {
         },
         body: JSON.stringify({
           model,
+          conversation_id: conversationId,
           messages: [...messages, userMsg].map(m => ({
             role: m.role,
             content: m.content
@@ -60,7 +62,9 @@ export function useOllama(accessToken = null) {
               try {
                 const data = JSON.parse(dataStr)
                 
-                if (data.type === 'chunk') {
+                if (data.type === 'meta' && data.conversation_id) {
+                  setConversationId(data.conversation_id)
+                } else if (data.type === 'chunk') {
                   setMessages(prev => {
                     const newMessages = [...prev]
                     newMessages[newMessages.length - 1] = {
@@ -121,14 +125,69 @@ export function useOllama(accessToken = null) {
 
   const clearChat = useCallback(() => {
     setMessages([])
+    setConversationId(null)
     setError(null)
   }, [])
 
+  const loadConversation = useCallback(async (id) => {
+    if (!accessToken) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/ai/conversations/${id}/messages`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      if (!response.ok) throw new Error('Failed to load conversation');
+      const data = await response.json();
+      setConversationId(id);
+      setMessages(data.map(m => ({ role: m.role, content: m.content })));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken]);
+
+  const fetchConversations = useCallback(async () => {
+    if (!accessToken) return [];
+    try {
+      const response = await fetch('/api/ai/conversations', {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch conversations');
+      return await response.json();
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }, [accessToken]);
+
+  const deleteConversation = useCallback(async (id) => {
+    if (!accessToken) return false;
+    try {
+      const response = await fetch(`/api/ai/conversations/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      if (response.ok && conversationId === id) {
+        clearChat();
+      }
+      return response.ok;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }, [accessToken, conversationId, clearChat]);
+
   return {
     messages,
+    conversationId,
     loading,
     error,
     sendMessage,
-    clearChat
+    clearChat,
+    loadConversation,
+    fetchConversations,
+    deleteConversation
   }
 }
