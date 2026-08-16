@@ -3,8 +3,6 @@ import json
 from duckduckgo_search import DDGS
 from PyPDF2 import PdfReader
 from pydantic import BaseModel, Field
-from sqlalchemy import text
-from .database import engine
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #  Tool Schemas (For LLM Function Calling)
@@ -16,9 +14,6 @@ class WebSearchSchema(BaseModel):
 
 class ReadDocumentSchema(BaseModel):
     filepath: str = Field(..., description="The absolute path to the document file (PDF or TXT) to read.")
-
-class QueryDatabaseSchema(BaseModel):
-    query: str = Field(..., description="The raw SQL query to execute against the PostgreSQL database.")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #  Tool Implementations
@@ -40,8 +35,16 @@ def web_search(query: str, max_results: int = 3) -> str:
 
 def read_document(filepath: str) -> str:
     """Extracts text from a local PDF or TXT file."""
-    if not os.path.exists(filepath):
-        return f"Error: File not found at path {filepath}"
+    
+    # Security: Prevent Local File Inclusion (LFI) & Directory Traversal
+    uploads_dir = os.path.abspath("/app/uploads")
+    target_path = os.path.abspath(filepath)
+    
+    if not target_path.startswith(uploads_dir):
+        return f"Security Error: Access to {filepath} is blocked. You can only read files from /app/uploads/"
+        
+    if not os.path.exists(target_path):
+        return f"Error: File not found at path {target_path}"
         
     try:
         ext = filepath.split('.')[-1].lower()
@@ -59,35 +62,6 @@ def read_document(filepath: str) -> str:
     except Exception as e:
         return f"Failed to read document: {str(e)}"
 
-def query_database(query: str) -> str:
-    """Executes a read-only SQL query against the database."""
-    # Basic security check to prevent destructive operations
-    forbidden = ["insert", "update", "delete", "drop", "alter", "truncate", "create", "grant"]
-    lower_query = query.lower()
-    if any(word in lower_query for word in forbidden):
-        return "Error: Security violation. Only read (SELECT) operations are permitted."
-        
-    try:
-        with engine.connect() as conn:
-            result = conn.execute(text(query))
-            rows = result.fetchall()
-            
-            if not rows:
-                return "Query returned 0 rows."
-            
-            # Format results as a markdown table
-            columns = list(result.keys())
-            output = [
-                " | ".join(str(c) for c in columns),
-                " | ".join("---" for _ in columns)
-            ]
-            for row in rows:
-                output.append(" | ".join(str(v) for v in row))
-                
-            return "\n".join(output)
-    except Exception as e:
-        return f"Database error: {str(e)}"
-
 # Registry mapping tool names to functions and schemas
 TOOLS_REGISTRY = {
     "web_search": {
@@ -99,10 +73,5 @@ TOOLS_REGISTRY = {
         "function": read_document,
         "schema": ReadDocumentSchema,
         "description": "Reads the content of a local PDF or TXT file. Use this when the user asks you to analyze or extract information from a file they uploaded."
-    },
-    "query_database": {
-        "function": query_database,
-        "schema": QueryDatabaseSchema,
-        "description": "Executes a SELECT SQL query against the CAMTECH application PostgreSQL database. Use this to analyze business data, users, and application state. Return insights based on the query results."
     }
 }

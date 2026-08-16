@@ -54,8 +54,16 @@ If you are just talking to the user or providing the final answer after using to
                 ext = filepath.split(".")[-1].lower()
                 
                 if ext in ["png", "jpg", "jpeg", "webp"] and os.path.exists(filepath):
+                    # Security: Prevent Local File Inclusion (LFI) & Directory Traversal
+                    uploads_dir = os.path.abspath("/app/uploads")
+                    target_path = os.path.abspath(filepath)
+                    
+                    if not target_path.startswith(uploads_dir):
+                        # Skip if they try to access files outside /app/uploads/
+                        continue
+                        
                     try:
-                        with open(filepath, "rb") as image_file:
+                        with open(target_path, "rb") as image_file:
                             encoded = base64.b64encode(image_file.read()).decode("utf-8")
                             images_base64.append(encoded)
                         # Remove the file tag from content so the LLM doesn't try to use read_document
