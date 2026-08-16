@@ -5,7 +5,7 @@ import ChatMessage from './ChatMessage'
 
 export default function AIChatStudio() {
   const { user, loginWithGoogle, logout, loading: authLoading, session } = useAuth()
-  const { messages, conversationId, loading, error, sendMessage, clearChat, loadConversation, fetchConversations, deleteConversation } = useOllama(session?.access_token)
+  const { messages, conversationId, loading, error, sendMessage, clearChat, loadConversation, fetchConversations, deleteConversation, uploadFile } = useOllama(session?.access_token)
   const [input, setInput] = useState('')
   const [model, setModel] = useState('llama3.2')
   const [aiMode, setAiMode] = useState('chat')
