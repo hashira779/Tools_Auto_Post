@@ -238,8 +238,12 @@ services:
       context: ./services/ai-orchestrator-api
       dockerfile: Dockerfile
     container_name: camtech-ai-orchestrator
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql://camtech:camtechpassword@postgres:5432/camtech
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - OLLAMA_URL=http://ollama:11434
     depends_on:
       - postgres

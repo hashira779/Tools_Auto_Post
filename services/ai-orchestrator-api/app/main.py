@@ -33,19 +33,25 @@ def get_ollama_models():
 
 from pydantic import BaseModel
 from typing import List, Dict
+from fastapi import Depends
 from fastapi.responses import StreamingResponse
 from .agent import Agent
+from .auth import get_current_user
 
 class ChatRequest(BaseModel):
     messages: List[Dict[str, str]]
     model: str = "llama3.2"
 
 @app.post("/api/chat/stream")
-def chat_stream(request: ChatRequest):
+def chat_stream(request: ChatRequest, user = Depends(get_current_user)):
+    # The 'user' object is populated by Supabase Auth (guaranteed authenticated)
+    # E.g. user.id is the Supabase UUID
+    
+    # In the future, we will use user.id to isolate conversations here.
     agent = Agent(ollama_url=OLLAMA_URL, model=request.model)
     return StreamingResponse(
         agent.chat(request.messages),
         media_type="text/event-stream"
     )
 
-# TODO: Add Auth endpoints
+# TODO: Add more authenticated endpoints (memory, history)

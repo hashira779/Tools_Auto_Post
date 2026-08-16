@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-export function useOllama() {
+export function useOllama(accessToken = null) {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -24,6 +24,7 @@ export function useOllama() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
         },
         body: JSON.stringify({
           model,

@@ -18,13 +18,15 @@ files_to_sync = {
     "services/ai-orchestrator-api/app/models.py": "CamTech/services/ai-orchestrator-api/app/models.py",
     "services/ai-orchestrator-api/app/agent.py": "CamTech/services/ai-orchestrator-api/app/agent.py",
     "services/ai-orchestrator-api/app/tools.py": "CamTech/services/ai-orchestrator-api/app/tools.py",
+    "services/ai-orchestrator-api/app/auth.py": "CamTech/services/ai-orchestrator-api/app/auth.py",
+    ".env": "CamTech/.env",
 }
 
 try:
     print(f"Connecting to {hostname}...")
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname, username=username, password=password, timeout=10)
+    client.connect(hostname, username=username, password=password, timeout=30)
     print("Connected successfully!")
     
     sftp = client.open_sftp()
