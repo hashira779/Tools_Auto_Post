@@ -225,8 +225,17 @@ services:
       POSTGRES_USER: camtech
       POSTGRES_PASSWORD: camtechpassword
       POSTGRES_DB: camtech
+    ports:
+      # Expose PostgreSQL to LAN so ORS workers can connect
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      # Custom pg_hba.conf to allow ORS worker connections
+      - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    command: >
+      postgres
+        -c listen_addresses='*'
+        -c hba_file=/etc/postgresql/pg_hba.conf
     networks:
       - camtech-net
 

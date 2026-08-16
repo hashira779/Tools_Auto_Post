@@ -1,0 +1,66 @@
+# ══════════════════════════════════════════════════════════════════
+#  CamTech — ORS Worker Node (AI Only)
+# ══════════════════════════════════════════════════════════════════
+#  This lightweight compose file runs ONLY the AI services:
+#    - AI Orchestrator API (FastAPI)
+#    - Ollama (Local LLM)
+#
+#  It connects to the MAIN server's PostgreSQL over the network.
+#  Deploy this on ORS worker servers (10.2.7.251, 10.2.7.252).
+#
+#  Usage:
+#    docker compose -f docker-compose.ors-worker.yml up -d --build
+# ══════════════════════════════════════════════════════════════════
+
+services:
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Ollama — Local LLM API
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ors-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - ors-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  AI Orchestrator API (FastAPI + ReAct Agent)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ai-orchestrator-api:
+    build:
+      context: ./services/ai-orchestrator-api
+      dockerfile: Dockerfile
+    container_name: ors-ai-orchestrator
+    environment:
+      # ── Points to MAIN server's PostgreSQL over the LAN ──
+      - DATABASE_URL=postgresql://camtech:camtechpassword@10.1.0.11:5432/camtech
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - OLLAMA_URL=http://ollama:11434
+    depends_on:
+      - ollama
+    ports:
+      # Expose on port 8100 so Nginx on the main server can reach it
+      - "8100:8000"
+    volumes:
+      - ai-uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - ors-net
+
+networks:
+  ors-net:
+    driver: bridge
+
+volumes:
+  ollama-data:
+  ai-uploads:
