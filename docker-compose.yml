@@ -18,8 +18,6 @@ services:
     image: redis:7-alpine
     container_name: camtech-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     networks:
       - camtech-net
 
@@ -54,7 +52,7 @@ services:
       - COOKIES_FILE=${COOKIES_FILE:-}
       - REDIS_URL=redis://redis:6379/0
     volumes:
-      - /mnt/nfs_camtech/savemedia_downloads:/tmp/savemedia_downloads
+      - savemedia-downloads:/tmp/savemedia_downloads
     expose:
       - "8000"
     healthcheck:
@@ -78,7 +76,7 @@ services:
       - COOKIES_FILE=${COOKIES_FILE:-}
       - REDIS_URL=redis://redis:6379/0
     volumes:
-      - /mnt/nfs_camtech/savemedia_downloads:/tmp/savemedia_downloads
+      - savemedia-downloads:/tmp/savemedia_downloads
     depends_on:
       - redis
     restart: unless-stopped
@@ -99,7 +97,7 @@ services:
     volumes:
       - ./credentials:/app/credentials:ro
       - ./cookies.txt:/app/cookies.txt:ro
-      - /mnt/nfs_camtech/bot_downloads:/app/downloads
+      - bot-downloads:/app/downloads
     restart: unless-stopped
     networks:
       - camtech-net
@@ -183,9 +181,9 @@ services:
       - ONNX_INTER_OP_THREADS=4
       - PYTORCH_NUM_THREADS=8
     volumes:
-      - /mnt/nfs_camtech/kokoro-models:/app/api/src/models
-      - /mnt/nfs_camtech/kokoro-voices:/app/api/src/voices
-      - /mnt/nfs_camtech/kokoro-temp:/tmp/kokoro
+      - kokoro-models:/app/api/src/models
+      - kokoro-voices:/app/api/src/voices
+      - kokoro-temp:/tmp/kokoro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8880/health"]
       interval: 30s
@@ -274,6 +272,11 @@ networks:
     driver: bridge
 
 volumes:
+  savemedia-downloads:
+  bot-downloads:
+  kokoro-models:
+  kokoro-voices:
+  kokoro-temp:
   ollama-data:
   postgres-data:
   ai-uploads:
