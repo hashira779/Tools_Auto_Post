@@ -66,7 +66,34 @@ function App() {
                 error={error}
               />
 
-              {videoInfo && (
+              {loading && !videoInfo && (
+                <div className="w-full card p-5 sm:p-6 mb-8 animate-pulse flex flex-col gap-5 border-[var(--color-border-2)]">
+                  {/* Skeleton Header */}
+                  <div className="flex gap-4">
+                    <div className="w-24 h-24 rounded-lg bg-[var(--color-surface-2)]"></div>
+                    <div className="flex-1 flex flex-col justify-center gap-2">
+                      <div className="h-5 w-3/4 bg-[var(--color-surface-2)] rounded-md"></div>
+                      <div className="h-3 w-1/2 bg-[var(--color-surface-2)] rounded-md"></div>
+                      <div className="h-3 w-1/3 bg-[var(--color-surface-2)] rounded-md mt-1"></div>
+                    </div>
+                  </div>
+                  {/* Skeleton Tabs */}
+                  <div className="flex gap-2 border-b border-[var(--color-border)] pb-3">
+                    <div className="h-8 w-24 bg-[var(--color-surface-2)] rounded-md"></div>
+                    <div className="h-8 w-24 bg-[var(--color-surface-2)] rounded-md"></div>
+                  </div>
+                  {/* Skeleton Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div className="h-12 bg-[var(--color-surface-2)] rounded-xl"></div>
+                    <div className="h-12 bg-[var(--color-surface-2)] rounded-xl"></div>
+                    <div className="h-12 bg-[var(--color-surface-2)] rounded-xl"></div>
+                  </div>
+                  {/* Skeleton Button */}
+                  <div className="h-12 w-full bg-[var(--color-surface-2)] rounded-xl mt-2"></div>
+                </div>
+              )}
+
+              {videoInfo && !loading && (
                 <div
                   id="results-card"
                   className="w-full card p-5 sm:p-6 animate-fade-in mb-8"
