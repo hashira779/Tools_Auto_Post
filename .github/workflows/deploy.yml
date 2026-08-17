@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Forces Git fetch instead of API tarball to prevent 429 Rate Limits
 
       - name: Free disk space before build
         run: |
