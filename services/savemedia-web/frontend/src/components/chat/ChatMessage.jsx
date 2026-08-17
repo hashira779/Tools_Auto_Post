@@ -36,7 +36,15 @@ export default function ChatMessage({ message }) {
                 
                 {/* Actual Content */}
                 {message.content ? (
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className="whitespace-pre-wrap">
+                    {message.content.split(/(\[.*?\]\(.*?\))/g).map((part, i) => {
+                        const match = part.match(/\[(.*?)\]\((.*?)\)/);
+                        if (match) {
+                            return <a key={i} href={match[2]} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">{match[1]}</a>;
+                        }
+                        return <span key={i}>{part}</span>;
+                    })}
+                  </p>
                 ) : message.isStreaming ? (
                   <div className="flex items-center gap-1 h-6">
                     <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>

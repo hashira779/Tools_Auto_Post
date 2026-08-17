@@ -70,7 +70,7 @@ services:
       context: ./services/savemedia-web/media-api
       dockerfile: Dockerfile
     container_name: camtech-savemedia-worker
-    command: celery -A app.celery_worker.celery_app worker --concurrency=8 --loglevel=info
+    command: celery -A app.celery_worker.celery_app worker --concurrency=4 --loglevel=info
     environment:
       - DOWNLOAD_DIR=/tmp/savemedia_downloads
       - COOKIES_FILE=${COOKIES_FILE:-}
@@ -79,6 +79,13 @@ services:
       - savemedia-downloads:/tmp/savemedia_downloads
     depends_on:
       - redis
+    healthcheck:
+      # Celery workers don't serve HTTP — check the process is alive instead
+      test: ["CMD-SHELL", "celery -A app.celery_worker.celery_app inspect ping --timeout 5 2>/dev/null | grep -q pong || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     restart: unless-stopped
     networks:
       - camtech-net
@@ -98,6 +105,13 @@ services:
       - ./credentials:/app/credentials:ro
       - ./cookies.txt:/app/cookies.txt:ro
       - bot-downloads:/app/downloads
+    healthcheck:
+      # Bot is a long-running Python process — check it's alive
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep -q 'python' || exit 1"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     restart: unless-stopped
     networks:
       - camtech-net
@@ -158,10 +172,7 @@ services:
     restart: unless-stopped
     expose:
       - "8002"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 30s
-      timeout: 10s
+    # Healthcheck is defined in the Dockerfile (uses Python urllib, not curl)
     networks:
       - camtech-net
 
@@ -264,6 +275,7 @@ services:
       - ollama
     volumes:
       - ai-uploads:/app/uploads
+    # Healthcheck is defined in the Dockerfile
     networks:
       - camtech-net
 

@@ -48,12 +48,7 @@ services:
     volumes:
       - ai-uploads:/app/uploads
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+    # Healthcheck is defined in the Dockerfile
     networks:
       - ors-net
 
