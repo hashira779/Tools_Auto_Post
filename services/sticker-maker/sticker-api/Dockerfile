@@ -4,9 +4,10 @@
 FROM python:3.12-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install fonts for text stickers and curl for model download
+# Install system dependencies (OpenCV requires libglib2.0-0 and libgl1)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends fonts-noto-core curl && \
+    apt-get install -y --no-install-recommends \
+    fonts-noto-core curl libglib2.0-0 libgl1 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

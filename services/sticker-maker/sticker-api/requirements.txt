@@ -15,3 +15,7 @@ onnxruntime>=1.16.0
 # High performance asyncio event loop and HTTP parser
 uvloop>=0.20.0
 httptools>=0.6.1
+
+# AI Face Detection for smart cropping
+mediapipe>=0.10.11
+opencv-python-headless>=4.9.0

@@ -69,6 +69,9 @@ def process_image(image_bytes: bytes, style: str = "original", remove_bg: bool =
         scale = STICKER_SIZE / max(w, h)
         img = img.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS)
 
+    # Automatically detect and crop to the subject's face/shoulders if a face is present
+    img = _smart_crop_face(img)
+
     if remove_bg:
         session = get_bg_session()
         if session:
