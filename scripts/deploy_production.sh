@@ -114,5 +114,26 @@ if [ "$DEPLOY_FAILED" -eq 1 ]; then
 fi
 
 echo "===================================================="
-echo "  🎉 Deployment Succeeded & Verified! All services UP."
+echo "  🎉 Deployment Succeeded & Verified! Main Server UP."
+echo "===================================================="
+
+# 7. Deploy to ORS Workers (Optional)
+# If you have ORS workers, this will automatically deploy to them.
+echo "===================================================="
+echo "  🚀 Deploying to ORS Workers"
+echo "===================================================="
+
+ORS_WORKERS=("10.2.7.251" "10.2.7.252")
+ORS_USER="ors-user"
+ORS_PASS="password" # CHANGE THIS: Set your actual ORS worker SSH password here
+
+# We use the existing python script which uses paramiko (no sshpass needed)
+for WORKER in "${ORS_WORKERS[@]}"; do
+    echo "🔄 Pushing update to ORS Worker: $WORKER..."
+    # The script automatically connects, pulls latest code, and rebuilds containers
+    python3 scripts/deploy_ors_worker.py --host "$WORKER" --user "$ORS_USER" --password "$ORS_PASS" || echo "  ⚠️ Failed to deploy to $WORKER (Is it offline or password wrong?)"
+done
+
+echo "===================================================="
+echo "  ✅ CI/CD Pipeline Fully Complete!"
 echo "===================================================="
