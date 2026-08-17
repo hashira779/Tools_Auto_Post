@@ -377,3 +377,64 @@ def _wrap_text(text: str, font, max_width: int) -> str:
         lines.append(" ".join(current_line))
 
     return "\n".join(lines)
+
+
+def _smart_crop_face(img: Image.Image) -> Image.Image:
+    """
+    Uses MediaPipe to detect faces and crop around head and shoulders.
+    Falls back safely to original image on any failure or if no face is found.
+    """
+    try:
+        import cv2
+        import numpy as np
+        import mediapipe as mp
+        
+        mp_face_detection = mp.solutions.face_detection
+        
+        rgb_img = img.convert("RGB")
+        np_img = np.array(rgb_img)
+        cv_img = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
+        
+        with mp_face_detection.FaceDetection(model_selection=1, min_detection_confidence=0.5) as face_detection:
+            results = face_detection.process(cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB))
+            
+            if not results or not results.detections:
+                return img
+                
+            detection = results.detections[0]
+            bbox = detection.location_data.relative_bounding_box
+            
+            h, w = cv_img.shape[:2]
+            
+            xmin = int(bbox.xmin * w)
+            ymin = int(bbox.ymin * h)
+            width = int(bbox.width * w)
+            height = int(bbox.height * h)
+            
+            pad_top = int(height * 0.6)
+            pad_bottom = int(height * 1.5)
+            pad_sides = int(width * 1.0)
+            
+            crop_xmin = max(0, xmin - pad_sides)
+            crop_ymin = max(0, ymin - pad_top)
+            crop_xmax = min(w, xmin + width + pad_sides)
+            crop_ymax = min(h, ymin + height + pad_bottom)
+            
+            crop_w = crop_xmax - crop_xmin
+            crop_h = crop_ymax - crop_ymin
+            
+            if crop_w > crop_h:
+                diff = crop_w - crop_h
+                crop_ymin = max(0, crop_ymin - diff // 2)
+                crop_ymax = min(h, crop_ymax + diff // 2)
+            elif crop_h > crop_w:
+                diff = crop_h - crop_w
+                crop_xmin = max(0, crop_xmin - diff // 2)
+                crop_xmax = min(w, crop_xmax + diff // 2)
+                
+            if crop_xmax > crop_xmin and crop_ymax > crop_ymin:
+                return img.crop((crop_xmin, crop_ymin, crop_xmax, crop_ymax))
+            return img
+    except Exception:
+        return img
+
