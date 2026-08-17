@@ -4,9 +4,9 @@
 FROM python:3.12-slim AS base
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install ffmpeg (required for audio extraction / video merging)
+# Install ffmpeg and aria2 (required for fast multi-threaded downloads)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg git && \
+    apt-get install -y --no-install-recommends ffmpeg git aria2 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

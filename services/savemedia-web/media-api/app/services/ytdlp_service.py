@@ -46,6 +46,16 @@ def _base_opts() -> dict:
             "Sec-Ch-Ua-Mobile": "?0",
             "Sec-Ch-Ua-Platform": '"Windows"',
         },
+        "external_downloader": "aria2c",
+        "external_downloader_args": {
+            "aria2c": [
+                "-c",             # Continue partially downloaded files
+                "-j", "16",       # Up to 16 concurrent downloads
+                "-x", "16",       # Up to 16 connections per server
+                "-s", "16",       # Split file into 16 parts
+                "-k", "1M"        # 1MB minimum split size
+            ]
+        },
     }
     if COOKIES_FILE and os.path.exists(COOKIES_FILE):
         opts["cookiefile"] = COOKIES_FILE
