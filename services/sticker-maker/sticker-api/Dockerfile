@@ -15,7 +15,8 @@ WORKDIR /app
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    python -c "import mediapipe" # Pre-builds the matplotlib font cache so first request isn't slow
 
 # Copy application code
 COPY app/ ./app/
