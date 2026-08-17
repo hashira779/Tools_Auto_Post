@@ -61,23 +61,23 @@ def process_image(image_bytes: bytes, style: str = "original", remove_bg: bool =
     Returns:
         WebP bytes ready for Telegram, guaranteed under 512 KB.
     """
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+
+    # Fast pre-scale to fit within 512x512 to ensure instantaneous filter execution and fast AI
+    w, h = img.size
+    if max(w, h) > STICKER_SIZE:
+        scale = STICKER_SIZE / max(w, h)
+        img = img.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS)
+
     if remove_bg:
         session = get_bg_session()
         if session:
             try:
                 from rembg import remove
-                image_bytes = remove(image_bytes, session=session)
+                img = remove(img, session=session)
             except Exception as e:
                 # Fallback if background removal fails
                 pass
-            
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
-
-    # Fast pre-scale to fit within 512x512 to ensure instantaneous filter execution
-    w, h = img.size
-    if max(w, h) > STICKER_SIZE:
-        scale = STICKER_SIZE / max(w, h)
-        img = img.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS)
 
     sticker_style = StickerStyle.from_str(style)
 
