@@ -123,15 +123,26 @@ echo "===================================================="
 echo "  🚀 Deploying to ORS Workers"
 echo "===================================================="
 
-ORS_WORKERS=("10.2.7.251" "10.2.7.252")
-ORS_USER="ors-user"
-ORS_PASS="password" # CHANGE THIS: Set your actual ORS worker SSH password here
+ORS_PASS="pTT!CT01"
 
-# We use the existing python script which uses paramiko (no sshpass needed)
-for WORKER in "${ORS_WORKERS[@]}"; do
-    echo "🔄 Pushing update to ORS Worker: $WORKER..."
-    # The script automatically connects, pulls latest code, and rebuilds containers
-    python3 scripts/deploy_ors_worker.py --host "$WORKER" --user "$ORS_USER" --password "$ORS_PASS" || echo "  ⚠️ Failed to deploy to $WORKER (Is it offline or password wrong?)"
+# Workers defined as "IP|USERNAME"
+ORS_WORKERS=(
+    "10.2.7.251|ors-server1"
+    "10.2.7.252|ors-server2"
+)
+
+# Ensure paramiko is installed for the deploy script
+if ! python3 -c "import paramiko" &> /dev/null; then
+    echo "📦 Installing paramiko..."
+    echo "$SUDO_PASS" | sudo -S apt-get update && echo "$SUDO_PASS" | sudo -S apt-get install -y python3-paramiko || pip3 install --user paramiko
+fi
+
+for WORKER_INFO in "${ORS_WORKERS[@]}"; do
+    WORKER_IP="${WORKER_INFO%%|*}"
+    WORKER_USER="${WORKER_INFO##*|}"
+    
+    echo "🔄 Pushing update to ORS Worker: $WORKER_IP (User: $WORKER_USER)..."
+    python3 scripts/deploy_ors_worker.py --host "$WORKER_IP" --user "$WORKER_USER" --password "$ORS_PASS" || echo "  ⚠️ Failed to deploy to $WORKER_IP"
 done
 
 echo "===================================================="
