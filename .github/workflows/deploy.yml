@@ -11,9 +11,13 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Forces Git fetch instead of API tarball to prevent 429 Rate Limits
+        run: |
+          if [ ! -d .git ]; then
+            git init
+            git remote add origin https://github.com/hashira779/Tools_Auto_Post.git
+          fi
+          git fetch --all
+          git reset --hard origin/main
 
       - name: Free disk space before build
         run: |
