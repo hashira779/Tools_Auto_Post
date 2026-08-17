@@ -20,7 +20,7 @@ def get_bg_session():
     if _bg_session is None:
         try:
             from rembg import new_session
-            _bg_session = new_session("u2net")
+            _bg_session = new_session("silueta")
         except Exception:
             _rembg_failed = True
             return None

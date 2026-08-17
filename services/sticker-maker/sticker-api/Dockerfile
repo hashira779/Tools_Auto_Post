@@ -21,10 +21,10 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Copy application code
 COPY app/ ./app/
 
-# Pre-download the rembg model to prevent 60-second freezes on first sticker creation
+# Pre-download the rembg model to prevent freezes on first sticker creation
 ENV U2NET_HOME=/root/.u2net
 RUN mkdir -p /root/.u2net && \
-    curl -fL -o /root/.u2net/u2net.onnx https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx
+    curl -fL -o /root/.u2net/silueta.onnx https://github.com/danielgatis/rembg/releases/download/v0.0.0/silueta.onnx
 
 # Environment
 ENV PYTHONUNBUFFERED=1
