@@ -80,6 +80,11 @@ async def process_sticker(
             "dimensions": "512x512",
             "style": style,
         },
+        "data_b64": b64,
+        "size_kb": round(len(processed) / 1024, 1),
+        "format": "webp",
+        "dimensions": "512x512",
+        "style": style,
     }
 
 

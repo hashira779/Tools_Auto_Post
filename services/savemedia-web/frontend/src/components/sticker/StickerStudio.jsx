@@ -72,13 +72,14 @@ export default function StickerStudio() {
         throw new Error(data.detail || 'Failed to process image.')
       }
 
-      // Ensure data_b64 exists
-      if (!data.data_b64) {
+      // Extract sticker data object (support both data.sticker and top-level data)
+      const stickerObj = data.sticker || data
+      if (!stickerObj || !stickerObj.data_b64) {
         throw new Error('Server returned invalid data format.')
       }
 
-      setBaseStickerData(data)
-      setCurrentStickerData(data) // initially same
+      setBaseStickerData(stickerObj)
+      setCurrentStickerData(stickerObj) // initially same
       setCurrentStep(3)
     } catch (e) {
       setError(e.message)
