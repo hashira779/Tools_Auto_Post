@@ -3,6 +3,7 @@ import { useDownloader } from './hooks/useDownloader'
 import { useAuth } from './hooks/useAuth'
 import { FORMAT_VIDEO } from './constants/platforms'
 
+import { lazy, Suspense } from 'react'
 import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM } from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
@@ -11,11 +12,13 @@ import VideoPreview from './components/VideoPreview'
 import FormatTabs from './components/FormatTabs'
 import QualityGrid from './components/QualityGrid'
 import DownloadButton from './components/DownloadButton'
-import TtsStudio from './components/tts/TtsStudio'
-import StickerHero from './components/sticker/StickerHero'
-import StickerStudio from './components/sticker/StickerStudio'
-import AIChatStudio from './components/chat/AIChatStudio'
 import Footer from './components/Footer'
+
+// Lazy load heavy tool chunks so the main downloader loads instantly
+const TtsStudio = lazy(() => import('./components/tts/TtsStudio'))
+const StickerHero = lazy(() => import('./components/sticker/StickerHero'))
+const StickerStudio = lazy(() => import('./components/sticker/StickerStudio'))
+const AIChatStudio = lazy(() => import('./components/chat/AIChatStudio'))
 
 function App() {
   const [activeTool, setActiveTool] = useState(TOOL_DOWNLOADER)
@@ -129,22 +132,28 @@ function App() {
             {/* Text-to-Voice Studio */}
             {activeTool === TOOL_TTS && (
               <main className="flex flex-col items-center animate-fade-in">
-                <TtsStudio />
+                <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
+                  <TtsStudio />
+                </Suspense>
               </main>
             )}
 
             {/* Telegram Sticker Studio */}
             {activeTool === TOOL_STICKER && (
               <main className="flex flex-col items-center animate-fade-in">
-                <StickerHero />
-                <StickerStudio />
+                <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
+                  <StickerHero />
+                  <StickerStudio />
+                </Suspense>
               </main>
             )}
           </div>
         ) : (
           /* AI Chat Studio (Full Width/Height Layout) */
           <div className="flex-1 w-full animate-fade-in">
-            <AIChatStudio />
+            <Suspense fallback={<div className="w-full h-full animate-pulse bg-[var(--color-surface-1)]"></div>}>
+              <AIChatStudio />
+            </Suspense>
           </div>
         )}
 

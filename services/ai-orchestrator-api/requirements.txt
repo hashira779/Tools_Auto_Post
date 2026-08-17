@@ -10,3 +10,7 @@ PyPDF2>=3.0.1
 supabase>=2.7.4
 python-multipart>=0.0.9
 fpdf2>=2.7.5
+
+# High performance asyncio event loop and HTTP parser
+uvloop>=0.20.0
+httptools>=0.6.1

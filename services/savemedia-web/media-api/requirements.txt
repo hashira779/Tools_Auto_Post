@@ -8,3 +8,7 @@ celery>=5.4.0
 redis>=5.2.0
 
 # Force cache invalidation to update yt-dlp (2026-08-01)
+
+# High performance asyncio event loop and HTTP parser
+uvloop>=0.20.0
+httptools>=0.6.1

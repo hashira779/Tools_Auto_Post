@@ -11,3 +11,7 @@ gTTS>=2.5.2
 google-cloud-texttospeech>=2.16.0
 rembg>=2.0.50
 onnxruntime>=1.16.0
+
+# High performance asyncio event loop and HTTP parser
+uvloop>=0.20.0
+httptools>=0.6.1
