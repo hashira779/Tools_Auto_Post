@@ -34,7 +34,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Security(securi
         local_user = db.query(models.User).filter(models.User.supabase_user_id == supabase_id).first()
         
         allowed_admins = os.getenv("ADMIN_EMAILS", "").split(",")
-        is_admin_email = email in allowed_admins or (email and email.lower() == "lovetoo46@gmail.com")
+        is_admin_email = email in allowed_admins
         
         if not local_user:
             # Create local user for the first time
