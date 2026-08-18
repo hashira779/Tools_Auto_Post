@@ -9,7 +9,7 @@ function Centered({ children }) {
 }
 
 export default function App() {
-  const { session, profile, loading, isAdmin, loginWithGoogle, logout } = useAuth()
+  const { session, profile, profileError, loading, isAdmin, loginWithGoogle, logout } = useAuth()
   const [tab, setTab] = useState('tokens')
 
   if (loading) {
@@ -18,6 +18,36 @@ export default function App() {
 
   if (!session) {
     return <Login onLogin={loginWithGoogle} />
+  }
+
+  // The profile request itself failed (backend down / stale deploy / auth error) —
+  // show the real error instead of a misleading "Access Denied".
+  if (profileError) {
+    return (
+      <Centered>
+        <div className="max-w-md bg-[#1a1c23] border border-yellow-900/30 rounded-2xl p-8">
+          <h1 className="text-xl font-bold text-white">Backend Unreachable</h1>
+          <p className="text-gray-400 mt-2 text-sm">
+            Could not verify your account with the API server.
+          </p>
+          <p className="text-yellow-400/80 mt-3 text-xs font-mono break-all">{profileError}</p>
+          <div className="mt-6 flex items-center justify-center gap-6">
+            <button
+              onClick={() => window.location.reload()}
+              className="text-sm font-semibold text-blue-400 hover:text-blue-300"
+            >
+              Retry
+            </button>
+            <button
+              onClick={logout}
+              className="text-sm font-semibold text-gray-400 hover:text-white"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+      </Centered>
+    )
   }
 
   // Signed in with Google but not an administrator.

@@ -8,6 +8,7 @@ export function useAuth() {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [profileError, setProfileError] = useState(null)
 
   const fetchProfile = useCallback(async (token) => {
     try {
@@ -16,12 +17,16 @@ export function useAuth() {
       })
       if (resp.ok) {
         setProfile(await resp.json())
+        setProfileError(null)
       } else {
         setProfile(null)
+        const body = await resp.text().catch(() => '')
+        setProfileError(`API error ${resp.status}: ${body || resp.statusText}`)
       }
     } catch (e) {
       console.error('Failed to load profile:', e)
       setProfile(null)
+      setProfileError(`Network error: ${e.message}`)
     } finally {
       setLoading(false)
     }
@@ -64,6 +69,7 @@ export function useAuth() {
   return {
     session,
     profile,
+    profileError,
     loading,
     isAdmin: profile?.is_admin === true,
     loginWithGoogle,
