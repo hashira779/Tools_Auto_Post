@@ -15,6 +15,7 @@ async def lifespan(app: FastAPI):
     init_db()
     yield
 
+from .routers import admin
 app = FastAPI(title="CamTech AI Orchestrator", lifespan=lifespan)
 app.include_router(admin.router)
 
@@ -39,7 +40,6 @@ from fastapi.responses import StreamingResponse
 import uuid
 from .agent import Agent
 from .auth import get_current_user, get_verified_user
-from .routers import admin
 import json
 
 @app.get("/api/auth/me")

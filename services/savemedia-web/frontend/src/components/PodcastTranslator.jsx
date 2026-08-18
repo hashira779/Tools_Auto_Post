@@ -112,6 +112,36 @@ const PodcastTranslator = () => {
     }
   }, [status, jobId]);
 
+  const handleUpload = async () => {
+    if (!file || !title) return;
+    
+    setStatus('UPLOADING');
+    setError(null);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', title);
+    
+    try {
+      const response = await fetch('/api/podcast/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+      
+      const data = await response.json();
+      setJobId(data.job_id);
+      setStatus('PROCESSING');
+    } catch (err) {
+      console.error('Upload error:', err);
+      setError(err.message || 'Failed to upload file');
+      setStatus('FAILED');
+    }
+  };
+
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
