@@ -25,6 +25,7 @@ def _base_opts() -> dict:
         "extractor_args": {
             "youtube": ["player_client=android", "player_skip=webpage"]
         },
+        "js_runtimes": "nodejs",
     }
 
 def download_audio(url: str, max_retries: int = 2) -> Tuple[Optional[Path], Optional[dict]]:

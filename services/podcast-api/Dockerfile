@@ -12,6 +12,7 @@ RUN apt-get update && \
     libsndfile1 \
     espeak-ng \
     curl \
+    nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
