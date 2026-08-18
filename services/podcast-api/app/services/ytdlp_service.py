@@ -25,6 +25,7 @@ def _base_opts() -> dict:
         "extractor_args": {
             "youtube": ["player_client=android"]
         },
+        "remote_components": ["ejs:github"],
     }
 
 def download_audio(url: str, max_retries: int = 2) -> Tuple[Optional[Path], Optional[dict]]:
@@ -37,7 +38,9 @@ def download_audio(url: str, max_retries: int = 2) -> Tuple[Optional[Path], Opti
 
     opts = _base_opts()
     opts["outtmpl"] = str(session_dir / "%(id)s.%(ext)s")
-    opts["format"] = "bestaudio/best"
+    # Prefer HLS/m3u8 streams (bypasses YouTube's 403 block on direct HTTPS
+    # audio from server/datacenter IPs), fall back to bestaudio for other sites
+    opts["format"] = "91/92/93/bestaudio/best"
     
     # Force conversion to mp3 or wav to make it easy to process
     opts["postprocessors"] = [{
@@ -70,7 +73,7 @@ def download_audio(url: str, max_retries: int = 2) -> Tuple[Optional[Path], Opti
     # Find the downloaded file
     downloaded_file = None
     for f in session_dir.iterdir():
-        if f.is_file() and f.suffix in (".mp3", ".m4a", ".wav", ".webm"):
+        if f.is_file() and f.suffix in (".mp3", ".m4a", ".wav", ".webm", ".mp4"):
             downloaded_file = f
             if f.suffix == ".mp3":
                 break
