@@ -22,12 +22,8 @@ def _base_opts() -> dict:
         "retries": 3,
         "extractor_retries": 3,
         "fragment_retries": 3,
-        "http_headers": {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/124.0.0.0 Safari/537.36"
-            ),
+        "extractor_args": {
+            "youtube": ["player_client=android", "player_skip=webpage"]
         },
     }
 
