@@ -112,6 +112,12 @@ const PodcastTranslator = () => {
     }
   }, [status, jobId]);
 
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
   const resetForm = () => {
     setFile(null);
     setTitle('');

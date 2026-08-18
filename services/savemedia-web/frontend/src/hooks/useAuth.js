@@ -32,7 +32,7 @@ export function useAuth() {
 
   const fetchDbUser = async (token) => {
     try {
-      const resp = await fetch('/api/conversations', { // Simple GET to check if user exists and get their status
+      const resp = await fetch('/api/ai/conversations', { // Simple GET to check if user exists and get their status
           headers: { 'Authorization': `Bearer ${token}` }
       })
       if (resp.status === 403) {
