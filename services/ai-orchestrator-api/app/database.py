@@ -26,12 +26,21 @@ def init_db():
     """Initializes the database and extensions."""
     # Ensure pgvector extension exists
     with engine.connect() as conn:
-        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        conn = conn.execution_options(isolation_level="AUTOCOMMIT")
+        try:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        except Exception as e:
+            print(f"Extension error (safe to ignore): {e}")
+            
         # Add missing columns if they don't exist
         try:
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin INTEGER DEFAULT 0;"))
+        except Exception as e:
+            print(f"Migration error is_admin (might be safe to ignore): {e}")
+            
+        try:
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified INTEGER DEFAULT 0;"))
         except Exception as e:
-            print(f"Migration error (might be safe to ignore): {e}")
-        conn.commit()
+            print(f"Migration error is_verified (might be safe to ignore): {e}")
+            
     Base.metadata.create_all(bind=engine)
