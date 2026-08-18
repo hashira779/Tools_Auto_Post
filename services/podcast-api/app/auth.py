@@ -42,8 +42,10 @@ def get_current_user(request: Request, credentials: HTTPAuthorizationCredentials
     elif "token" in request.query_params:
         token = request.query_params["token"]
         
-    if not token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+    if not token or token == "undefined" or token == "null":
+        raise HTTPException(status_code=401, detail="Your login session has expired or is invalid. Please log out and log back in.")
+        
+    print(f"DEBUG TOKEN RECEIVED: '{token}'")
         
     try:
         res = supabase.auth.get_user(token)
