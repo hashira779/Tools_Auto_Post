@@ -72,50 +72,65 @@ export default function TokenManager() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
       <div className="lg:col-span-1">
-        <div className="bg-[#1a1c23] border border-blue-900/20 rounded-2xl p-6 sticky top-6">
-          <h3 className="text-xl font-semibold text-white mb-6">Generate New Token</h3>
-          <form onSubmit={handleCreate} className="space-y-4">
+        <div className="relative bg-gradient-to-b from-[#0B1221]/90 to-[#050B14]/90 border border-cyan-900/40 rounded-3xl p-8 sticky top-6 shadow-[0_0_40px_-10px_rgba(6,182,212,0.15)] overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"></div>
+          
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-full bg-cyan-900/40 border border-cyan-400/30 flex items-center justify-center shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+              <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-200">Generate Token</h3>
+          </div>
+
+          <form onSubmit={handleCreate} className="space-y-6">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Description</label>
+              <label className="block text-[11px] font-bold text-cyan-500/70 uppercase tracking-wider mb-2">Description</label>
               <input
                 type="text"
                 placeholder="e.g. VIP Partner access"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-[#0d0e12] border border-blue-900/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full bg-[#03060D] border border-cyan-900/50 rounded-xl px-4 py-3 text-cyan-50 placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-400/50 transition-all duration-300 shadow-inner text-sm"
               />
             </div>
 
-            <label className="flex items-center gap-2 py-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={unlimited}
-                onChange={(e) => setUnlimited(e.target.checked)}
-                className="w-4 h-4 rounded"
-              />
-              <span className="text-sm text-gray-300">Unlimited usage / never expires</span>
+            <label className="flex items-center gap-3 py-2 cursor-pointer group">
+              <div className="relative flex items-center justify-center">
+                <input
+                  type="checkbox"
+                  checked={unlimited}
+                  onChange={(e) => setUnlimited(e.target.checked)}
+                  className="peer appearance-none w-5 h-5 border border-cyan-900/50 rounded bg-[#03060D] checked:bg-cyan-500/20 checked:border-cyan-400/50 transition-all cursor-pointer"
+                />
+                <svg className="absolute w-3 h-3 text-cyan-400 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">Unlimited usage / never expires</span>
             </label>
 
             {!unlimited && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 animate-fade-in">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Valid Days</label>
+                  <label className="block text-[11px] font-bold text-cyan-500/70 uppercase tracking-wider mb-2">Valid Days</label>
                   <input
                     type="number" min="1"
                     value={validDays}
                     onChange={(e) => setValidDays(e.target.value)}
-                    className="w-full bg-[#0d0e12] border border-blue-900/10 rounded-xl px-4 py-2.5 text-white"
+                    className="w-full bg-[#03060D] border border-cyan-900/50 rounded-xl px-4 py-3 text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-400/50 transition-all duration-300 shadow-inner text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Max Uses</label>
+                  <label className="block text-[11px] font-bold text-cyan-500/70 uppercase tracking-wider mb-2">Max Uses</label>
                   <input
                     type="number" min="1"
                     value={maxUses}
                     onChange={(e) => setMaxUses(e.target.value)}
-                    className="w-full bg-[#0d0e12] border border-blue-900/10 rounded-xl px-4 py-2.5 text-white"
+                    className="w-full bg-[#03060D] border border-cyan-900/50 rounded-xl px-4 py-3 text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-400/50 transition-all duration-300 shadow-inner text-sm"
                   />
                 </div>
               </div>
@@ -124,64 +139,73 @@ export default function TokenManager() {
             <button
               type="submit"
               disabled={creating}
-              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all mt-2"
+              className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 mt-4"
             >
-              {creating ? 'Generating…' : 'Generate Token'}
+              {creating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Generating…</span>
+                </>
+              ) : 'Generate Token'}
             </button>
           </form>
         </div>
       </div>
 
-      <div className="lg:col-span-2 space-y-4">
+      <div className="lg:col-span-2 space-y-5">
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3">
+          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-2xl px-5 py-4 animate-fade-in flex items-center gap-3">
+            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             {error}
           </div>
         )}
         {loading ? (
-          <div className="text-gray-500 animate-pulse p-8">Loading tokens…</div>
-        ) : tokens.length === 0 ? (
-          <div className="bg-[#1a1c23] rounded-2xl p-12 text-center text-gray-500 border border-dashed border-gray-800">
-            No tokens generated yet.
+          <div className="flex flex-col items-center justify-center py-20 gap-4 text-cyan-500/50">
+            <div className="w-8 h-8 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin"></div>
+            <p className="text-sm font-medium uppercase tracking-widest animate-pulse">Loading Tokens...</p>
           </div>
-        ) : tokens.map((t) => {
+        ) : tokens.length === 0 ? (
+          <div className="bg-gradient-to-b from-[#0B1221]/50 to-[#050B14]/50 border border-cyan-900/20 rounded-3xl p-16 text-center text-slate-500 flex flex-col items-center gap-4">
+            <svg className="w-12 h-12 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <p className="text-sm font-medium">No tokens generated yet.</p>
+          </div>
+        ) : tokens.map((t, i) => {
           const expired = isExpired(t)
           const limitReached = t.max_uses > 0 && t.current_uses >= t.max_uses
           return (
-            <div key={t.id} className="bg-[#1a1c23] border border-blue-900/10 rounded-2xl p-5 flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                  <code className="text-lg font-mono font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">{t.token_key}</code>
+            <div key={t.id} style={{animationDelay: `${i * 50}ms`}} className="bg-gradient-to-r from-[#0B1221]/80 to-[#050B14]/80 border border-cyan-900/30 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 animate-slide-up hover:border-cyan-500/30 hover:shadow-[0_0_20px_rgba(6,182,212,0.05)] transition-all duration-300">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                  <code className="text-base font-mono font-bold text-cyan-300 bg-cyan-900/30 border border-cyan-500/20 px-3 py-1 rounded-lg tracking-wider shadow-inner">{t.token_key}</code>
                   {!t.is_active
-                    ? <span className="bg-gray-500/10 text-gray-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Disabled</span>
+                    ? <span className="bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Disabled</span>
                     : expired
-                      ? <span className="bg-orange-500/10 text-orange-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Expired</span>
+                      ? <span className="bg-red-900/20 text-red-400 border border-red-500/20 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Expired</span>
                       : limitReached
-                        ? <span className="bg-orange-500/10 text-orange-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Limit reached</span>
-                        : <span className="bg-green-500/10 text-green-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Active</span>}
+                        ? <span className="bg-orange-900/20 text-orange-400 border border-orange-500/20 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Limit Reached</span>
+                        : <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-[0_0_10px_rgba(34,211,238,0.2)]">Active</span>}
                 </div>
-                <p className="text-gray-300 text-sm font-medium truncate">{t.description || 'No description'}</p>
-                <div className="flex gap-4 mt-2 text-[11px] text-gray-500 flex-wrap">
-                  <span>Uses: <b className="text-gray-400">{t.current_uses} / {t.max_uses === 0 ? '∞' : t.max_uses}</b></span>
-                  <span>Expires: <b className="text-gray-400">{t.valid_until ? new Date(t.valid_until).toLocaleDateString() : 'Never'}</b></span>
-                  <span>Created: <b className="text-gray-400">{new Date(t.created_at).toLocaleDateString()}</b></span>
+                <p className="text-slate-300 text-sm font-medium mb-4">{t.description || <span className="text-slate-600 italic">No description provided</span>}</p>
+                <div className="flex gap-5 text-xs text-slate-500 flex-wrap font-medium">
+                  <span className="flex items-center gap-1.5"><svg className="w-3.5 h-3.5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg> <span className="text-slate-300">{t.current_uses}</span> / {t.max_uses === 0 ? '∞' : t.max_uses} uses</span>
+                  <span className="flex items-center gap-1.5"><svg className="w-3.5 h-3.5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> {t.valid_until ? new Date(t.valid_until).toLocaleDateString() : 'Never expires'}</span>
+                  <span className="flex items-center gap-1.5"><svg className="w-3.5 h-3.5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> {new Date(t.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex sm:flex-col items-center gap-2 shrink-0 border-t sm:border-t-0 sm:border-l border-cyan-900/30 pt-4 sm:pt-0 sm:pl-5">
                 <button
                   onClick={() => toggleActive(t)}
-                  className={`text-xs font-bold px-3 py-2 rounded-lg transition-all ${t.is_active ? 'text-orange-400 hover:bg-orange-400/10' : 'text-green-400 hover:bg-green-400/10'}`}
+                  className={`w-full text-xs font-bold px-4 py-2 rounded-xl transition-all duration-300 border ${t.is_active ? 'text-slate-400 border-slate-700 hover:bg-slate-800 hover:text-white' : 'text-cyan-400 border-cyan-900 hover:bg-cyan-900/30 hover:border-cyan-500/50 shadow-[0_0_10px_rgba(34,211,238,0.1)]'}`}
                 >
-                  {t.is_active ? 'Disable' : 'Enable'}
+                  {t.is_active ? 'Revoke Access' : 'Reactivate'}
                 </button>
                 <button
                   onClick={() => remove(t)}
-                  className="p-2.5 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-all"
-                  title="Delete token"
+                  className="w-full text-xs font-bold px-4 py-2 rounded-xl text-red-400/70 border border-transparent hover:border-red-900/50 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  Delete
                 </button>
               </div>
             </div>
