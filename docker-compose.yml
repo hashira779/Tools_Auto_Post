@@ -51,6 +51,7 @@ services:
     depends_on:
       - savemedia-api
       - sticker-api
+      - podcast-api
     restart: unless-stopped
     networks:
       - camtech-net
