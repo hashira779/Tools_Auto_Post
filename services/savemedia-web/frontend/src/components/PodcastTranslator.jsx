@@ -113,8 +113,22 @@ const PodcastTranslator = () => {
   }, [status, jobId]);
 
   const handleUpload = async () => {
-    if (importMode === 'file' && (!file || !title)) return;
-    if (importMode === 'url' && (!url || !title)) return;
+    setError(null);
+    
+    if (!title || !title.trim()) {
+      setError('Please provide a Project Title (e.g. "Interview with CEO").');
+      return;
+    }
+    
+    if (importMode === 'file' && !file) {
+      setError('Please select an audio or video file to upload.');
+      return;
+    }
+    
+    if (importMode === 'url' && (!url || !url.trim())) {
+      setError('Please paste a valid media link.');
+      return;
+    }
     
     setStatus('UPLOADING');
     setError(null);
@@ -271,9 +285,14 @@ const PodcastTranslator = () => {
             )}
           </div>
           
+          {error && status === 'IDLE' && (
+            <div className="p-3 bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 rounded-xl flex items-center gap-2 text-[var(--color-error)] text-sm font-medium mt-4">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
           <button 
             onClick={handleUpload}
-            disabled={(importMode === 'file' && !file) || (importMode === 'url' && !url) || !title}
             className="btn-primary w-full py-4 text-lg mt-2 shadow-sm focus-ring"
           >
             Start Translation
