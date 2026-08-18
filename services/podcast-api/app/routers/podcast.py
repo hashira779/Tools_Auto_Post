@@ -87,6 +87,87 @@ async def upload_podcast(
         "duration_seconds": job.duration_seconds
     }
 
+from app.services.ytdlp_service import download_audio, cleanup_audio
+from pydantic import BaseModel
+
+class UrlUploadRequest(BaseModel):
+    url: str
+    title: str = ""
+    voice_id: str = "en_US-lessac-medium"
+    strict_verification: bool = False
+
+@router.post("/upload-url")
+async def upload_podcast_url(
+    req: UrlUploadRequest,
+    user: User = Depends(get_verified_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Downloads audio from a given URL (YouTube, TikTok, etc.) and starts the pipeline.
+    """
+    if not req.url:
+        raise HTTPException(status_code=400, detail="No URL provided")
+        
+    # Download audio synchronously
+    try:
+        downloaded_file, info = download_audio(req.url)
+        if not downloaded_file:
+            raise HTTPException(status_code=400, detail="Could not download audio from the provided URL")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Download failed: {str(e)}")
+
+    final_title = req.title or info.get("title", "Imported Podcast")
+    
+    # Create DB Job
+    job = PodcastJob(
+        title=final_title,
+        user_id=user.id,
+        original_filename=downloaded_file.name,
+        voice_id=req.voice_id,
+        strict_verification=req.strict_verification,
+        original_file_path="" 
+    )
+    db.add(job)
+    db.flush()
+    
+    # Move file to permanent storage
+    file_ext = downloaded_file.suffix
+    safe_path = os.path.join(STORAGE_DIR, f"{job.id}_original{file_ext}")
+    
+    try:
+        shutil.copy2(downloaded_file, safe_path)
+        cleanup_audio(downloaded_file)
+        
+        # Validate audio
+        metadata = validate_audio_file(safe_path, downloaded_file.name)
+        
+        job.original_file_path = safe_path
+        job.duration_seconds = metadata.get("duration_seconds")
+        db.commit()
+        
+    except AudioValidationError as e:
+        if os.path.exists(safe_path):
+            os.remove(safe_path)
+        db.delete(job)
+        db.commit()
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        if os.path.exists(safe_path):
+            os.remove(safe_path)
+        db.delete(job)
+        db.commit()
+        raise HTTPException(status_code=500, detail=f"Failed to process download: {e}")
+        
+    # Trigger Celery Task
+    process_podcast_job.delay(str(job.id))
+    
+    return {
+        "job_id": job.id,
+        "message": "Podcast translation pipeline started from URL.",
+        "duration_seconds": job.duration_seconds
+    }
+
+
 @router.get("/status/{job_id}")
 def get_job_status(job_id: UUID, user: User = Depends(get_verified_user), db: Session = Depends(get_db)):
     """
