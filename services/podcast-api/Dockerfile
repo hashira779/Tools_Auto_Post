@@ -12,9 +12,13 @@ RUN apt-get update && \
     libsndfile1 \
     espeak-ng \
     curl \
-    nodejs \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# ── Install Deno (required by yt-dlp for YouTube JS signature decryption) ──
+RUN curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
+
 
 WORKDIR /app
 

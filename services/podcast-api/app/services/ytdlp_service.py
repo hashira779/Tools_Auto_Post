@@ -23,9 +23,8 @@ def _base_opts() -> dict:
         "extractor_retries": 3,
         "fragment_retries": 3,
         "extractor_args": {
-            "youtube": ["player_client=android", "player_skip=webpage"]
+            "youtube": ["player_client=android"]
         },
-        "js_runtimes": "nodejs",
     }
 
 def download_audio(url: str, max_retries: int = 2) -> Tuple[Optional[Path], Optional[dict]]:
