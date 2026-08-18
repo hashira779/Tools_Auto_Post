@@ -170,7 +170,7 @@ const PodcastTranslator = () => {
       }
       
       if (!response.ok) {
-        let errorMsg = 'Upload failed';
+        let errorMsg = `Upload failed (${response.status} ${response.statusText})`;
         try {
           const errData = await response.json();
           errorMsg = errData.detail || errData.error || errorMsg;
