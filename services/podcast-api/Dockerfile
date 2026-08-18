@@ -23,7 +23,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # ── Pre-download AI Models ──────────────────────────────────────
 # faster-whisper medium model (~1.5 GB)
-RUN python -c "from faster_whisper import WhisperModel; WhisperModel('medium', device='cpu', compute_type='int8')" || true
+# Commented out to prevent Out-Of-Memory (exit code 137) during Docker build on low-RAM servers. 
+# The model will automatically be downloaded at runtime instead.
+# RUN python -c "from faster_whisper import WhisperModel; WhisperModel('medium', device='cpu', compute_type='int8')" || true
 
 # Piper TTS English voices (pre-download during build)
 RUN mkdir -p /app/models/piper && \
