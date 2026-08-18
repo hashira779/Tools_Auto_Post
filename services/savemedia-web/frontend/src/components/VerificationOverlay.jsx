@@ -18,7 +18,7 @@ export default function VerificationOverlay() {
     setError('');
 
     try {
-      const resp = await fetch('/api/admin/verify-token', {
+      const resp = await fetch('/api/ai/admin/verify-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
