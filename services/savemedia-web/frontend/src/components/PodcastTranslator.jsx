@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, FileAudio, CheckCircle, AlertTriangle, Loader, Download, Play, Mic, Edit, List } from 'lucide-react';
 import SegmentEditor from './SegmentEditor';
+import { useAuth } from '../hooks/useAuth';
 
 const PodcastTranslator = () => {
+  const { session } = useAuth();
   const [file, setFile] = useState(null);
   const [importMode, setImportMode] = useState('file'); // 'file' or 'url'
   const [url, setUrl] = useState('');
@@ -19,7 +21,9 @@ const PodcastTranslator = () => {
   const fetchSegments = async () => {
     if (!jobId) return;
     try {
-      const response = await fetch(`/api/podcast/jobs/${jobId}/segments`);
+      const response = await fetch(`/api/podcast/jobs/${jobId}/segments`, {
+        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      });
       if (response.ok) {
         const data = await response.json();
         setSegments(data);
@@ -39,7 +43,10 @@ const PodcastTranslator = () => {
     try {
       const response = await fetch(`/api/podcast/jobs/${jobId}/segments/${segmentId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
         body: JSON.stringify(data),
       });
       if (response.ok) {
@@ -55,12 +62,16 @@ const PodcastTranslator = () => {
     try {
       await fetch(`/api/podcast/jobs/${jobId}/segments/${segmentId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
         body: JSON.stringify(data),
       });
       
       const response = await fetch(`/api/podcast/jobs/${jobId}/segments/${segmentId}/regenerate`, {
         method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token}` }
       });
       if (response.ok) {
         fetchSegments();
@@ -73,7 +84,7 @@ const PodcastTranslator = () => {
 
   useEffect(() => {
     if (status === 'PROCESSING' && jobId) {
-      const eventSource = new EventSource(`/api/podcast/stream/${jobId}`);
+      const eventSource = new EventSource(`/api/podcast/stream/${jobId}?token=${session?.access_token}`);
       
       eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -142,6 +153,9 @@ const PodcastTranslator = () => {
         
         response = await fetch('/api/podcast/upload', {
           method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
           body: formData,
         });
       } else {
@@ -149,13 +163,19 @@ const PodcastTranslator = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
           },
           body: JSON.stringify({ url, title }),
         });
       }
       
       if (!response.ok) {
-        throw new Error('Upload failed');
+        let errorMsg = 'Upload failed';
+        try {
+          const errData = await response.json();
+          errorMsg = errData.detail || errData.error || errorMsg;
+        } catch(e) {}
+        throw new Error(errorMsg);
       }
       
       const data = await response.json();
@@ -186,7 +206,10 @@ const PodcastTranslator = () => {
 
   const handleResume = async () => {
     try {
-      const response = await fetch(`/api/podcast/jobs/${jobId}/resume`, { method: 'POST' });
+      const response = await fetch(`/api/podcast/jobs/${jobId}/resume`, { 
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      });
       if (response.ok) {
         setStatus('PROCESSING');
         setCurrentStage('Resuming audio synthesis...');
@@ -362,7 +385,7 @@ const PodcastTranslator = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mt-6 max-w-2xl">
             <a 
-              href={`/api/podcast/download/${jobId}/wav`}
+              href={`/api/podcast/download/${jobId}/wav?token=${session?.access_token}`}
               className="btn-primary py-3.5 flex items-center justify-center gap-2 text-[15px]"
             >
               <Download className="w-5 h-5" />

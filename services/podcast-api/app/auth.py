@@ -28,13 +28,23 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 # Create a Supabase client to interact with the Auth API
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Security(security), db: Session = Depends(get_db)):
+from fastapi import Request
+
+def get_current_user(request: Request, credentials: HTTPAuthorizationCredentials = Security(security), db: Session = Depends(get_db)):
     """
     FastAPI dependency to verify the Supabase JWT and map to local PostgreSQL user.
     """
-    token = credentials.credentials
+    token = None
+    if credentials:
+        token = credentials.credentials
+    elif "token" in request.query_params:
+        token = request.query_params["token"]
+        
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+        
     try:
         res = supabase.auth.get_user(token)
         if not res.user:
