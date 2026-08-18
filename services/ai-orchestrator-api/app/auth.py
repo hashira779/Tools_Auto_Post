@@ -62,13 +62,28 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Security(securi
         print(f"Auth error in get_current_user: {str(e)}", flush=True)
         raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
 
-def get_verified_user(user: models.User = Depends(get_current_user)):
+def get_verified_user(user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Dependency to ensure the user is verified with an admin token."""
     if not user.is_verified:
         raise HTTPException(
             status_code=403, 
             detail="Verification Required: Please enter the token provided by your admin."
         )
+        
+    # Check if tied to a token
+    if user.used_token_id:
+        token = db.query(models.AdminToken).filter(models.AdminToken.id == user.used_token_id).first()
+        if not token or not token.is_active:
+            raise HTTPException(
+                status_code=403,
+                detail="Verification Revoked: Your access token has been disabled."
+            )
+        if token.valid_until and token.valid_until < datetime.now(timezone.utc):
+            raise HTTPException(
+                status_code=403,
+                detail="Verification Revoked: Your access token has expired."
+            )
+            
     return user
 
 def get_admin_user(user: models.User = Depends(get_current_user)):

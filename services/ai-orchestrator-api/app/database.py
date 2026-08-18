@@ -47,5 +47,12 @@ def init_db():
         except Exception as e:
             conn.rollback()
             print(f"Migration error is_verified (might be safe to ignore): {e}")
+
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS used_token_id UUID REFERENCES admin_tokens(id);"))
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(f"Migration error used_token_id (might be safe to ignore): {e}")
             
     Base.metadata.create_all(bind=engine)

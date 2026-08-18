@@ -188,6 +188,7 @@ def verify_user_with_token(data: VerifyRequest, user: models.User = Depends(get_
         
     # Valid token!
     user.is_verified = 1
+    user.used_token_id = token.id
     token.current_uses += 1
     
     # Auto-disable if reached limit

@@ -17,6 +17,7 @@ class User(Base):
     status = Column(String(50), default="active")
     is_admin = Column(Integer, default=0) # 0 = user, 1 = admin
     is_verified = Column(Integer, default=0) # 0 = not verified, 1 = verified
+    used_token_id = Column(UUID(as_uuid=True), ForeignKey("admin_tokens.id"), nullable=True)
     
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     generated_documents = relationship("GeneratedDocument", back_populates="user", cascade="all, delete-orphan")
