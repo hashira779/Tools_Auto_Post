@@ -7,9 +7,10 @@ from typing import List, Dict, Any
 from .tools import TOOLS_REGISTRY
 
 class Agent:
-    def __init__(self, ollama_url: str, model: str = "llama3.2"):
+    def __init__(self, ollama_url: str, model: str = "llama3.2", conversation_id: str = None):
         self.ollama_url = ollama_url
         self.model = model
+        self.conversation_id = conversation_id
 
     def _build_system_prompt(self) -> str:
         tools_desc = []
@@ -58,8 +59,12 @@ If you are just talking to the user or providing the final answer after using to
                     uploads_dir = os.path.abspath("/app/uploads")
                     target_path = os.path.abspath(filepath)
                     
-                    if not target_path.startswith(uploads_dir):
-                        # Skip if they try to access files outside /app/uploads/
+                    try:
+                        common = os.path.commonpath([uploads_dir, target_path])
+                        if common != uploads_dir:
+                            # Skip if they try to access files outside /app/uploads/
+                            continue
+                    except ValueError:
                         continue
                         
                     try:
@@ -67,7 +72,7 @@ If you are just talking to the user or providing the final answer after using to
                             encoded = base64.b64encode(image_file.read()).decode("utf-8")
                             images_base64.append(encoded)
                         # Remove the file tag from content so the LLM doesn't try to use read_document
-                        content = content.replace(match.group(0), f"[Attached Image: {filepath.split('/')[-1]}]")
+                        content = content.replace(match.group(0), f"[Attached Image: {os.path.basename(filepath)}]")
                         has_images = True
                     except Exception:
                         pass
@@ -118,6 +123,13 @@ If you are just talking to the user or providing the final answer after using to
                         yield f"data: {json.dumps({'type': 'progress', 'content': f'Running {tool_name}...'})}\n\n"
                         
                         tool_func = TOOLS_REGISTRY[tool_name]["function"]
+                        
+                        # Automatically inject conversation_id if the tool requires it
+                        import inspect
+                        sig = inspect.signature(tool_func)
+                        if "conversation_id" in sig.parameters and "conversation_id" not in tool_kwargs:
+                            tool_kwargs["conversation_id"] = self.conversation_id
+                            
                         tool_result = tool_func(**tool_kwargs)
                         
                         # Add assistant's tool call intent and the tool's result to history

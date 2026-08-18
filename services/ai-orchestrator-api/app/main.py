@@ -4,18 +4,19 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
 
-from .database import engine, get_db, Base
+from .database import engine, get_db, Base, init_db
 from . import models
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize the database tables if they don't exist
-    Base.metadata.create_all(bind=engine)
+    # Initialize the database tables and extensions
+    init_db()
     yield
 
 app = FastAPI(title="CamTech AI Orchestrator", lifespan=lifespan)
+app.include_router(admin.router)
 
 @app.get("/health")
 def health_check():
@@ -37,8 +38,20 @@ from fastapi import Depends, UploadFile, File
 from fastapi.responses import StreamingResponse
 import uuid
 from .agent import Agent
-from .auth import get_current_user
+from .auth import get_current_user, get_verified_user
+from .routers import admin
 import json
+
+@app.get("/api/auth/me")
+def get_me(user = Depends(get_current_user)):
+    """Return the current authenticated user's profile and roles."""
+    return {
+        "id": str(user.id),
+        "email": user.email,
+        "is_admin": user.is_admin == 1,
+        "is_verified": user.is_verified == 1,
+        "status": user.status,
+    }
 
 class ChatRequest(BaseModel):
     conversation_id: Optional[str] = None
@@ -90,13 +103,13 @@ def stream_and_save(agent_gen, db: Session, user, conversation_id: str, new_user
         db.commit()
 
 @app.post("/api/chat/stream")
-def chat_stream(request: ChatRequest, user = Depends(get_current_user), db: Session = Depends(get_db)):
+def chat_stream(request: ChatRequest, user = Depends(get_verified_user), db: Session = Depends(get_db)):
     if not request.messages:
         raise HTTPException(status_code=400, detail="No messages provided")
         
     new_user_msg = request.messages[-1].get("content", "")
     
-    agent = Agent(ollama_url=OLLAMA_URL, model=request.model)
+    agent = Agent(ollama_url=OLLAMA_URL, model=request.model, conversation_id=request.conversation_id)
     agent_gen = agent.chat(request.messages)
     
     return StreamingResponse(
@@ -104,13 +117,24 @@ def chat_stream(request: ChatRequest, user = Depends(get_current_user), db: Sess
         media_type="text/event-stream"
     )
 
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.vectorstores import PGVector
+from sqlalchemy.orm import Session
+import uuid
+import os
+
 @app.post("/api/chat/upload")
-async def upload_file(file: UploadFile = File(...), user = Depends(get_current_user)):
-    """Uploads a file to be processed by the AI Agent"""
+async def upload_file(file: UploadFile = File(...), conversation_id: str = None, user = Depends(get_verified_user)):
+    """Uploads a file, extracts text, chunks it, and embeds it into PGVector"""
     os.makedirs("/app/uploads", exist_ok=True)
     
-    # Generate unique filename to prevent collisions
-    ext = file.filename.split(".")[-1]
+    if not conversation_id:
+        # If no conversation is provided, we can't reliably scope the document
+        raise HTTPException(status_code=400, detail="conversation_id is required for uploading documents")
+        
+    ext = file.filename.split(".")[-1].lower()
     unique_filename = f"{uuid.uuid4().hex}.{ext}"
     file_path = os.path.join("/app/uploads", unique_filename)
     
@@ -118,9 +142,46 @@ async def upload_file(file: UploadFile = File(...), user = Depends(get_current_u
         with open(file_path, "wb") as f:
             content = await file.read()
             f.write(content)
-        return {"filepath": file_path, "filename": file.filename}
+            
+        if ext == "pdf":
+            # 1. Load PDF
+            loader = PyPDFLoader(file_path)
+            docs = loader.load()
+            
+            # 2. Chunk text
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=1000,
+                chunk_overlap=200,
+                length_function=len
+            )
+            chunks = text_splitter.split_documents(docs)
+            
+            # Add metadata for filtering later
+            for chunk in chunks:
+                chunk.metadata["source"] = file.filename
+                chunk.metadata["conversation_id"] = conversation_id
+                
+            # 3. Embed and store
+            # Using ollama nomic-embed-text for fast CPU embeddings
+            embeddings = OllamaEmbeddings(
+                base_url=OLLAMA_URL,
+                model="nomic-embed-text"
+            )
+            
+            from .database import DATABASE_URL
+            
+            PGVector.from_documents(
+                documents=chunks,
+                embedding=embeddings,
+                connection_string=DATABASE_URL,
+                collection_name=f"conv_{conversation_id}",
+                pre_delete_collection=False
+            )
+            
+        return {"filepath": file_path, "filename": file.filename, "status": "processed"}
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Could not save file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Could not process file: {str(e)}")
 
 from fastapi.responses import Response
 
@@ -143,12 +204,21 @@ def download_document(file_id: str, db: Session = Depends(get_db)):
 # --- Chat History Endpoints ---
 
 @app.get("/api/conversations")
-def get_conversations(user = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_conversations(user = Depends(get_verified_user), db: Session = Depends(get_db)):
     convs = db.query(models.Conversation).filter(models.Conversation.user_id == user.id).order_by(models.Conversation.created_at.desc()).all()
     return [{"id": str(c.id), "title": c.title, "model": c.model, "created_at": c.created_at} for c in convs]
 
+@app.post("/api/conversations")
+def create_conversation(user = Depends(get_verified_user), db: Session = Depends(get_db)):
+    """Explicitly creates a new empty conversation for uploading files before chatting."""
+    conv = models.Conversation(user_id=user.id, title="New Chat")
+    db.add(conv)
+    db.commit()
+    db.refresh(conv)
+    return {"id": str(conv.id), "title": conv.title, "model": conv.model, "created_at": conv.created_at}
+
 @app.get("/api/conversations/{conversation_id}/messages")
-def get_messages(conversation_id: str, user = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_messages(conversation_id: str, user = Depends(get_verified_user), db: Session = Depends(get_db)):
     conv = db.query(models.Conversation).filter(models.Conversation.id == conversation_id, models.Conversation.user_id == user.id).first()
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
@@ -157,7 +227,7 @@ def get_messages(conversation_id: str, user = Depends(get_current_user), db: Ses
     return [{"id": str(m.id), "role": m.role, "content": m.content, "created_at": m.created_at} for m in messages]
 
 @app.delete("/api/conversations/{conversation_id}")
-def delete_conversation(conversation_id: str, user = Depends(get_current_user), db: Session = Depends(get_db)):
+def delete_conversation(conversation_id: str, user = Depends(get_verified_user), db: Session = Depends(get_db)):
     conv = db.query(models.Conversation).filter(models.Conversation.id == conversation_id, models.Conversation.user_id == user.id).first()
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")

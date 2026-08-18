@@ -1,18 +1,24 @@
 import { useState, useEffect } from 'react'
 import CamtechLogo from './CamtechLogo'
+import { useAuth } from '../hooks/useAuth'
+
 export const TOOL_DOWNLOADER = 'downloader'
 export const TOOL_TTS = 'tts'
 export const TOOL_STICKER = 'sticker'
 export const TOOL_LLM = 'llm'
+export const TOOL_PODCAST = 'podcast'
+export const TOOL_ADMIN = 'admin'
 
 const NAV_TOOLS = [
   { id: TOOL_DOWNLOADER, label: 'Downloader', mobileLabel: 'Download' },
   { id: TOOL_TTS, label: 'Text to Voice', mobileLabel: 'Voice' },
+  { id: TOOL_PODCAST, label: 'Podcast', mobileLabel: 'Podcast' },
   { id: TOOL_STICKER, label: 'Stickers', mobileLabel: 'Stickers' },
   { id: TOOL_LLM, label: 'AI Chat', mobileLabel: 'Chat' },
 ]
 
 export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }) {
+  const { dbUser } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -82,6 +88,24 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                 </button>
               )
             })}
+            
+            {dbUser?.is_admin && (
+              <button
+                role="tab"
+                aria-selected={activeTool === TOOL_ADMIN}
+                onClick={() => onSelectTool(TOOL_ADMIN)}
+                className={`px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors duration-150 cursor-pointer focus-ring flex items-center gap-1.5 ${
+                  activeTool === TOOL_ADMIN
+                    ? 'text-red-400 bg-red-400/10'
+                    : 'text-red-500/70 hover:text-red-400 hover:bg-red-400/5'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m3.332-8A4.499 4.499 0 1115.67 7H9.33a4.499 4.499 0 112.338 8.057l1.232 3.696a1 1 0 001.914 0l1.232-3.696A4.499 4.499 0 0115.332 7z" />
+                </svg>
+                Admin
+              </button>
+            )}
           </nav>
 
           {/* ── Right: Theme + Mobile Menu ─────────────── */}

@@ -162,6 +162,23 @@ export function useOllama(accessToken = null) {
     }
   }, [accessToken]);
 
+  const createConversation = useCallback(async () => {
+    if (!accessToken) return null;
+    try {
+      const response = await fetch('/api/ai/conversations', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      if (!response.ok) throw new Error('Failed to create conversation');
+      const data = await response.json();
+      setConversationId(data.id);
+      return data.id;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  }, [accessToken]);
+
   const deleteConversation = useCallback(async (id) => {
     if (!accessToken) return false;
     try {
@@ -181,12 +198,21 @@ export function useOllama(accessToken = null) {
 
   const uploadFile = useCallback(async (file) => {
     if (!accessToken) throw new Error("Must be logged in to upload files.");
+    
+    let activeConversationId = conversationId;
+    if (!activeConversationId) {
+      activeConversationId = await createConversation();
+      if (!activeConversationId) {
+        throw new Error("Failed to create a conversation for the file upload.");
+      }
+    }
+
     const formData = new FormData();
     formData.append("file", file);
     
     setLoading(true);
     try {
-      const response = await fetch('/api/ai/chat/upload', {
+      const response = await fetch(`/api/ai/chat/upload?conversation_id=${activeConversationId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -195,7 +221,8 @@ export function useOllama(accessToken = null) {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to upload file');
+        const errData = await response.json();
+        throw new Error(errData.detail || 'Failed to upload file');
       }
       
       return await response.json();
@@ -205,7 +232,7 @@ export function useOllama(accessToken = null) {
     } finally {
       setLoading(false);
     }
-  }, [accessToken]);
+  }, [accessToken, conversationId, createConversation]);
 
   return {
     messages,

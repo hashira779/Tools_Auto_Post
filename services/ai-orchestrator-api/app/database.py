@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://camtech:camtechpassword@localhost:5432/camtech")
@@ -21,3 +21,11 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def init_db():
+    """Initializes the database and extensions."""
+    # Ensure pgvector extension exists
+    with engine.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        conn.commit()
+    Base.metadata.create_all(bind=engine)

@@ -6,36 +6,49 @@ Monorepo for CamTech media automation tools.
 
 ```
 CamTech/
-├── docker-compose.yml              ← Unified orchestration
+├── docker-compose.yml              ← Main orchestration (Control Plane + UI)
+├── docker-compose.ors-worker.yml   ← Worker orchestration (AI Scaling)
 ├── .env / .env.example             ← Environment config
 │
 ├── services/
+│   ├── ai-orchestrator-api/        ← Central AI Agent & ReAct Logic
+│   ├── podcast-api/                ← Khmer → English Localization Engine
 │   ├── auto-post-bot/              ← Telegram bot (download → YouTube/TikTok/FB)
-│   │   ├── Dockerfile
-│   │   ├── main.py
-│   │   ├── config.py
-│   │   ├── bot/                    Telegram handlers
-│   │   ├── youtube/                YouTube auth + upload
-│   │   ├── tiktok/                 TikTok auth + upload
-│   │   ├── facebook/               Facebook templates + upload
-│   │   └── lyrics_srt/             SRT subtitle generation
-│   │
-│   └── savemedia-web/              ← Web downloader (MP4/MP3)
-│       ├── frontend/               React SPA (Vite + Tailwind v4)
-│       │   ├── Dockerfile          Multi-stage: Node → Nginx
-│       │   └── src/
-│       └── media-api/              FastAPI + yt-dlp microservice
-│           ├── Dockerfile
-│           └── app/
+│   ├── mms-tts/                    ← Offline Khmer TTS
+│   ├── savemedia-web/              ← Web downloader (MP4/MP3)
+│   └── sticker-maker/              ← Sticker generation service
 │
 ├── shared/                         ← Shared Python libraries
-│   ├── downloader/                 yt-dlp engine (used by both services)
-│   └── utils/                      Logger, link parser
-│
 ├── credentials/                    ← OAuth secrets (gitignored)
 ├── scripts/                        ← Deploy & setup scripts
 └── tests/                          ← Test files
 ```
+
+## Cluster & Scaling
+
+CamTech is designed for multi-server scaling using an **Nginx-based AI Cluster**.
+
+### 1. Main Server (Control Plane)
+Runs the Database, Redis, Nginx, Frontend, and all core APIs.
+- **Port 80**: Public gateway.
+- **Port 5432**: PostgreSQL (exposed to LAN for workers).
+- **Port 6379**: Redis (exposed to LAN for workers).
+
+### 2. ORS Worker Nodes (10.2.7.251, 10.2.7.252)
+Offload heavy AI tasks (Whisper, NLLB, Qwen, Ollama).
+- Runs `docker-compose.ors-worker.yml`.
+- Connects to Main Server for DB and Task Queue.
+
+### 3. Load Balancing
+Nginx (in `savemedia-frontend`) automatically load balances across:
+- `ai_cluster`: Distributes Agent Orchestrator requests.
+- `podcast_cluster`: Distributes Podcast Translation API requests.
+- **Health Checks**: Automatic failover if a worker node goes offline.
+
+### 4. Shared Storage (CRITICAL)
+For multi-server scaling, the following Docker volumes **MUST** be shared using a network filesystem (NFS, SMB, or GlusterFS):
+- `ai-uploads`: Shared between Orchestrator instances.
+- `podcast-storage`: Shared between Podcast API and all Podcast Workers.
 
 ## Services
 

@@ -17,6 +17,22 @@ services:
   redis:
     image: redis:7-alpine
     container_name: camtech-redis
+    # Cap memory so Redis can never OOM the host; noeviction keeps
+    # Celery queue data safe (tasks are never silently dropped).
+    command: >
+      redis-server
+        --maxmemory 256mb
+        --maxmemory-policy noeviction
+        --appendonly yes
+        --appendfsync everysec
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     restart: unless-stopped
     networks:
       - camtech-net
@@ -78,7 +94,8 @@ services:
     volumes:
       - savemedia-downloads:/tmp/savemedia_downloads
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     healthcheck:
       # Celery workers don't serve HTTP — check the process is alive instead
       test: ["CMD-SHELL", "celery -A app.celery_worker.celery_app inspect ping --timeout 5 2>/dev/null | grep -q pong || exit 1"]
@@ -226,10 +243,10 @@ services:
       - camtech-net
 
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  #  CAMTECH Database (PostgreSQL)
+  #  CAMTECH Database (PostgreSQL with pgvector)
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     container_name: camtech-postgres
     restart: unless-stopped
     environment:
@@ -252,6 +269,12 @@ services:
         -c work_mem=16MB
         -c maintenance_work_mem=256MB
         -c effective_cache_size=4GB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U camtech -d camtech"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - camtech-net
 
@@ -271,11 +294,98 @@ services:
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - OLLAMA_URL=http://ollama:11434
     depends_on:
-      - postgres
-      - ollama
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
     volumes:
       - ai-uploads:/app/uploads
     # Healthcheck is defined in the Dockerfile
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Admin Console (standalone React SPA)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  admin-web:
+    build:
+      context: ./services/admin-web
+      dockerfile: Dockerfile
+      args:
+        - VITE_SUPABASE_URL=${SUPABASE_URL}
+        - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+    container_name: camtech-admin-web
+    depends_on:
+      - ai-orchestrator-api
+    ports:
+      - "8080:80"
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Podcast Translator API
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  podcast-api:
+    build:
+      context: ./services/podcast-api
+      dockerfile: Dockerfile
+    container_name: camtech-podcast-api
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - OLLAMA_URL=http://ollama:11434
+      - REDIS_URL=redis://redis:6379/1
+      - WHISPER_MODEL=${WHISPER_MODEL:-medium}
+      - WHISPER_LANGUAGE=${WHISPER_LANGUAGE:-km}
+      - TRANSLATION_PROVIDER=${TRANSLATION_PROVIDER:-nllb}
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - LLM_MODEL=${LLM_MODEL:-qwen3:4b}
+      - TTS_PROVIDER=${TTS_PROVIDER:-piper}
+      - CPU_THREADS=${CPU_THREADS:-8}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    volumes:
+      - podcast-storage:/app/storage
+    expose:
+      - "8003"
+    networks:
+      - camtech-net
+
+  podcast-worker:
+    build:
+      context: ./services/podcast-api
+      dockerfile: Dockerfile
+    container_name: camtech-podcast-worker
+    command: celery -A app.workers.celery_app worker --concurrency=1 --loglevel=info -Q podcast
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - OLLAMA_URL=http://ollama:11434
+      - REDIS_URL=redis://redis:6379/1
+      - WHISPER_MODEL=${WHISPER_MODEL:-medium}
+      - LLM_MODEL=${LLM_MODEL:-qwen3:4b}
+      - TTS_PROVIDER=${TTS_PROVIDER:-piper}
+      - CPU_THREADS=${CPU_THREADS:-6}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    volumes:
+      - podcast-storage:/app/storage
     networks:
       - camtech-net
 
@@ -284,6 +394,7 @@ networks:
     driver: bridge
 
 volumes:
+  redis-data:
   savemedia-downloads:
   bot-downloads:
   kokoro-models:
@@ -292,3 +403,4 @@ volumes:
   ollama-data:
   postgres-data:
   ai-uploads:
+  podcast-storage:

@@ -15,9 +15,33 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     last_login_at = Column(DateTime(timezone=True), nullable=True)
     status = Column(String(50), default="active")
+    is_admin = Column(Integer, default=0) # 0 = user, 1 = admin
+    is_verified = Column(Integer, default=0) # 0 = not verified, 1 = verified
     
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     generated_documents = relationship("GeneratedDocument", back_populates="user", cascade="all, delete-orphan")
+
+class AdminToken(Base):
+    __tablename__ = "admin_tokens"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    token_key = Column(String(100), unique=True, index=True, nullable=False)
+    description = Column(String(255), nullable=True)
+    valid_until = Column(DateTime(timezone=True), nullable=True) # If null, it's permanent
+    max_uses = Column(Integer, default=1) # 0 for unlimited
+    current_uses = Column(Integer, default=0)
+    is_active = Column(Integer, default=1) # 1 = active, 0 = disabled
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+
+class AdminActionLog(Base):
+    __tablename__ = "admin_action_logs"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    admin_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    action = Column(String(255), nullable=False)
+    details = Column(JSONB, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 class Conversation(Base):
     __tablename__ = "conversations"

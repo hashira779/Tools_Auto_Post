@@ -4,7 +4,7 @@ import { useAuth } from './hooks/useAuth'
 import { FORMAT_VIDEO } from './constants/platforms'
 
 import { lazy, Suspense } from 'react'
-import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM } from './components/AppNavbar'
+import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM, TOOL_PODCAST, TOOL_ADMIN } from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
 import SearchCard from './components/SearchCard'
@@ -13,12 +13,15 @@ import FormatTabs from './components/FormatTabs'
 import QualityGrid from './components/QualityGrid'
 import DownloadButton from './components/DownloadButton'
 import Footer from './components/Footer'
+import VerificationOverlay from './components/VerificationOverlay'
 
 // Lazy load heavy tool chunks so the main downloader loads instantly
 const TtsStudio = lazy(() => import('./components/tts/TtsStudio'))
 const StickerHero = lazy(() => import('./components/sticker/StickerHero'))
 const StickerStudio = lazy(() => import('./components/sticker/StickerStudio'))
 const AIChatStudio = lazy(() => import('./components/chat/AIChatStudio'))
+const PodcastTranslator = lazy(() => import('./components/PodcastTranslator'))
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'))
 
 function App() {
   const [activeTool, setActiveTool] = useState(TOOL_DOWNLOADER)
@@ -57,6 +60,8 @@ function App() {
         activeTool={activeTool}
         onSelectTool={setActiveTool}
       />
+
+      <VerificationOverlay />
 
       {/* Main Layout */}
       <div className="relative min-h-screen flex flex-col">
@@ -138,12 +143,30 @@ function App() {
               </main>
             )}
 
+            {/* Podcast Translator */}
+            {activeTool === TOOL_PODCAST && (
+              <main className="flex flex-col items-center animate-fade-in w-full">
+                <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
+                  <PodcastTranslator />
+                </Suspense>
+              </main>
+            )}
+
             {/* Telegram Sticker Studio */}
             {activeTool === TOOL_STICKER && (
               <main className="flex flex-col items-center animate-fade-in">
                 <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
                   <StickerHero />
                   <StickerStudio />
+                </Suspense>
+              </main>
+            )}
+
+            {/* Admin Dashboard */}
+            {activeTool === TOOL_ADMIN && (
+              <main className="flex flex-col items-center animate-fade-in w-full">
+                <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
+                  <AdminDashboard />
                 </Suspense>
               </main>
             )}

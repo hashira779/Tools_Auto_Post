@@ -14,3 +14,9 @@ fpdf2>=2.7.5
 # High performance asyncio event loop and HTTP parser
 uvloop>=0.20.0
 httptools>=0.6.1
+
+# RAG specific libraries
+pgvector>=0.2.1
+langchain>=0.1.13
+langchain-community>=0.0.29
+sentence-transformers>=2.6.1
