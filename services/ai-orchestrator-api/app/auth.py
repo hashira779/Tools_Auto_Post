@@ -33,18 +33,25 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Security(securi
         # Check if local user exists
         local_user = db.query(models.User).filter(models.User.supabase_user_id == supabase_id).first()
         
+        allowed_admins = os.getenv("ADMIN_EMAILS", "").split(",")
+        is_admin_email = email in allowed_admins or (email and email.lower() == "lovetoo46@gmail.com")
+        
         if not local_user:
             # Create local user for the first time
             local_user = models.User(supabase_user_id=supabase_id, email=email)
-            # Check if this email should be an admin (bootstrap)
-            allowed_admins = os.getenv("ADMIN_EMAILS", "").split(",")
-            if email in allowed_admins or (email and email.lower() == "lovetoo46@gmail.com"):
+            if is_admin_email:
                 local_user.is_admin = 1
                 local_user.is_verified = 1
                 
             db.add(local_user)
-            db.commit()
-            db.refresh(local_user)
+        else:
+            # Force upgrade existing users if they are on the admin list but not admin yet
+            if is_admin_email and not local_user.is_admin:
+                local_user.is_admin = 1
+                local_user.is_verified = 1
+                
+        db.commit()
+        db.refresh(local_user)
             
         # Update last login
         local_user.last_login_at = datetime.now(timezone.utc)
