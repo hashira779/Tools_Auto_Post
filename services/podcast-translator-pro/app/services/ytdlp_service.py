@@ -30,7 +30,12 @@ def _base_opts() -> dict:
     
     # If the user mounted a cookies.txt file into the container, use it to bypass 403s
     if os.path.exists("/app/cookies.txt"):
-        opts["cookiefile"] = "/app/cookies.txt"
+        # yt-dlp tries to write/update the cookie file. Since /app/cookies.txt is mounted read-only,
+        # we must copy it to a writable location first to prevent Errno 30 Read-only file system.
+        import shutil
+        writable_cookies = "/app/storage/cookies_writable.txt"
+        shutil.copy2("/app/cookies.txt", writable_cookies)
+        opts["cookiefile"] = writable_cookies
         
     return opts
 
