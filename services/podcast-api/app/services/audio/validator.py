@@ -9,7 +9,7 @@ import mimetypes
 from typing import Dict, Any, Tuple
 from app.config import config
 
-ALLOWED_EXTENSIONS = {'.mp3', '.wav', '.m4a', '.flac'}
+ALLOWED_EXTENSIONS = {'.mp3', '.wav', '.m4a', '.flac', '.mp4'}
 ALLOWED_MIME_TYPES = {
     'audio/mpeg',
     'audio/wav',
@@ -17,7 +17,8 @@ ALLOWED_MIME_TYPES = {
     'audio/mp4',
     'audio/x-m4a',
     'audio/flac',
-    'audio/x-flac'
+    'audio/x-flac',
+    'video/mp4'
 }
 
 class AudioValidationError(Exception):
@@ -43,7 +44,7 @@ def validate_audio_file(file_path: str, original_filename: str) -> Dict[str, Any
     # 2. Check extension
     ext = os.path.splitext(original_filename)[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
-        raise AudioValidationError(f"File extension '{ext}' is not supported. Use MP3, WAV, M4A, or FLAC.")
+        raise AudioValidationError(f"File extension '{ext}' is not supported. Use MP3, WAV, M4A, FLAC, or MP4.")
     
     # 3. Use ffprobe to validate codec, duration, and corruption
     try:

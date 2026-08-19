@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileAudio, CheckCircle, AlertTriangle, Loader, Download, Play, Mic, Edit, List } from 'lucide-react';
+import { Upload, FileAudio, CheckCircle, AlertTriangle, Loader, Download, Play, Mic, Edit, List, Link } from 'lucide-react';
 import SegmentEditor from './SegmentEditor';
 import { useAuth } from '../hooks/useAuth';
 
@@ -15,6 +15,8 @@ const PodcastTranslator = () => {
   const [segments, setSegments] = useState([]);
   const [editingSegment, setEditingSegment] = useState(null);
   const [showSegmentList, setShowSegmentList] = useState(false);
+  const [uploadType, setUploadType] = useState('file');
+  const [url, setUrl] = useState('');
 
   const fetchSegments = async () => {
     if (!jobId) return;
@@ -121,7 +123,7 @@ const PodcastTranslator = () => {
     }
   }, [status, jobId]);
 
-  const handleUpload = async () => {
+  const handleStart = async () => {
     setError(null);
     
     if (!title || !title.trim()) {
@@ -129,32 +131,52 @@ const PodcastTranslator = () => {
       return;
     }
     
-    if (!file) {
-      setError('Please select an audio or video file to upload.');
-      return;
+    if (uploadType === 'file') {
+      if (!file) {
+        setError('Please select an audio or video file to upload.');
+        return;
+      }
+      
+      // Cloudflare limits uploads to 100MB
+      if (file.size > 100 * 1024 * 1024) {
+        setError(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). The maximum allowed size is 100MB.`);
+        return;
+      }
+    } else {
+      if (!url || !url.trim()) {
+        setError('Please provide a valid video or audio URL.');
+        return;
+      }
     }
     
-    // Cloudflare limits uploads to 100MB
-    if (file.size > 100 * 1024 * 1024) {
-      setError(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). The maximum allowed size is 100MB.`);
-      return;
-    }
-    
-    setStatus('UPLOADING');
+    setStatus(uploadType === 'file' ? 'UPLOADING' : 'PROCESSING');
+    if (uploadType === 'url') setCurrentStage('Downloading media...');
     setError(null);
     
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('title', title);
-      
-      const response = await fetch('/api/podcast/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-        body: formData,
-      });
+      let response;
+      if (uploadType === 'file') {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', title);
+        
+        response = await fetch('/api/podcast/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: formData,
+        });
+      } else {
+        response = await fetch('/api/podcast/upload-url', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: url.trim(), title }),
+        });
+      }
       
       if (!response.ok) {
         let errorMsg = `Upload failed (${response.status} ${response.statusText})`;
@@ -170,7 +192,7 @@ const PodcastTranslator = () => {
       setStatus('PROCESSING');
     } catch (err) {
       console.error('Upload error:', err);
-      setError(err.message || 'Failed to upload file');
+      setError(err.message || 'Failed to start translation');
       setStatus('FAILED');
     }
   };
@@ -184,6 +206,7 @@ const PodcastTranslator = () => {
   const resetForm = () => {
     setFile(null);
     setTitle('');
+    setUrl('');
     setJobId(null);
     setStatus('IDLE');
     setProgress(0);
@@ -234,33 +257,63 @@ const PodcastTranslator = () => {
           </div>
           
           <div>
-            <div className="relative group">
-              <input 
-                type="file" 
-                accept="audio/*,video/*" 
-                onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              />
-              <div className={`w-full border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-200 ${file ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)]/5' : 'border-[var(--color-border-2)] bg-[var(--color-surface-1)] group-hover:border-[var(--color-primary-300)]'}`}>
-                {file ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="p-3 bg-[var(--color-primary-500)]/10 rounded-full">
-                      <FileAudio className="w-10 h-10 text-[var(--color-primary-500)]" />
-                    </div>
-                    <p className="text-lg font-medium text-[var(--color-text)]">{file.name}</p>
-                    <p className="text-sm font-medium text-[var(--color-text-4)]">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="p-3 bg-[var(--color-surface-3)] rounded-full text-[var(--color-text-3)] group-hover:text-[var(--color-primary-500)] group-hover:bg-[var(--color-primary-500)]/10 transition-colors">
-                      <Upload className="w-10 h-10" />
-                    </div>
-                    <p className="text-lg font-semibold text-[var(--color-text)]">Click or drag audio/video file to upload</p>
-                    <p className="text-sm font-medium text-[var(--color-text-4)]">Supports MP3, WAV, M4A, FLAC, MP4 (Max 100MB)</p>
-                  </div>
-                )}
-              </div>
+            <div className="flex rounded-lg bg-[var(--color-surface-2)] p-1 mb-4 w-max border border-[var(--color-border-2)]">
+              <button
+                className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${uploadType === 'file' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-primary-600)]' : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'}`}
+                onClick={() => setUploadType('file')}
+              >
+                Upload File
+              </button>
+              <button
+                className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${uploadType === 'url' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-primary-600)]' : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'}`}
+                onClick={() => setUploadType('url')}
+              >
+                Paste URL
+              </button>
             </div>
+            
+            {uploadType === 'file' ? (
+              <div className="relative group">
+                <input 
+                  type="file" 
+                  accept="audio/*,video/*" 
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                <div className={`w-full border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-200 ${file ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)]/5' : 'border-[var(--color-border-2)] bg-[var(--color-surface-1)] group-hover:border-[var(--color-primary-300)]'}`}>
+                  {file ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="p-3 bg-[var(--color-primary-500)]/10 rounded-full">
+                        <FileAudio className="w-10 h-10 text-[var(--color-primary-500)]" />
+                      </div>
+                      <p className="text-lg font-medium text-[var(--color-text)]">{file.name}</p>
+                      <p className="text-sm font-medium text-[var(--color-text-4)]">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="p-3 bg-[var(--color-surface-3)] rounded-full text-[var(--color-text-3)] group-hover:text-[var(--color-primary-500)] group-hover:bg-[var(--color-primary-500)]/10 transition-colors">
+                        <Upload className="w-10 h-10" />
+                      </div>
+                      <p className="text-lg font-semibold text-[var(--color-text)]">Click or drag audio/video file to upload</p>
+                      <p className="text-sm font-medium text-[var(--color-text-4)]">Supports MP3, WAV, M4A, FLAC, MP4 (Max 100MB)</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Link className="h-5 w-5 text-[var(--color-text-4)]" />
+                </div>
+                <input 
+                  type="text" 
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="input-field w-full pl-11 pr-4 py-4 text-base"
+                  placeholder="Paste YouTube, TikTok, or Facebook video URL..."
+                />
+              </div>
+            )}
           </div>
           
           {error && status === 'IDLE' && (
@@ -270,7 +323,7 @@ const PodcastTranslator = () => {
             </div>
           )}
           <button 
-            onClick={handleUpload}
+            onClick={handleStart}
             className="btn-primary w-full py-4 text-lg mt-2 shadow-sm focus-ring"
           >
             Start Translation
