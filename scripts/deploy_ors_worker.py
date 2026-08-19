@@ -90,10 +90,14 @@ def main():
     else:
         run_ssh(client, f"git clone https://github.com/hashira779/Tools_Auto_Post.git {app_dir}", "Cloning CamTech repo")
 
-    # 4. Create .env file
-    env_content = """SUPABASE_URL=https://icouardbzhytnozaordc.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imljb3VhcmRiemh5dG5vemFvcmRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NzY3NjAsImV4cCI6MjEwMjQ1Mjc2MH0.rDHOKRw-Kw6W7jHRrmIvaqelCwzDMaZshio-4d2p2hw
-DATABASE_URL=postgresql://camtech:camtechpassword@10.1.0.11:5432/camtech"""
+    # 4. Copy local .env file
+    try:
+        with open(".env", "r") as f:
+            env_content = f.read()
+    except FileNotFoundError:
+        print("  ⚠️ .env file not found locally! ORS worker might fail to authenticate Supabase.")
+        env_content = ""
+        
     run_ssh(client, f"cat > {app_dir}/.env << 'ENVEOF'\n{env_content}\nENVEOF", "Creating .env file")
 
     # 5. Build and start containers
