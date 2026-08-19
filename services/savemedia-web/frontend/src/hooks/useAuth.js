@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, createContext, useContext } from 'react'
 import { supabase } from '../lib/supabase'
 
-export function useAuth() {
+const AuthContext = createContext({})
+
+export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [user, setUser] = useState(null)
   const [dbUser, setDbUser] = useState(null)
@@ -20,8 +22,9 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
-      if (session) fetchDbUser(session.access_token)
-      else {
+      if (session) {
+          fetchDbUser(session.access_token)
+      } else {
         setDbUser(null)
         setLoading(false)
       }
@@ -32,16 +35,17 @@ export function useAuth() {
 
   const fetchDbUser = async (token) => {
     try {
-      const resp = await fetch('/api/ai/conversations', { // Simple GET to check if user exists and get their status
+      const resp = await fetch('/api/ai/conversations', { 
           headers: { 'Authorization': `Bearer ${token}` }
       })
       if (resp.status === 403) {
-          // Might be "Verification Required"
           const data = await resp.json()
           setDbUser({ is_verified: false, error: data.detail })
+      } else if (resp.status === 401) {
+          // Token is invalid/expired - clear local db user state, don't spam errors
+          setDbUser(null)
+          console.warn("Auth token expired or invalid (401)")
       } else if (resp.ok) {
-          // For now, let's add a dedicated /api/auth/me endpoint later, 
-          // but we can infer verified = true if this succeeds
           setDbUser({ is_verified: true })
       }
     } catch (e) {
@@ -66,5 +70,13 @@ export function useAuth() {
     if (error) console.error("Logout error:", error.message)
   }
 
-  return { session, user, dbUser, loading, loginWithGoogle, logout, refreshDbUser: () => session && fetchDbUser(session.access_token) }
+  return (
+    <AuthContext.Provider value={{ session, user, dbUser, loading, loginWithGoogle, logout, refreshDbUser: () => session && fetchDbUser(session.access_token) }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth() {
+  return useContext(AuthContext)
 }
