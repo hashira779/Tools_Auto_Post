@@ -355,6 +355,7 @@ services:
         condition: service_started
     volumes:
       - podcast-storage:/app/storage
+      - ./cookies.txt:/app/cookies.txt:ro
     expose:
       - "8003"
     networks:
@@ -387,6 +388,7 @@ services:
         condition: service_started
     volumes:
       - podcast-storage:/app/storage
+      - ./cookies.txt:/app/cookies.txt:ro
     networks:
       - camtech-net
 
