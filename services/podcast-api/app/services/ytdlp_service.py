@@ -27,6 +27,12 @@ def _base_opts() -> dict:
         },
         "remote_components": ["ejs:github"],
     }
+    
+    # If the user mounted a cookies.txt file into the container, use it to bypass 403s
+    if os.path.exists("/app/cookies.txt"):
+        opts["cookiefile"] = "/app/cookies.txt"
+        
+    return opts
 
 def download_audio(url: str, max_retries: int = 2) -> Tuple[Optional[Path], Optional[dict]]:
     """
