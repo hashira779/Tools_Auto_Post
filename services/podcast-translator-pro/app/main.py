@@ -19,9 +19,10 @@ async def lifespan(app: FastAPI):
     """Lifecycle events for the FastAPI application."""
     logger.info("Starting CAMTECH Podcast Translator API...")
     
+    from app.database import Base, engine
     # Initialize database tables
-    # Base.metadata.create_all(bind=engine)
-    # logger.info("Database initialized.")
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database initialized.")
     
     # Check resources / verify model paths
     logger.info(f"Using Whisper model: {config.WHISPER_MODEL}")

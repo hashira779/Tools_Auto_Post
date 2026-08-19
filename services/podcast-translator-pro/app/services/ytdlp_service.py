@@ -22,9 +22,6 @@ def _base_opts() -> dict:
         "retries": 3,
         "extractor_retries": 3,
         "fragment_retries": 3,
-        "extractor_args": {
-            "youtube": ["player_client=ios,tv,web"]
-        },
         "remote_components": ["ejs:github"],
     }
     
