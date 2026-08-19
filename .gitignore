@@ -1,7 +1,7 @@
 # Environment
 .env
 *.env
-cookies.txt
+# cookies.txt (Temporarily tracked to deploy to Ubuntu servers)
 
 # Deploy scripts (contain server credentials)
 update.py
