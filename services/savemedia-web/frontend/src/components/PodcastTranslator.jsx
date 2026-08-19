@@ -134,6 +134,12 @@ const PodcastTranslator = () => {
       return;
     }
     
+    // Cloudflare limits uploads to 100MB
+    if (file.size > 100 * 1024 * 1024) {
+      setError(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). The maximum allowed size is 100MB.`);
+      return;
+    }
+    
     setStatus('UPLOADING');
     setError(null);
     
@@ -250,7 +256,7 @@ const PodcastTranslator = () => {
                       <Upload className="w-10 h-10" />
                     </div>
                     <p className="text-lg font-semibold text-[var(--color-text)]">Click or drag audio/video file to upload</p>
-                    <p className="text-sm font-medium text-[var(--color-text-4)]">Supports MP3, WAV, M4A, FLAC, MP4 (Max 500MB)</p>
+                    <p className="text-sm font-medium text-[var(--color-text-4)]">Supports MP3, WAV, M4A, FLAC, MP4 (Max 100MB)</p>
                   </div>
                 )}
               </div>
