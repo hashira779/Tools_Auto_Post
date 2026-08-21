@@ -152,11 +152,13 @@ async def upload_podcast_url(
         db.commit()
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        import traceback
+        err_details = traceback.format_exc()
         if os.path.exists(safe_path):
             os.remove(safe_path)
         db.delete(job)
         db.commit()
-        raise HTTPException(status_code=500, detail=f"Failed to process download: {e}")
+        raise HTTPException(status_code=400, detail=f"Failed to process download: {type(e).__name__} - {str(e)} | TRACE: {err_details}")
         
     # Trigger Celery Task
     process_podcast_job.delay(str(job.id))
