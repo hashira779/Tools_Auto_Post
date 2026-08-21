@@ -1,5 +1,6 @@
 import os
 import shutil
+import logging
 from uuid import UUID
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, BackgroundTasks, Body
 from sqlalchemy.orm import Session
@@ -8,9 +9,12 @@ from app.database import get_db, SessionLocal
 from app.models import PodcastJob, JobStatus, PodcastSegment
 from app.auth import get_verified_user, User
 from app.services.audio.validator import validate_audio_file, AudioValidationError
+from app.workers.celery_app import celery_app
 from app.workers.pipeline import process_podcast_job
 from app.providers.manager import ModelManager
 from app.services.audio.alignment import align_audio_timing
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/podcast", tags=["podcast"])
 
@@ -161,14 +165,76 @@ async def upload_podcast_url(
         raise HTTPException(status_code=400, detail=f"Failed to process download: {type(e).__name__} - {str(e)} | TRACE: {err_details}")
         
     # Trigger Celery Task
-    process_podcast_job.delay(str(job.id))
-    
+    try:
+        process_podcast_job.delay(str(job.id))
+    except Exception as e:
+        import traceback
+        logger.error(f"Failed to queue celery task: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Audio processed successfully, but failed to start translation pipeline: {str(e)}")
+        
     return {
         "job_id": job.id,
         "message": "Podcast translation pipeline started from URL.",
         "duration_seconds": job.duration_seconds
     }
 
+@router.post("/test-upload-url")
+async def test_upload_podcast_url(req: UrlUploadRequest, db: Session = Depends(get_db)):
+    """TEMPORARY endpoint to debug the 500/400 error without auth."""
+    # Download audio synchronously
+    try:
+        downloaded_file, info = download_audio(req.url)
+        if not downloaded_file:
+            raise HTTPException(status_code=400, detail="Could not download audio from the provided URL")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Download failed: {str(e)}")
+
+    final_title = req.title or info.get("title", "Imported Podcast")
+    
+    # Create DB Job
+    job = PodcastJob(
+        title=final_title,
+        # Use a dummy UUID for the user_id since we bypassed auth
+        user_id="9ee0b897-5abd-4c03-b166-14ccb5ecedf8",
+        original_filename=downloaded_file.name,
+        voice_id=req.voice_id,
+        strict_verification=req.strict_verification,
+        original_file_path="" 
+    )
+    db.add(job)
+    db.flush()
+    
+    # Move file to permanent storage
+    file_ext = downloaded_file.suffix
+    safe_path = os.path.join(STORAGE_DIR, f"{job.id}_original{file_ext}")
+    
+    try:
+        shutil.copy2(downloaded_file, safe_path)
+        cleanup_audio(downloaded_file)
+        
+        # Validate audio
+        metadata = validate_audio_file(safe_path, downloaded_file.name)
+        
+        job.original_file_path = safe_path
+        job.duration_seconds = metadata.get("duration_seconds")
+        db.commit()
+        
+    except AudioValidationError as e:
+        if os.path.exists(safe_path):
+            os.remove(safe_path)
+        db.delete(job)
+        db.commit()
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        import traceback
+        err_details = traceback.format_exc()
+        if os.path.exists(safe_path):
+            os.remove(safe_path)
+        db.delete(job)
+        db.commit()
+        raise HTTPException(status_code=400, detail=f"Failed to process download: {type(e).__name__} - {str(e)} | TRACE: {err_details}")
+        
+    return {"message": "Success"}
 
 @router.get("/status/{job_id}")
 def get_job_status(job_id: UUID, user: User = Depends(get_verified_user), db: Session = Depends(get_db)):
