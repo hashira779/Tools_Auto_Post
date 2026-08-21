@@ -45,6 +45,13 @@ def _base_opts() -> dict:
         shutil.copy2("/app/cookies.txt", writable_cookies)
         opts["cookiefile"] = writable_cookies
         
+    # Attempt to bypass 403 forbidden by impersonating Android/Web clients
+    opts["extractor_args"] = {
+        "youtube": {
+            "player_client": ["android", "web"]
+        }
+    }
+        
     return opts
 
 def download_audio(url: str, max_retries: int = 2) -> Tuple[Optional[Path], Optional[dict]]:

@@ -26,6 +26,7 @@ mkdir -p "$APP_DIR"
 rsync -a --delete --exclude '.git' --exclude '.venv' --exclude 'node_modules' --exclude '.env' --exclude 'savemedia-downloads' ./ "$APP_DIR/"
 
 cd "$APP_DIR"
+chmod +x scripts/*.sh scripts/*.py || true
 
 # 3. Pre-flight system check
 echo "📊 System Resource Check:"

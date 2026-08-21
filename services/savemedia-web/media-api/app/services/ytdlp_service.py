@@ -59,6 +59,14 @@ def _base_opts() -> dict:
     }
     if COOKIES_FILE and os.path.exists(COOKIES_FILE):
         opts["cookiefile"] = COOKIES_FILE
+        
+    # Attempt to bypass 403 forbidden by impersonating Android/Web clients
+    opts["extractor_args"] = {
+        "youtube": {
+            "player_client": ["android", "web"]
+        }
+    }
+        
     return opts
 
 
