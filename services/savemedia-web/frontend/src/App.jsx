@@ -4,7 +4,7 @@ import { useAuth } from './hooks/useAuth'
 import { FORMAT_VIDEO } from './constants/platforms'
 
 import { lazy, Suspense } from 'react'
-import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM, TOOL_PODCAST, TOOL_ADMIN } from './components/AppNavbar'
+import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM, TOOL_PODCAST, TOOL_ADMIN, TOOL_PDF } from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
 import SearchCard from './components/SearchCard'
@@ -159,6 +159,19 @@ function App() {
                   <StickerHero />
                   <StickerStudio />
                 </Suspense>
+              </main>
+            )}
+
+            {/* PDF Tools (Stirling-PDF) */}
+            {activeTool === TOOL_PDF && (
+              <main className="flex flex-col items-center animate-fade-in w-full">
+                <iframe
+                  src="/pdf/"
+                  title="CamTech PDF Tools"
+                  className="w-full rounded-xl border border-[var(--color-border)]"
+                  style={{ height: 'calc(100vh - 120px)', minHeight: '600px' }}
+                  allow="clipboard-write"
+                />
               </main>
             )}
 

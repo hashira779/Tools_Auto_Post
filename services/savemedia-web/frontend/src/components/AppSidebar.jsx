@@ -6,6 +6,7 @@ const SIDEBAR_TOOLS = [
   { id: TOOL_DOWNLOADER, label: 'Media Downloader' },
   { id: TOOL_TTS, label: 'Text to Voice' },
   { id: TOOL_STICKER, label: 'Telegram Stickers' },
+  { id: 'pdf', label: 'PDF Tools' },
 ]
 
 const BOTS = [
