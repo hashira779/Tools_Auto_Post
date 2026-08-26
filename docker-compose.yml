@@ -330,6 +330,10 @@ services:
     image: stirlingtools/stirling-pdf:latest
     container_name: camtech-stirling-pdf
     environment:
+      - SERVER_SERVLET_CONTEXT_PATH=/pdf
+      - SYSTEM_ROOTURI=/pdf
+      - SYSTEM_ROOTPATH=/pdf
+      - SECURITY_ENABLELOGIN=false
       - DOCKER_ENABLE_SECURITY=false
       - SYSTEM_DEFAULTLOCALE=en_US
       - UI_APPNAME=CamTech PDF Tools
