@@ -83,7 +83,11 @@ def process_podcast_job(self, job_id_str: str):
         segments = db.query(PodcastSegment).filter(PodcastSegment.job_id == job_id).order_by(PodcastSegment.index.asc()).all()
         
         context_manager = ContextManager(db, str(job_id))
-        llm = model_manager.get_llm()
+        try:
+            llm = model_manager.get_llm()
+        except Exception as e:
+            logger.warning(f"Failed to initialize LLM, proceeding without it: {e}")
+            llm = None
         
         with model_manager.use_translation() as translator:
             for i, segment in enumerate(segments):
@@ -91,7 +95,7 @@ def process_podcast_job(self, job_id_str: str):
                 process_translation(db, segment, translator, llm, context_manager, str(job.user_id) if job.user_id else None)
                 
                 # Generate summaries every 5 minutes (approx every 10-15 segments)
-                if i > 0 and i % 12 == 0:
+                if i > 0 and i % 12 == 0 and llm:
                     generate_summary(db, str(job_id), segments[i-12].start_time, segment.end_time, "5_MIN", llm)
                     
                 # Update progress roughly
@@ -100,8 +104,11 @@ def process_podcast_job(self, job_id_str: str):
 
         # 4. Verification
         update_job_status(db, job, JobStatus.VERIFYING, 65, "Verifying semantics")
-        for i, segment in enumerate(segments):
-            verify_and_revise(db, segment, llm, context_manager)
+        if llm:
+            for i, segment in enumerate(segments):
+                verify_and_revise(db, segment, llm, context_manager)
+        else:
+            logger.info("Skipping semantic verification because LLM is disabled.")
             
         # If strict mode and any segment failed, pause for review
         if job.strict_verification:
@@ -130,7 +137,7 @@ def process_podcast_job(self, job_id_str: str):
                 tts_duration = get_audio_duration(tts_path)
                 
                 # If too long (>15% longer), try concise rewrite
-                if tts_duration > segment.duration * 1.15:
+                if tts_duration > segment.duration * 1.15 and llm:
                     logger.info(f"Segment {i} is too long ({tts_duration:.2f}s vs {segment.duration:.2f}s). Attempting concise rewrite.")
                     concise_prompt = f"The following English text is too long to fit in its allotted time of {segment.duration:.2f} seconds. Please rewrite it to be more concise while preserving all meaning, facts, and conversational tone.\n\nText: {text_to_speak}"
                     concise_text = llm.generate(prompt=concise_prompt, system_prompt="You are a professional podcast editor. Be concise.")

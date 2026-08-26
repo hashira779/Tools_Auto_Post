@@ -166,7 +166,7 @@ async def upload_podcast_url(
         
     # Trigger Celery Task
     try:
-        process_podcast_job.delay(str(job.id))
+        process_podcast_job.apply_async(args=[str(job.id)], queue='podcast')
     except Exception as e:
         import traceback
         logger.error(f"Failed to queue celery task: {traceback.format_exc()}")
