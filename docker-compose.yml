@@ -51,7 +51,6 @@ services:
     depends_on:
       - savemedia-api
       - sticker-api
-      - podcast-api
     restart: unless-stopped
     networks:
       - camtech-net
@@ -323,74 +322,6 @@ services:
     networks:
       - camtech-net
 
-  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  #  Podcast Translator API
-  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  podcast-api:
-    build:
-      context: ./services/podcast-api
-      dockerfile: Dockerfile
-    container_name: camtech-podcast-api
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - OLLAMA_URL=http://ollama:11434
-      - REDIS_URL=redis://redis:6379/1
-      - WHISPER_MODEL=${WHISPER_MODEL:-medium}
-      - WHISPER_LANGUAGE=${WHISPER_LANGUAGE:-km}
-      - TRANSLATION_PROVIDER=${TRANSLATION_PROVIDER:-nllb}
-      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
-      - LLM_MODEL=${LLM_MODEL:-qwen3:4b}
-      - TTS_PROVIDER=${TTS_PROVIDER:-piper}
-      - CPU_THREADS=${CPU_THREADS:-8}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      ollama:
-        condition: service_started
-    volumes:
-      - podcast-storage:/app/storage
-      - ./cookies.txt:/app/cookies.txt:ro
-    expose:
-      - "8003"
-    networks:
-      - camtech-net
-
-  podcast-worker:
-    build:
-      context: ./services/podcast-api
-      dockerfile: Dockerfile
-    container_name: camtech-podcast-worker
-    command: celery -A app.workers.celery_app worker --concurrency=1 --loglevel=info -Q podcast
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - OLLAMA_URL=http://ollama:11434
-      - REDIS_URL=redis://redis:6379/1
-      - WHISPER_MODEL=${WHISPER_MODEL:-medium}
-      - LLM_MODEL=${LLM_MODEL:-qwen3:4b}
-      - TTS_PROVIDER=${TTS_PROVIDER:-piper}
-      - CPU_THREADS=${CPU_THREADS:-6}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      ollama:
-        condition: service_started
-    volumes:
-      - podcast-storage:/app/storage
-      - ./cookies.txt:/app/cookies.txt:ro
-    networks:
-      - camtech-net
 
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   #  Stirling-PDF — 50+ PDF Tools (Edit, Merge, Convert, OCR...)

@@ -4,7 +4,7 @@ import { useAuth } from './hooks/useAuth'
 import { FORMAT_VIDEO } from './constants/platforms'
 
 import { lazy, Suspense } from 'react'
-import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM, TOOL_PODCAST, TOOL_ADMIN, TOOL_PDF } from './components/AppNavbar'
+import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM, TOOL_ADMIN, TOOL_PDF } from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
 import SearchCard from './components/SearchCard'
@@ -20,7 +20,6 @@ const TtsStudio = lazy(() => import('./components/tts/TtsStudio'))
 const StickerHero = lazy(() => import('./components/sticker/StickerHero'))
 const StickerStudio = lazy(() => import('./components/sticker/StickerStudio'))
 const AIChatStudio = lazy(() => import('./components/chat/AIChatStudio'))
-const PodcastTranslator = lazy(() => import('./components/PodcastTranslator'))
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'))
 
 function App() {
@@ -143,14 +142,7 @@ function App() {
               </main>
             )}
 
-            {/* Podcast Translator */}
-            {activeTool === TOOL_PODCAST && (
-              <main className="flex flex-col items-center animate-fade-in w-full">
-                <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
-                  <PodcastTranslator />
-                </Suspense>
-              </main>
-            )}
+
 
             {/* Telegram Sticker Studio */}
             {activeTool === TOOL_STICKER && (

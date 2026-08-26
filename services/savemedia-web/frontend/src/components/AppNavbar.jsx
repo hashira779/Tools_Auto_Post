@@ -6,14 +6,12 @@ export const TOOL_DOWNLOADER = 'downloader'
 export const TOOL_TTS = 'tts'
 export const TOOL_STICKER = 'sticker'
 export const TOOL_LLM = 'llm'
-export const TOOL_PODCAST = 'podcast'
 export const TOOL_ADMIN = 'admin'
 export const TOOL_PDF = 'pdf'
 
 const NAV_TOOLS = [
   { id: TOOL_DOWNLOADER, label: 'Downloader', mobileLabel: 'Download' },
   { id: TOOL_TTS, label: 'Text to Voice', mobileLabel: 'Voice' },
-  { id: TOOL_PODCAST, label: 'Podcast', mobileLabel: 'Podcast' },
   { id: TOOL_STICKER, label: 'Stickers', mobileLabel: 'Stickers' },
   { id: TOOL_PDF, label: 'PDF Tools', mobileLabel: 'PDF' },
   { id: TOOL_LLM, label: 'AI Chat', mobileLabel: 'Chat' },
