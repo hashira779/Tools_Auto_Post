@@ -99,11 +99,6 @@ if ! check_health "http://localhost:80/api/sticker/styles" "Sticker API"; then
     DEPLOY_FAILED=1
 fi
 
-# We temporarily ignore podcast health failure so it doesn't rollback, allowing us to read the logs!
-echo "🔍 Dumping podcast-api logs for remote debugging..."
-echo "$SUDO_PASS" | sudo -S docker logs camtech-podcast-api > debug_logs.txt || true
-echo "$SUDO_PASS" | sudo -S docker cp debug_logs.txt camtech-savemedia-frontend:/usr/share/nginx/html/debug_logs.txt || true
-
 # 6. Automated Rollback if deployment failed
 if [ "$DEPLOY_FAILED" -eq 1 ]; then
     echo "===================================================="
