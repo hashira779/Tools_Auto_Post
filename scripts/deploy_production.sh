@@ -151,8 +151,8 @@ for WORKER_INFO in "${ORS_WORKERS[@]}"; do
     WORKER_IP="${WORKER_INFO%%|*}"
     WORKER_USER="${WORKER_INFO##*|}"
     
-    echo "🔄 Skipping ORS Worker: $WORKER_IP (User: $WORKER_USER) as they are currently offline..."
-    # python3 scripts/deploy_ors_worker.py --host "$WORKER_IP" --user "$WORKER_USER" --password "$ORS_PASS" || echo "  ⚠️ Failed to deploy to $WORKER_IP"
+    echo "🔄 Pushing update to ORS Worker: $WORKER_IP (User: $WORKER_USER)..."
+    python3 scripts/deploy_ors_worker.py --host "$WORKER_IP" --user "$WORKER_USER" --password "$ORS_PASS" || echo "  ⚠️ Failed to deploy to $WORKER_IP"
 done
 
 echo "===================================================="
