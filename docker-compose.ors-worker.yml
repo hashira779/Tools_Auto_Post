@@ -41,7 +41,6 @@ services:
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - OLLAMA_URL=http://ollama:11434
       # ── Tool Communication (Point to Main Server) ──
-      - PODCAST_API_URL=http://10.1.0.11:8003
       - MMS_TTS_URL=http://10.1.0.11:8002
     depends_on:
       - ollama
@@ -55,51 +54,6 @@ services:
     networks:
       - ors-net
 
-  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  #  Podcast API & Worker (Distributed Processing)
-  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  podcast-api:
-    build:
-      context: ./services/podcast-api
-      dockerfile: Dockerfile
-    container_name: ors-podcast-api
-    environment:
-      - DATABASE_URL=postgresql://camtech:camtechpassword@10.1.0.11:5432/camtech
-      - REDIS_URL=redis://10.1.0.11:6379/1
-      - OLLAMA_URL=http://ollama:11434
-      - WHISPER_MODEL=medium
-      - LLM_MODEL=qwen3:4b
-    ports:
-      - "8300:8003"
-    volumes:
-      - podcast-storage:/app/storage
-    depends_on:
-      - ollama
-    restart: unless-stopped
-    networks:
-      - ors-net
-
-  podcast-worker:
-    build:
-      context: ./services/podcast-api
-      dockerfile: Dockerfile
-    container_name: ors-podcast-worker
-    command: celery -A app.workers.celery_app worker --concurrency=1 --loglevel=info -Q podcast
-    environment:
-      - DATABASE_URL=postgresql://camtech:camtechpassword@10.1.0.11:5432/camtech
-      - REDIS_URL=redis://10.1.0.11:6379/1
-      - OLLAMA_URL=http://ollama:11434
-      - WHISPER_MODEL=medium
-      - LLM_MODEL=qwen3:4b
-      - CPU_THREADS=6
-    volumes:
-      - podcast-storage:/app/storage
-    depends_on:
-      - ollama
-    restart: unless-stopped
-    networks:
-      - ors-net
-
 networks:
   ors-net:
     driver: bridge
@@ -107,4 +61,3 @@ networks:
 volumes:
   ollama-data:
   ai-uploads:
-  podcast-storage:
