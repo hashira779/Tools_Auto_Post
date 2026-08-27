@@ -72,7 +72,7 @@ function App() {
         />
 
         {/* Content (For normal tools) */}
-        {activeTool !== TOOL_LLM ? (
+        {(activeTool !== TOOL_LLM && activeTool !== TOOL_PDF) ? (
           <div className="flex-1 w-full max-w-[1024px] mx-auto px-5 sm:px-6 lg:px-8 pt-12 pb-20">
             {/* Media Downloader */}
             {activeTool === TOOL_DOWNLOADER && (
@@ -87,7 +87,6 @@ function App() {
                 />
                 {loading && !videoInfo && (
                   <div className="w-full card p-5 sm:p-6 mb-8 animate-pulse flex flex-col gap-4">
-                    {/* Skeleton... omitted for brevity but intact in real code */}
                     <div className="flex gap-4">
                       <div className="w-24 h-24 rounded-lg bg-[var(--color-surface-3)]"></div>
                       <div className="flex-1 flex flex-col justify-center gap-2.5">
@@ -142,8 +141,6 @@ function App() {
               </main>
             )}
 
-
-
             {/* Telegram Sticker Studio */}
             {activeTool === TOOL_STICKER && (
               <main className="flex flex-col items-center animate-fade-in">
@@ -151,19 +148,6 @@ function App() {
                   <StickerHero />
                   <StickerStudio />
                 </Suspense>
-              </main>
-            )}
-
-            {/* PDF Tools (Stirling-PDF) */}
-            {activeTool === TOOL_PDF && (
-              <main className="flex flex-col items-center animate-fade-in w-full">
-                <iframe
-                  src="/pdf/"
-                  title="CamTech PDF Tools"
-                  className="w-full rounded-xl border border-[var(--color-border)]"
-                  style={{ height: 'calc(100vh - 120px)', minHeight: '600px' }}
-                  allow="clipboard-write"
-                />
               </main>
             )}
 
@@ -177,15 +161,27 @@ function App() {
             )}
           </div>
         ) : (
-          /* AI Chat Studio (Full Width/Height Layout) */
-          <div className="flex-1 w-full animate-fade-in">
-            <Suspense fallback={<div className="w-full h-full animate-pulse bg-[var(--color-surface-1)]"></div>}>
-              <AIChatStudio />
-            </Suspense>
+          /* Full Width/Height Layout for LLM & PDF */
+          <div className="flex-1 w-full animate-fade-in flex flex-col">
+            {activeTool === TOOL_LLM && (
+              <Suspense fallback={<div className="w-full h-full animate-pulse bg-[var(--color-surface-1)]"></div>}>
+                <AIChatStudio />
+              </Suspense>
+            )}
+            
+            {activeTool === TOOL_PDF && (
+              <iframe
+                src="/pdf/"
+                title="CamTech PDF Tools"
+                className="w-full h-full flex-1 border-0"
+                style={{ minHeight: 'calc(100vh - 64px)' }}
+                allow="clipboard-write"
+              />
+            )}
           </div>
         )}
 
-        {activeTool !== TOOL_LLM && <Footer />}
+        {(activeTool !== TOOL_LLM && activeTool !== TOOL_PDF) && <Footer />}
       </div>
     </>
   )
