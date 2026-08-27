@@ -340,9 +340,11 @@ services:
       - SYSTEM_MAXFILESIZE=500
       - UI_HOMEDESCRIPTION=Free PDF tools - Edit, merge, split, compress, convert and more
       - SYSTEM_ENABLEANALYTICS=false
-      - SYSTEM_GOOGLEAPPNAME=CamTech PDF Tools
-      - SYSTEM_GOOGLECLIENTID=${GOOGLE_CLIENT_ID}
-      - SYSTEM_GOOGLEAPIKEY=${GOOGLE_API_KEY}
+      - PREMIUM_ENABLED=true
+      - PREMIUM_PRO_FEATURES_GOOGLE_DRIVE_ENABLED=true
+      - PREMIUM_PRO_FEATURES_GOOGLE_DRIVE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - PREMIUM_PRO_FEATURES_GOOGLE_DRIVE_API_KEY=${GOOGLE_API_KEY}
+      - PREMIUM_PRO_FEATURES_GOOGLE_DRIVE_APP_ID=20284729454
     volumes:
       - stirling-data:/usr/share/tessdata
       - stirling-configs:/configs
