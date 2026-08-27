@@ -152,7 +152,7 @@ for WORKER_INFO in "${ORS_WORKERS[@]}"; do
     WORKER_USER="${WORKER_INFO##*|}"
     
     echo "🔄 Pushing update to ORS Worker: $WORKER_IP (User: $WORKER_USER)..."
-    python3 scripts/deploy_ors_worker.py --host "$WORKER_IP" --user "$WORKER_USER" --password "$ORS_PASS" || echo "  ⚠️ Failed to deploy to $WORKER_IP"
+    python3 -u scripts/deploy_ors_worker.py --host "$WORKER_IP" --user "$WORKER_USER" --password "$ORS_PASS" || echo "  ⚠️ Failed to deploy to $WORKER_IP"
 done
 
 echo "===================================================="
