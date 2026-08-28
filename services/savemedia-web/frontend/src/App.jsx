@@ -175,7 +175,7 @@ function App() {
                 title="CamTech PDF Tools"
                 className="w-full h-full flex-1 border-0"
                 style={{ minHeight: 'calc(100vh - 64px)' }}
-                allow="clipboard-write"
+                allow="clipboard-write; clipboard-read"
               />
             )}
           </div>
