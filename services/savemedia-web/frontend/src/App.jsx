@@ -4,7 +4,7 @@ import { useAuth } from './hooks/useAuth'
 import { FORMAT_VIDEO } from './constants/platforms'
 
 import { lazy, Suspense } from 'react'
-import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_LLM, TOOL_ADMIN, TOOL_PDF } from './components/AppNavbar'
+import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_ADMIN, TOOL_PDF } from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
 import SearchCard from './components/SearchCard'
@@ -19,7 +19,6 @@ import VerificationOverlay from './components/VerificationOverlay'
 const TtsStudio = lazy(() => import('./components/tts/TtsStudio'))
 const StickerHero = lazy(() => import('./components/sticker/StickerHero'))
 const StickerStudio = lazy(() => import('./components/sticker/StickerStudio'))
-const AIChatStudio = lazy(() => import('./components/chat/AIChatStudio'))
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'))
 
 function App() {
@@ -32,8 +31,7 @@ function App() {
   // Automatically switch to Chat AI if returning from Google Login (URL contains access_token)
   useEffect(() => {
     if (window.location.hash && window.location.hash.includes('access_token=')) {
-      setActiveTool(TOOL_LLM)
-      // Supabase will automatically parse the hash and clear it, so we just switch the tab.
+      // Supabase will automatically parse the hash and clear it.
     }
   }, [])
 
@@ -72,7 +70,7 @@ function App() {
         />
 
         {/* Content (For normal tools) */}
-        {(activeTool !== TOOL_LLM && activeTool !== TOOL_PDF) ? (
+        {(activeTool !== TOOL_PDF) ? (
           <div className="flex-1 w-full max-w-[1024px] mx-auto px-5 sm:px-6 lg:px-8 pt-12 pb-20">
             {/* Media Downloader */}
             {activeTool === TOOL_DOWNLOADER && (
@@ -163,12 +161,6 @@ function App() {
         ) : (
           /* Full Width/Height Layout for LLM & PDF */
           <div className="flex-1 w-full animate-fade-in flex flex-col">
-            {activeTool === TOOL_LLM && (
-              <Suspense fallback={<div className="w-full h-full animate-pulse bg-[var(--color-surface-1)]"></div>}>
-                <AIChatStudio />
-              </Suspense>
-            )}
-            
             {activeTool === TOOL_PDF && (
               <iframe
                 src="/pdf/"
@@ -181,7 +173,7 @@ function App() {
           </div>
         )}
 
-        {(activeTool !== TOOL_LLM && activeTool !== TOOL_PDF) && <Footer />}
+        {activeTool !== TOOL_PDF && <Footer />}
       </div>
     </>
   )

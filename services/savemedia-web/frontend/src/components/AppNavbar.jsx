@@ -5,7 +5,6 @@ import { useAuth } from '../hooks/useAuth'
 export const TOOL_DOWNLOADER = 'downloader'
 export const TOOL_TTS = 'tts'
 export const TOOL_STICKER = 'sticker'
-export const TOOL_LLM = 'llm'
 export const TOOL_ADMIN = 'admin'
 export const TOOL_PDF = 'pdf'
 
@@ -14,7 +13,6 @@ const NAV_TOOLS = [
   { id: TOOL_TTS, label: 'Text to Voice', mobileLabel: 'Voice' },
   { id: TOOL_STICKER, label: 'Stickers', mobileLabel: 'Stickers' },
   { id: TOOL_PDF, label: 'PDF Tools', mobileLabel: 'PDF' },
-  { id: TOOL_LLM, label: 'AI Chat', mobileLabel: 'Chat' },
 ]
 
 export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }) {
