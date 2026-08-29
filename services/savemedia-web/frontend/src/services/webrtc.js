@@ -27,43 +27,138 @@ const getIceServers = () => {
   return servers;
 };
 
-export const createPeerConnection = (roomId, onTrack, onConnectionStateChange) => {
-  const pc = new RTCPeerConnection({
-    iceServers: getIceServers(),
-    iceTransportPolicy: 'all', // can be 'relay' to force TURN for testing
-  });
+export class MultipartyWebRTC {
+  constructor(roomId, localStream, onStreamAdded, onStreamRemoved) {
+    this.roomId = roomId;
+    this.localStream = localStream;
+    this.onStreamAdded = onStreamAdded;
+    this.onStreamRemoved = onStreamRemoved;
+    
+    this.peers = new Map(); // targetId -> RTCPeerConnection
 
-  pc.onicecandidate = (event) => {
-    if (event.candidate) {
-      socket.emit('ice-candidate', { roomId, candidate: event.candidate });
-    }
-  };
-
-  if (onTrack) {
-    pc.ontrack = (event) => {
-      onTrack(event.streams[0]);
-    };
+    this.init();
   }
 
-  if (onConnectionStateChange) {
-    pc.onconnectionstatechange = () => {
-      onConnectionStateChange(pc.connectionState);
+  init() {
+    socket.on('all-users', (existingUsers) => {
+      console.log("[WEBRTC] Existing users in room:", existingUsers);
+      // I am the new guy. I must create an offer for every existing user in the room.
+      existingUsers.forEach(userId => {
+        this.createPeerConnection(userId, true);
+      });
+    });
+
+    socket.on('user-joined', ({ userId }) => {
+      console.log("[WEBRTC] New user joined:", userId);
+      // We don't create the offer here, the new guy will create the offer to us
+      // But we CAN prepare a PeerConnection to receive it. (Usually it's created lazily on receiving offer)
+    });
+
+    socket.on('webrtc-offer', async ({ callerId, offer }) => {
+      console.log(`[WEBRTC] Received offer from ${callerId}`);
+      let pc = this.peers.get(callerId);
+      if (!pc) {
+        pc = this.createPeerConnection(callerId, false);
+      }
       
-      // Auto-recover disconnected states
-      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-        console.log("WebRTC Connection failed. Attempting ICE Restart...");
-        // Re-negotiate with iceRestart
-        pc.createOffer({ iceRestart: true })
-          .then(offer => {
-            return pc.setLocalDescription(offer).then(() => offer);
-          })
-          .then(offer => {
-            socket.emit('webrtc-offer', { roomId, offer });
-          })
-          .catch(e => console.error("ICE restart failed", e));
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket.emit('webrtc-answer', { targetId: callerId, callerId: socket.id, answer });
+      } catch (err) {
+        console.error("Error handling offer:", err);
+      }
+    });
+
+    socket.on('webrtc-answer', async ({ callerId, answer }) => {
+      console.log(`[WEBRTC] Received answer from ${callerId}`);
+      const pc = this.peers.get(callerId);
+      if (pc) {
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        } catch (err) {
+          console.error("Error setting remote description from answer:", err);
+        }
+      }
+    });
+
+    socket.on('ice-candidate', async ({ callerId, candidate }) => {
+      const pc = this.peers.get(callerId);
+      if (pc) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (err) {
+          console.error("Error adding ice candidate:", err);
+        }
+      }
+    });
+
+    socket.on('user-left', ({ userId }) => {
+      console.log(`[WEBRTC] User left: ${userId}`);
+      const pc = this.peers.get(userId);
+      if (pc) {
+        pc.close();
+        this.peers.delete(userId);
+      }
+      if (this.onStreamRemoved) {
+        this.onStreamRemoved(userId);
+      }
+    });
+
+    // Finally, tell server we want to join
+    socket.emit('join-room', { roomId: this.roomId });
+  }
+
+  createPeerConnection(targetId, isInitiator) {
+    const pc = new RTCPeerConnection({
+      iceServers: getIceServers(),
+    });
+
+    this.peers.set(targetId, pc);
+
+    // Add local tracks to the connection
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(track => {
+        pc.addTrack(track, this.localStream);
+      });
+    }
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit('ice-candidate', { targetId, callerId: socket.id, candidate: event.candidate });
       }
     };
+
+    pc.ontrack = (event) => {
+      console.log(`[WEBRTC] Track received from ${targetId}`);
+      if (this.onStreamAdded && event.streams && event.streams[0]) {
+        this.onStreamAdded(targetId, event.streams[0]);
+      }
+    };
+
+    if (isInitiator) {
+      pc.createOffer()
+        .then(offer => {
+          return pc.setLocalDescription(offer).then(() => offer);
+        })
+        .then(offer => {
+          socket.emit('webrtc-offer', { targetId, callerId: socket.id, offer });
+        })
+        .catch(err => console.error("Error creating offer:", err));
+    }
+
+    return pc;
   }
 
-  return pc;
-};
+  destroy() {
+    this.peers.forEach((pc) => pc.close());
+    this.peers.clear();
+    socket.off('all-users');
+    socket.off('user-joined');
+    socket.off('webrtc-offer');
+    socket.off('webrtc-answer');
+    socket.off('ice-candidate');
+    socket.off('user-left');
+  }
+}

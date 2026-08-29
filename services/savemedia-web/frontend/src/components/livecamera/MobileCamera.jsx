@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { socket, connectSocket } from '../../services/socket';
-import { createPeerConnection } from '../../services/webrtc';
-import { MonitorUp, XCircle, AlertCircle, Info } from 'lucide-react';
+import { MultipartyWebRTC } from '../../services/webrtc';
+import VideoPreview from './VideoPreview';
+import { MonitorUp, XCircle, Send, MessageCircle } from 'lucide-react';
 
 const STATE = {
   INITIAL: 'INITIAL',
@@ -9,163 +10,100 @@ const STATE = {
   UNSUPPORTED: 'UNSUPPORTED',
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   BLOCKED_BY_SECURITY: 'BLOCKED_BY_SECURITY',
-  NOT_READY: 'NOT_READY',
-  CONNECTION_FAILED: 'CONNECTION_FAILED',
   LIVE: 'LIVE'
 };
 
 export default function MobileCamera({ roomId }) {
   const [supportState, setSupportState] = useState(STATE.INITIAL);
-  const [sharing, setSharing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [pcState, setPcState] = useState('new');
-  const [showDebug, setShowDebug] = useState(false);
+  const [streams, setStreams] = useState(new Map()); // userId -> MediaStream
+  const [messages, setMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [reactions, setReactions] = useState([]);
   
-  const [diagnostics, setDiagnostics] = useState({});
-
   const streamRef = useRef(null);
-  const pcRef = useRef(null);
+  const webrtcRef = useRef(null);
+  const chatEndRef = useRef(null);
 
   useEffect(() => {
-    // Check URL for debug flag
-    if (window.location.search.includes('debug=1')) {
-      setShowDebug(true);
-    }
-
-    // 1. Strict Feature Detection
     const isSecureContext = window.isSecureContext;
     const hasMediaDevices = !!navigator.mediaDevices;
     const hasGetUserMedia = typeof navigator.mediaDevices?.getUserMedia === 'function';
-    
-    setDiagnostics({
-      href: location.href,
-      secure: isSecureContext,
-      mediaDevices: hasMediaDevices,
-      getUserMedia: hasGetUserMedia ? 'AVAILABLE' : 'UNAVAILABLE',
-      userAgent: navigator.userAgent
-    });
 
     if (!isSecureContext) {
       setSupportState(STATE.BLOCKED_BY_SECURITY);
       setErrorMsg('Live Camera requires HTTPS.');
-    } else if (!hasMediaDevices) {
+    } else if (!hasMediaDevices || !hasGetUserMedia) {
       setSupportState(STATE.UNSUPPORTED);
-      setErrorMsg('Camera API is unavailable (navigator.mediaDevices is undefined).');
-    } else if (!hasGetUserMedia) {
-      setSupportState(STATE.UNSUPPORTED);
-      setErrorMsg('Camera API is unavailable (getUserMedia is not a function).');
+      setErrorMsg('Camera API is unavailable.');
     } else {
       setSupportState(STATE.SUPPORTED);
     }
 
-    connectSocket();
-    socket.emit('join-room-presenter', { roomId });
-
-    socket.on('webrtc-answer', async (answer) => {
-      if (pcRef.current) {
-        try {
-          await pcRef.current.setRemoteDescription(new RTCSessionDescription(answer));
-        } catch (e) {
-          console.error("Failed to set remote description:", e);
-        }
-      }
-    });
-
-    socket.on('ice-candidate', async (candidate) => {
-      if (pcRef.current) {
-        try {
-          await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (e) {
-          console.error("Failed to add ice candidate:", e);
-        }
-      }
-    });
-
-    socket.on('error', (err) => {
-      setErrorMsg(err.message);
-    });
-
     return () => {
-      socket.off('webrtc-answer');
-      socket.off('ice-candidate');
-      socket.off('error');
       stopSharing();
     };
   }, [roomId]);
 
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   const startSharing = async () => {
     setErrorMsg('');
     try {
-      if (!window.isSecureContext) {
-          throw new Error("HTTPS_REQUIRED");
-      }
-      if (!navigator.mediaDevices) {
-          throw new Error("MEDIA_DEVICES_UNAVAILABLE");
-      }
-      if (typeof navigator.mediaDevices.getUserMedia !== "function") {
-          throw new Error("GET_USER_MEDIA_UNAVAILABLE");
-      }
-
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "user"
-        },
+        video: { facingMode: "user" },
         audio: true
       });
 
       streamRef.current = stream;
-      setSharing(true);
       setSupportState(STATE.LIVE);
 
-      // Listen for user stopping stream via browser UI
       stream.getVideoTracks()[0].onended = () => {
         stopSharing();
       };
 
-      // Create WebRTC Connection
-      pcRef.current = createPeerConnection(roomId, null, (state) => {
-        setPcState(state);
-        if (state === 'failed' || state === 'disconnected') {
-           setSupportState(STATE.CONNECTION_FAILED);
+      connectSocket();
+
+      webrtcRef.current = new MultipartyWebRTC(
+        roomId,
+        stream,
+        (userId, remoteStream) => {
+          setStreams(prev => {
+            const newMap = new Map(prev);
+            newMap.set(userId, remoteStream);
+            return newMap;
+          });
+        },
+        (userId) => {
+          setStreams(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(userId);
+            return newMap;
+          });
         }
+      );
+
+      socket.on('chat-message', (msg) => {
+        setMessages(prev => [...prev, msg]);
       });
 
-      // Add tracks
-      stream.getTracks().forEach((track) => {
-        pcRef.current.addTrack(track, stream);
+      socket.on('room-reaction', (reaction) => {
+        setReactions(prev => [...prev, reaction]);
+        setTimeout(() => {
+          setReactions(prev => prev.filter(r => r.id !== reaction.id));
+        }, 3000);
       });
-
-      // Create Offer
-      const offer = await pcRef.current.createOffer();
-      await pcRef.current.setLocalDescription(offer);
-
-      socket.emit('webrtc-offer', { roomId, offer });
 
     } catch (error) {
-      console.error("Camera access failed:", {
-          name: error?.name,
-          message: error?.message,
-          stack: error?.stack
-      });
-      setDiagnostics(prev => ({ ...prev, lastErrorName: error?.name, lastErrorMessage: error?.message }));
-
+      console.error(error);
       if (error.name === 'NotAllowedError') {
         setSupportState(STATE.PERMISSION_DENIED);
-        setErrorMsg('Camera/Microphone permission was denied.\n\nPlease allow access to talk.');
-      } else if (error.name === 'NotFoundError') {
-        setErrorMsg('No camera or microphone found on this device.');
-      } else if (error.name === 'InvalidStateError') {
-        setErrorMsg('Please tap the Start button again.');
-      } else if (error.name === 'SecurityError' || error.message === 'HTTPS_REQUIRED') {
-        setSupportState(STATE.BLOCKED_BY_SECURITY);
-        setErrorMsg('Camera access is blocked by the current security configuration.');
-      } else if (error.message === 'GET_USER_MEDIA_UNAVAILABLE' || error.message === 'MEDIA_DEVICES_UNAVAILABLE') {
-        setSupportState(STATE.UNSUPPORTED);
-        setErrorMsg('Live camera is unavailable in this browser environment.\nPlease use a supported browser with the latest updates.');
+        setErrorMsg('Camera permission denied.');
       } else {
-        setErrorMsg(`Unable to start camera.\n\nTechnical error: ${error?.name || error?.message || 'Unknown'}`);
+        setErrorMsg(`Error: ${error?.message}`);
       }
-      setSharing(false);
     }
   };
 
@@ -174,115 +112,146 @@ export default function MobileCamera({ roomId }) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    if (pcRef.current) {
-      pcRef.current.close();
-      pcRef.current = null;
+    if (webrtcRef.current) {
+      webrtcRef.current.destroy();
+      webrtcRef.current = null;
     }
-    setSharing(false);
-    setPcState('closed');
-    if (supportState === STATE.LIVE || supportState === STATE.CONNECTION_FAILED) {
-      setSupportState(STATE.SUPPORTED);
-    }
-    socket.emit('stop-sharing', { roomId });
+    setStreams(new Map());
+    setSupportState(STATE.SUPPORTED);
+    socket.off('chat-message');
+    socket.off('room-reaction');
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto min-h-[60vh] gap-6 animate-fade-in w-full">
-      
-      {showDebug && (
-        <div className="w-full bg-black/90 text-green-400 font-mono text-[11px] text-left p-5 rounded-xl overflow-x-auto shadow-2xl border border-green-500/20">
-          <h3 className="text-green-500 font-bold mb-3 uppercase tracking-widest text-xs flex items-center gap-2 border-b border-green-500/20 pb-2">
-            <Info className="w-4 h-4"/> Talk Mode Diagnostics
-          </h3>
-          <div className="space-y-1">
-            <div className="flex justify-between"><span>HTTPS:</span> <span className="text-white">{diagnostics.secure ? 'YES' : 'NO'}</span></div>
-            <div className="flex justify-between"><span>Secure Context:</span> <span className="text-white">{diagnostics.secure ? 'YES' : 'NO'}</span></div>
-            <div className="flex justify-between"><span>MediaDevices:</span> <span className="text-white">{diagnostics.mediaDevices ? 'YES' : 'NO'}</span></div>
-            <div className="flex justify-between"><span>getUserMedia:</span> <span className="text-white">{diagnostics.getUserMedia}</span></div>
-            
-            <div className="mt-3 pt-3 border-t border-green-500/20 text-gray-400 truncate max-w-full block">
-              <span className="block text-green-500/70 mb-1">User Agent:</span> 
-              {diagnostics.userAgent}
-            </div>
-            
-            {diagnostics.lastErrorName && (
-              <div className="mt-3 pt-3 border-t border-red-500/20 text-red-400 whitespace-pre-wrap">
-                <span className="block text-red-500/70 mb-1">Last Error:</span>
-                {diagnostics.lastErrorName}: {diagnostics.lastErrorMessage}
-              </div>
-            )}
-            
-            <div className="mt-3 pt-3 border-t border-blue-500/20 text-blue-400">
-              <span className="text-blue-500/70">WebRTC State:</span> {pcState}
-            </div>
-          </div>
-        </div>
-      )}
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    socket.emit('chat-message', {
+      roomId,
+      message: chatInput,
+      senderId: socket.id,
+      senderName: 'Mobile User'
+    });
+    setChatInput('');
+  };
 
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-[var(--color-text)]">Live Camera & Audio</h1>
-        <p className="text-base text-gray-400">Room: <span className="font-mono text-[var(--color-primary)] font-bold">{roomId}</span></p>
+  const sendReaction = (emoji) => {
+    socket.emit('room-reaction', { roomId, emoji, senderId: socket.id });
+  };
+
+  if (supportState !== STATE.LIVE) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto min-h-[60vh] gap-6 animate-fade-in w-full">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-[var(--color-text)]">Live Room</h1>
+          <p className="text-base text-gray-400">Join Room: <span className="font-mono text-[var(--color-primary)] font-bold">{roomId}</span></p>
+        </div>
+
+        {errorMsg && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-5 rounded-xl text-sm w-full font-medium shadow-lg whitespace-pre-wrap text-left">
+            {errorMsg}
+          </div>
+        )}
+
+        <button
+          onClick={startSharing}
+          disabled={supportState === STATE.BLOCKED_BY_SECURITY || supportState === STATE.UNSUPPORTED}
+          className={`w-full py-5 px-6 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-all shadow-xl text-lg mt-8 ${
+            supportState === STATE.BLOCKED_BY_SECURITY || supportState === STATE.UNSUPPORTED 
+              ? 'bg-gray-700 opacity-50 cursor-not-allowed' 
+              : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-600)] hover:scale-[1.02] active:scale-[0.98]'
+          }`}
+        >
+          <MonitorUp className="w-6 h-6" />
+          Join with Camera
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col w-full h-[calc(100vh-80px)] overflow-hidden bg-black animate-fade-in relative">
+      
+      {/* Floating Reactions Overlay */}
+      <div className="pointer-events-none fixed bottom-40 right-4 w-20 h-64 z-50 flex flex-col justify-end items-center overflow-visible">
+        {reactions.map(r => (
+          <div 
+            key={r.id} 
+            className="absolute bottom-0 text-3xl animate-float-up opacity-0"
+            style={{ left: `${Math.random() * 40 - 20}px` }}
+          >
+            {r.emoji}
+          </div>
+        ))}
       </div>
 
-      {errorMsg && (
-        <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-5 rounded-xl text-sm w-full font-medium shadow-lg whitespace-pre-wrap text-left">
-          {errorMsg}
-        </div>
-      )}
-
-
-
-      <div className="w-full flex flex-col items-center gap-4 mt-4">
-        {!sharing ? (
-          <>
-            <button
-              onClick={startSharing}
-              disabled={supportState === STATE.BLOCKED_BY_SECURITY || supportState === STATE.UNSUPPORTED}
-              className={`w-full py-5 px-6 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-all shadow-xl text-lg ${
-                supportState === STATE.BLOCKED_BY_SECURITY || supportState === STATE.UNSUPPORTED 
-                  ? 'bg-gray-700 opacity-50 cursor-not-allowed' 
-                  : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-600)] hover:scale-[1.02] active:scale-[0.98]'
-              }`}
-            >
-              <MonitorUp className="w-6 h-6" />
-              Start Camera / Talk
-            </button>
-            <p className="text-sm text-gray-500 font-medium">
-              No app required where supported.
-            </p>
-          </>
-        ) : (
-          <>
-            <div className="flex flex-col items-center gap-3 py-8 bg-[var(--color-surface-2)] w-full rounded-2xl border border-[var(--color-surface-3)] shadow-inner">
-              {pcState === 'connected' ? (
-                <>
-                  <div className="w-5 h-5 rounded-full bg-green-500 animate-pulse shadow-[0_0_20px_rgba(34,197,94,0.7)]" />
-                  <p className="text-green-500 font-bold text-xl tracking-wide mt-2">● LIVE</p>
-                  <p className="text-sm text-gray-400 font-medium">Connected to PC</p>
-                </>
-              ) : pcState === 'failed' || pcState === 'disconnected' ? (
-                <>
-                  <div className="w-5 h-5 rounded-full bg-red-500" />
-                  <p className="text-red-500 font-bold text-xl mt-2">Connection lost</p>
-                  <p className="text-sm text-gray-400 font-medium">Reconnecting...</p>
-                </>
-              ) : (
-                <>
-                  <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-                  <p className="text-[var(--color-primary)] font-bold text-xl mt-2">Connecting...</p>
-                </>
-              )}
+      {/* Main Video Grid */}
+      <div className="flex-1 w-full overflow-hidden relative">
+        <div className={`w-full h-full grid gap-1 ${streams.size > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {/* Local Stream */}
+          <div className="relative w-full h-full bg-gray-900 border border-gray-800 flex items-center justify-center">
+            <video
+              ref={el => {
+                if (el && streamRef.current) el.srcObject = streamRef.current;
+              }}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover transform -scale-x-100"
+            />
+            <span className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">You</span>
+          </div>
+          
+          {/* Remote Streams */}
+          {Array.from(streams.entries()).map(([id, stream]) => (
+            <div key={id} className="relative w-full h-full bg-gray-900 border border-gray-800 flex items-center justify-center">
+               <VideoPreview stream={stream} connectionState="connected" />
             </div>
-            
-            <button
-              onClick={stopSharing}
-              className="w-full py-4 px-6 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50 rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors mt-2"
-            >
-              <XCircle className="w-6 h-6" />
-              Stop Camera
+          ))}
+        </div>
+        
+        {/* Leave Button */}
+        <button
+          onClick={stopSharing}
+          className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-red-500/80 transition-colors z-20 backdrop-blur-sm"
+        >
+          <XCircle className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* Chat Overlay (Bottom) */}
+      <div className="h-64 bg-[var(--color-surface-2)] flex flex-col border-t border-[var(--color-surface-3)] z-30">
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {messages.map(msg => (
+            <div key={msg.id} className={`flex flex-col ${msg.senderId === socket.id ? 'items-end' : 'items-start'}`}>
+              <span className="text-[10px] text-gray-400 px-1">{msg.senderName}</span>
+              <div className={`px-3 py-1.5 rounded-2xl max-w-[85%] text-sm ${msg.senderId === socket.id ? 'bg-[var(--color-primary)] text-white' : 'bg-gray-700 text-white'}`}>
+                {msg.message}
+              </div>
+            </div>
+          ))}
+          <div ref={chatEndRef} />
+        </div>
+
+        <div className="p-3 bg-black/20 space-y-2">
+          <div className="flex justify-around pb-2 border-b border-gray-700/50">
+            <button onClick={() => sendReaction('❤️')} className="text-xl hover:scale-125 transition-transform">❤️</button>
+            <button onClick={() => sendReaction('😂')} className="text-xl hover:scale-125 transition-transform">😂</button>
+            <button onClick={() => sendReaction('👏')} className="text-xl hover:scale-125 transition-transform">👏</button>
+            <button onClick={() => sendReaction('🔥')} className="text-xl hover:scale-125 transition-transform">🔥</button>
+          </div>
+          <form onSubmit={sendMessage} className="flex gap-2">
+            <input 
+              type="text" 
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              placeholder="Chat..." 
+              className="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+            />
+            <button type="submit" className="p-2 bg-[var(--color-primary)] text-white rounded-full">
+              <Send className="w-4 h-4" />
             </button>
-          </>
-        )}
+          </form>
+        </div>
       </div>
     </div>
   );
