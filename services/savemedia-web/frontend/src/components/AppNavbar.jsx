@@ -48,6 +48,28 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
     setTheme(prev => prev === 'dark' ? 'light' : 'dark')
   }
 
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`)
+      })
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen()
+      }
+    }
+  }
+
   return (
     <header
       className={`sticky top-0 z-40 w-full navbar transition-[border-color] duration-200 ${
@@ -106,8 +128,26 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
             )}
           </nav>
 
-          {/* ── Right: Theme + Mobile Menu ─────────────── */}
+          {/* ── Right: Fullscreen + Theme + Mobile Menu ─────────────── */}
           <div className="flex items-center gap-2">
+
+            {/* Fullscreen Toggle Button */}
+            <button
+              onClick={toggleFullscreen}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer focus-ring hidden sm:flex"
+              aria-label="Toggle Fullscreen"
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullscreen ? (
+                <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+                </svg>
+              ) : (
+                <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+              )}
+            </button>
 
             {/* Theme Toggle Button */}
             <button
