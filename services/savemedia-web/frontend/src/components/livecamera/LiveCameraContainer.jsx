@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import ScreenShareHero from './ScreenShareHero';
-import MobileShare from './MobileShare';
+import LiveCameraHero from './LiveCameraHero';
+import MobileCamera from './MobileCamera';
 
-export default function ScreenShareContainer() {
+export default function LiveCameraContainer() {
   const [roomId, setRoomId] = useState(null);
   
   useEffect(() => {
@@ -16,11 +16,10 @@ export default function ScreenShareContainer() {
     }
   }, []);
 
-  // If there's a roomId in the URL, this is the mobile presentation view
   if (roomId) {
-    return <MobileShare roomId={roomId} />;
+    return <MobileCamera roomId={roomId} />;
   }
 
   // Otherwise, it's the PC creation view
-  return <ScreenShareHero />;
+  return <LiveCameraHero />;
 }

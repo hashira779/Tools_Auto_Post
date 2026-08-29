@@ -20,7 +20,7 @@ const TtsStudio = lazy(() => import('./components/tts/TtsStudio'))
 const StickerHero = lazy(() => import('./components/sticker/StickerHero'))
 const StickerStudio = lazy(() => import('./components/sticker/StickerStudio'))
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'))
-const ScreenShareContainer = lazy(() => import('./components/screenshare/ScreenShareContainer'))
+const LiveCameraContainer = lazy(() => import('./components/livecamera/LiveCameraContainer'))
 
 function App() {
   const [activeTool, setActiveTool] = useState(() => {
@@ -190,7 +190,7 @@ function App() {
             {activeTool === TOOL_SCREEN_SHARE && (
               <main className="flex flex-col items-center animate-fade-in w-full">
                 <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
-                  <ScreenShareContainer />
+                  <LiveCameraContainer />
                 </Suspense>
               </main>
             )}

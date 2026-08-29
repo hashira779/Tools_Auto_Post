@@ -7,7 +7,7 @@ import { Copy, RefreshCw } from 'lucide-react';
 
 const generateRoomId = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
-export default function ScreenShareHero() {
+export default function LiveCameraHero() {
   const [roomId, setRoomId] = useState('');
   const [status, setStatus] = useState('Waiting for phone...');
   const [stream, setStream] = useState(null);

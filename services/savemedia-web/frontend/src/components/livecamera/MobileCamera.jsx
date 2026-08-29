@@ -14,7 +14,7 @@ const STATE = {
   LIVE: 'LIVE'
 };
 
-export default function MobileShare({ roomId }) {
+export default function MobileCamera({ roomId }) {
   const [supportState, setSupportState] = useState(STATE.INITIAL);
   const [sharing, setSharing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
