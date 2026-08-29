@@ -58,3 +58,6 @@ install.ps1
 # Temporary files
 Stirling-PDF/
 *.tar.gz
+
+*.backup
+*.backup.yml
