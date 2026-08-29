@@ -4,13 +4,12 @@ const getIceServers = () => {
   const servers = [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
     {
-      urls: 'turn:camtech.cam:3478',
-      username: 'camtech',
-      credential: 'camtech_turn_secret'
-    },
-    {
-      urls: 'turn:camtech.cam:3478?transport=tcp',
+      urls: [
+        'turn:camtech.cam:3478?transport=udp',
+        'turn:camtech.cam:3478?transport=tcp'
+      ],
       username: 'camtech',
       credential: 'camtech_turn_secret'
     }

@@ -394,6 +394,19 @@ body {
   animation: floatUp 3s ease-out forwards;
 }
 
+.mask-gradient {
+  mask-image: linear-gradient(to bottom, transparent, black 15%, black 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 100%);
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Respect reduced motion ───────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,

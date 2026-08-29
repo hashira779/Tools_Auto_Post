@@ -3,34 +3,55 @@ import QRCode from 'react-qr-code';
 import { socket, connectSocket } from '../../services/socket';
 import { MultipartyWebRTC } from '../../services/webrtc';
 import VideoPreview from './VideoPreview';
-import { Copy, RefreshCw, Send, Heart, Flame, ThumbsUp, MessageCircle, MonitorUp, Mic, MicOff, Video, VideoOff } from 'lucide-react';
+import { 
+  Copy, RefreshCw, Send, Users, 
+  MonitorUp, Mic, MicOff, Video, VideoOff, 
+  MessageCircle, MessageSquareOff, QrCode, Maximize, Minimize,
+  Check, Sparkles, Radio, PhoneOff
+} from 'lucide-react';
 
 const generateRoomId = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+const EMOJI_LIST = ['❤️', '🔥', '👏', '😂', '🎉', '🚀'];
 
 export default function LiveCameraHero() {
   const [roomId, setRoomId] = useState('');
   const [streams, setStreams] = useState(new Map()); // userId -> MediaStream
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
-  const [reactions, setReactions] = useState([]); // Array of floating emojis
+  const [reactions, setReactions] = useState([]); // Floating reactions
   
   const [localStream, setLocalStream] = useState(null);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  const localVideoRef = useRef(null);
-  
+  const [showChat, setShowChat] = useState(true);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   const webrtcRef = useRef(null);
   const chatEndRef = useRef(null);
+  const containerRef = useRef(null);
+  const localVideoRef = useRef(null);
 
   useEffect(() => {
     initSession();
-    return () => cleanupSession();
+    return () => {
+      cleanupSession();
+    };
   }, []);
 
   useEffect(() => {
-    // Scroll to bottom of chat
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (showChat) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, showChat]);
+
+  // Bind local video element whenever localStream changes
+  useEffect(() => {
+    if (localVideoRef.current && localStream) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
 
   const initSession = (stream = null, existingRoomId = null) => {
     const newRoomId = existingRoomId || generateRoomId();
@@ -68,7 +89,7 @@ export default function LiveCameraHero() {
       setReactions(prev => [...prev, reaction]);
       setTimeout(() => {
         setReactions(prev => prev.filter(r => r.id !== reaction.id));
-      }, 3000); // Remove after 3s animation
+      }, 3000);
     });
   };
 
@@ -106,8 +127,17 @@ export default function LiveCameraHero() {
       initSession(stream, roomId); // Re-join with the same room ID
     } catch (err) {
       console.error(err);
-      alert("Could not access camera or microphone.");
+      alert("Could not access camera or microphone. Please check your browser permissions.");
     }
+  };
+
+  const stopCamera = () => {
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+    }
+    cleanupSession();
+    initSession(null, roomId);
   };
 
   const toggleAudio = () => {
@@ -133,6 +163,8 @@ export default function LiveCameraHero() {
   const copyLink = () => {
     const url = `${window.location.origin}/share/${roomId}`;
     navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const sendMessage = (e) => {
@@ -142,7 +174,7 @@ export default function LiveCameraHero() {
       roomId,
       message: chatInput,
       senderId: socket.id,
-      senderName: 'PC Host'
+      senderName: 'Host (PC)'
     });
     setChatInput('');
   };
@@ -151,103 +183,244 @@ export default function LiveCameraHero() {
     socket.emit('room-reaction', { roomId, emoji, senderId: socket.id });
   };
 
-  const hasStreams = streams.size > 0 || localStream !== null;
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement && containerRef.current) {
+      containerRef.current.requestFullscreen().catch(err => console.error(err));
+      setIsFullscreen(true);
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen().catch(err => console.error(err));
+      setIsFullscreen(false);
+    }
+  };
+
+  const hasActiveSession = streams.size > 0 || localStream !== null;
+  const totalParticipants = streams.size + (localStream ? 1 : 0);
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col items-center gap-6 animate-fade-in relative">
+    <div 
+      ref={containerRef}
+      className="w-full flex-1 bg-slate-950 text-slate-100 flex flex-col min-h-[calc(100vh-64px)] relative select-none"
+    >
       
-      {!hasStreams && (
-        <div className="text-center space-y-4 mb-4">
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-[var(--color-text)]">
-            Live Camera & Audio
-          </h1>
-          <p className="text-lg text-[var(--color-text-3)] max-w-2xl mx-auto">
-            Scan the code to join the live room. Multiple people can join, chat, and react!
-          </p>
-        </div>
-      )}
-
-      {/* Floating Reactions Overlay */}
-      <div className="pointer-events-none fixed bottom-24 right-10 md:right-32 w-20 h-96 z-50 flex flex-col justify-end items-center overflow-visible">
-        {reactions.map(r => (
-          <div 
-            key={r.id} 
-            className="absolute bottom-0 text-3xl animate-float-up"
-            style={{ left: `${Math.random() * 60 - 30}px` }}
-          >
-            {r.emoji}
-          </div>
-        ))}
-      </div>
-
-      {hasStreams ? (
-        <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main Video Grid */}
-          <div className="lg:col-span-3 flex flex-col gap-4">
-            <div className="w-full flex items-center justify-between px-4 bg-[var(--color-surface-2)] p-4 rounded-xl border border-[var(--color-surface-3)]">
-              <div className="flex items-center gap-3">
-                <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
-                <span className="font-bold text-red-500 tracking-widest text-lg">LIVE</span>
-                <span className="ml-4 text-[var(--color-text-3)] font-mono text-sm bg-black/20 px-3 py-1 rounded-full">Room: {roomId}</span>
-              </div>
-              <button 
-                onClick={handleRecreate}
-                className="px-4 py-2 bg-[var(--color-surface-1)] hover:bg-[var(--color-primary)] hover:text-white rounded-lg text-sm transition-all font-medium flex items-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" /> End Session
-              </button>
+      {/* ── Studio Header Bar ── */}
+      <header className="h-16 px-4 sm:px-6 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between z-30 flex-shrink-0">
+        
+        {/* Left: Studio Identity & Room Info */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20">
+              <Radio className="w-5 h-5 text-white" />
             </div>
-            
-            <div className={`grid gap-4 w-full ${(streams.size + (localStream ? 1 : 0)) > 1 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+            <div className="hidden sm:block">
+              <h2 className="text-sm font-bold text-white leading-tight">Live Studio</h2>
+              <p className="text-[11px] text-slate-400">CamTech Multiparty Mesh</p>
+            </div>
+          </div>
+
+          <div className="h-6 w-px bg-white/10 hidden sm:block"></div>
+
+          {/* Status Badge */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              <span>LIVE</span>
+            </div>
+
+            {/* Room Code Badge */}
+            <button
+              onClick={copyLink}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 text-xs font-mono text-slate-300 transition-colors"
+              title="Click to copy invite link"
+            >
+              <span>Room: <strong>{roomId}</strong></span>
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Right: Participants Counter & Tools */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/60 border border-white/10 text-xs font-medium text-slate-300">
+            <Users className="w-4 h-4 text-indigo-400" />
+            <span>{totalParticipants} {totalParticipants === 1 ? 'Participant' : 'Participants'}</span>
+          </div>
+
+          <button
+            onClick={() => setShowQrModal(true)}
+            className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-white/10 text-slate-300 hover:text-white transition-colors"
+            title="Show QR Code / Invite"
+          >
+            <QrCode className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={toggleFullscreen}
+            className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-white/10 text-slate-300 hover:text-white transition-colors hidden sm:block"
+            title="Toggle Fullscreen"
+          >
+            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+          </button>
+        </div>
+      </header>
+
+      {/* ── Main Workspace ── */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative p-3 sm:p-4 gap-4">
+        
+        {/* Floating Reactions Stream (Overlay on right side of stage) */}
+        <div className="pointer-events-none absolute bottom-24 right-6 sm:right-80 w-20 h-96 z-40 flex flex-col justify-end items-center overflow-visible">
+          {reactions.map(r => (
+            <div 
+              key={r.id} 
+              className="absolute bottom-0 text-4xl animate-float-up drop-shadow-lg"
+              style={{ left: `${Math.random() * 40 - 20}px` }}
+            >
+              {r.emoji}
+            </div>
+          ))}
+        </div>
+
+        {/* Main Stage Grid */}
+        <main className="flex-1 flex flex-col justify-center items-center relative overflow-hidden rounded-3xl bg-slate-900/50 border border-white/10 p-2 sm:p-4">
+          
+          {hasActiveSession ? (
+            <div className={`w-full h-full grid gap-3 ${
+              totalParticipants === 1 ? 'grid-cols-1 grid-rows-1' :
+              totalParticipants === 2 ? 'grid-cols-1 md:grid-cols-2' :
+              totalParticipants === 3 ? 'grid-cols-1 md:grid-cols-3' :
+              'grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3'
+            }`}>
               
-              {/* Local PC Stream */}
+              {/* Local Host Video Tile */}
               {localStream && (
-                <div className="relative w-full aspect-[16/9] bg-black rounded-xl overflow-hidden flex items-center justify-center border border-[var(--color-surface-3)]">
+                <div className="relative w-full h-full min-h-[220px] rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-2xl flex items-center justify-center group">
                   <video
-                    ref={el => { if (el && localStream) el.srcObject = localStream; }}
+                    ref={localVideoRef}
                     autoPlay
                     playsInline
                     muted
                     className="w-full h-full object-cover transform -scale-x-100"
                   />
-                  <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">You</div>
-                  
-                  {/* Host Controls */}
-                  <div className="absolute bottom-2 right-2 flex gap-2">
-                    <button onClick={toggleAudio} className={`p-2 rounded-lg transition-colors ${isAudioMuted ? 'bg-red-500 text-white' : 'bg-black/50 text-white hover:bg-black/70'}`}>
-                      {isAudioMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                    </button>
-                    <button onClick={toggleVideo} className={`p-2 rounded-lg transition-colors ${isVideoOff ? 'bg-red-500 text-white' : 'bg-black/50 text-white hover:bg-black/70'}`}>
-                      {isVideoOff ? <VideoOff className="w-4 h-4" /> : <Video className="w-4 h-4" />}
-                    </button>
+
+                  {isVideoOff && (
+                    <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center gap-3 text-slate-400 z-10">
+                      <div className="w-16 h-16 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-white text-xl font-bold">
+                        Host
+                      </div>
+                      <span className="text-xs font-medium">Camera is Off</span>
+                    </div>
+                  )}
+
+                  {/* Nameplate & Status Badge */}
+                  <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-medium">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>You (Host)</span>
+                    {isAudioMuted && <MicOff className="w-3.5 h-3.5 text-rose-400" />}
                   </div>
                 </div>
               )}
 
-              {/* Remote Streams */}
+              {/* Remote Participant Tiles */}
               {Array.from(streams.entries()).map(([id, stream]) => (
-                <VideoPreview key={id} stream={stream} connectionState="connected" />
+                <div key={id} className="relative w-full h-full min-h-[220px] rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-2xl flex items-center justify-center">
+                  <VideoPreview stream={stream} connectionState="connected" />
+                  
+                  <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-medium">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>Guest</span>
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
+          ) : (
+            /* Lobby State (When nobody has joined yet and host hasn't started camera) */
+            <div className="w-full max-w-md p-8 rounded-3xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col items-center text-center gap-6 relative z-10">
+              
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Ready to Stream</span>
+                </div>
+                <h3 className="text-2xl font-bold text-white">Join the Live Room</h3>
+                <p className="text-sm text-slate-400">
+                  Scan this QR code with your phone camera or share the link to invite participants.
+                </p>
+              </div>
 
-          {/* Chat Sidebar */}
-          <div className="lg:col-span-1 bg-[var(--color-surface-2)] border border-[var(--color-surface-3)] rounded-2xl flex flex-col h-[600px] shadow-xl overflow-hidden">
-            <div className="p-4 border-b border-[var(--color-surface-3)] bg-black/20 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-[var(--color-primary)]" />
-              <h3 className="font-bold text-[var(--color-text)]">Live Chat</h3>
+              {/* Crisp QR Code */}
+              <div className="p-4 bg-white rounded-2xl shadow-xl ring-1 ring-black/5">
+                <QRCode 
+                  value={`${window.location.origin}/share/${roomId}`}
+                  size={190}
+                  level="H"
+                  bgColor="#ffffff"
+                  fgColor="#000000"
+                />
+              </div>
+
+              <div className="w-full flex flex-col gap-3">
+                <button
+                  onClick={startCamera}
+                  className="w-full py-3.5 px-5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:opacity-95 text-white font-bold flex items-center justify-center gap-2.5 shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Video className="w-5 h-5" />
+                  <span>Start My Camera (Host)</span>
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={copyLink}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-400" />}
+                    <span>{copied ? 'Copied!' : 'Copy Link'}</span>
+                  </button>
+
+                  <button
+                    onClick={handleRecreate}
+                    className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
+                    title="Generate New Room"
+                  >
+                    <RefreshCw className="w-4 h-4 text-slate-400" />
+                    <span>New Code</span>
+                  </button>
+                </div>
+              </div>
             </div>
+          )}
+        </main>
+
+        {/* Collapsible Live Chat Sidebar */}
+        {showChat && (
+          <aside className="w-full lg:w-80 h-72 lg:h-auto rounded-3xl bg-slate-900/90 border border-white/10 backdrop-blur-xl flex flex-col overflow-hidden shadow-2xl flex-shrink-0 animate-fade-in">
             
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Chat Header */}
+            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/20">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-indigo-400" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Live Chat</h4>
+              </div>
+              <span className="text-[10px] text-slate-500 font-mono">{messages.length} messages</span>
+            </div>
+
+            {/* Messages List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 ? (
-                <div className="text-center text-[var(--color-text-3)] text-sm mt-10">
-                  Welcome to the live room! Say hi! 👋
+                <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-500 gap-2">
+                  <MessageCircle className="w-8 h-8 opacity-30" />
+                  <p className="text-xs">No messages yet.<br/>Be the first to say hi!</p>
                 </div>
               ) : (
                 messages.map(msg => (
-                  <div key={msg.id} className={`flex flex-col ${msg.senderId === socket.id ? 'items-end' : 'items-start'}`}>
-                    <span className="text-xs text-[var(--color-text-3)] mb-1 px-1">{msg.senderName}</span>
-                    <div className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm ${msg.senderId === socket.id ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-surface-3)] text-[var(--color-text)]'}`}>
+                  <div 
+                    key={msg.id} 
+                    className={`flex flex-col ${msg.senderId === socket.id ? 'items-end' : 'items-start'}`}
+                  >
+                    <span className="text-[10px] text-slate-400 mb-1 px-1">{msg.senderName}</span>
+                    <div className={`px-3.5 py-2 rounded-2xl max-w-[85%] text-xs shadow-md ${
+                      msg.senderId === socket.id 
+                        ? 'bg-indigo-600 text-white rounded-br-none' 
+                        : 'bg-slate-800 text-slate-200 border border-white/10 rounded-bl-none'
+                    }`}>
                       {msg.message}
                     </div>
                   </div>
@@ -256,64 +429,154 @@ export default function LiveCameraHero() {
               <div ref={chatEndRef} />
             </div>
 
-            <div className="p-4 bg-black/20 border-t border-[var(--color-surface-3)] space-y-3">
-              <div className="flex justify-around pb-3 border-b border-[var(--color-surface-3)]">
-                <button onClick={() => sendReaction('❤️')} className="p-2 hover:bg-white/10 rounded-full transition-transform hover:scale-125">❤️</button>
-                <button onClick={() => sendReaction('😂')} className="p-2 hover:bg-white/10 rounded-full transition-transform hover:scale-125">😂</button>
-                <button onClick={() => sendReaction('👏')} className="p-2 hover:bg-white/10 rounded-full transition-transform hover:scale-125">👏</button>
-                <button onClick={() => sendReaction('🔥')} className="p-2 hover:bg-white/10 rounded-full transition-transform hover:scale-125">🔥</button>
+            {/* Reactions Bar & Message Form */}
+            <div className="p-3 bg-black/40 border-t border-white/10 space-y-2.5">
+              
+              {/* Quick Emojis */}
+              <div className="flex justify-between px-1">
+                {EMOJI_LIST.map(emoji => (
+                  <button
+                    key={emoji}
+                    onClick={() => sendReaction(emoji)}
+                    className="w-8 h-8 flex items-center justify-center text-lg hover:scale-125 active:scale-95 transition-transform"
+                  >
+                    {emoji}
+                  </button>
+                ))}
               </div>
+
+              {/* Chat Input */}
               <form onSubmit={sendMessage} className="flex gap-2">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
-                  placeholder="Send a message..." 
-                  className="flex-1 bg-[var(--color-surface-3)] text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  placeholder="Type a message..."
+                  className="flex-1 bg-slate-800/90 border border-white/10 text-white text-xs placeholder:text-slate-500 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
-                <button type="submit" className="p-2 bg-[var(--color-primary)] text-white rounded-xl hover:bg-[var(--color-primary-600)] transition-colors">
-                  <Send className="w-4 h-4" />
+                <button
+                  type="submit"
+                  disabled={!chatInput.trim()}
+                  className="p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl disabled:opacity-40 transition-colors shadow-md shadow-indigo-600/20"
+                >
+                  <Send className="w-3.5 h-3.5" />
                 </button>
               </form>
             </div>
-          </div>
+          </aside>
+        )}
+      </div>
+
+      {/* ── Bottom Control Dock (Zoom / Teams Style) ── */}
+      <footer className="h-20 px-4 bg-slate-900/90 backdrop-blur-xl border-t border-white/10 flex items-center justify-center z-30 flex-shrink-0">
+        <div className="flex items-center gap-3 sm:gap-4 p-2 rounded-2xl bg-black/40 border border-white/10 shadow-2xl">
+          
+          {/* Host Camera Start / Toggle */}
+          {localStream ? (
+            <>
+              {/* Mic Toggle */}
+              <button
+                onClick={toggleAudio}
+                className={`p-3.5 rounded-xl border transition-all ${
+                  isAudioMuted 
+                    ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-600/30' 
+                    : 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-white/10'
+                }`}
+                title={isAudioMuted ? "Unmute Mic" : "Mute Mic"}
+              >
+                {isAudioMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </button>
+
+              {/* Video Toggle */}
+              <button
+                onClick={toggleVideo}
+                className={`p-3.5 rounded-xl border transition-all ${
+                  isVideoOff 
+                    ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-600/30' 
+                    : 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-white/10'
+                }`}
+                title={isVideoOff ? "Turn On Video" : "Turn Off Video"}
+              >
+                {isVideoOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+              </button>
+
+              {/* Stop Camera button */}
+              <button
+                onClick={stopCamera}
+                className="p-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-white/10 transition-colors"
+                title="Disconnect Webcam"
+              >
+                <MonitorUp className="w-5 h-5 text-indigo-400" />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={startCamera}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 text-white text-xs font-bold shadow-lg shadow-indigo-600/25 transition-all"
+            >
+              <Video className="w-4 h-4" />
+              <span>Turn On My Camera</span>
+            </button>
+          )}
+
+          {/* Chat Toggle */}
+          <button
+            onClick={() => setShowChat(prev => !prev)}
+            className={`p-3.5 rounded-xl border transition-all ${
+              showChat 
+                ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-600/20' 
+                : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-white/10'
+            }`}
+            title={showChat ? "Hide Chat" : "Open Chat"}
+          >
+            {showChat ? <MessageCircle className="w-5 h-5" /> : <MessageSquareOff className="w-5 h-5" />}
+          </button>
+
+          {/* End Session Button */}
+          <button
+            onClick={handleRecreate}
+            className="p-3.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 transition-all flex items-center gap-2"
+            title="End Call & Reset Room"
+          >
+            <PhoneOff className="w-5 h-5" />
+            <span className="text-xs font-bold hidden sm:inline">End Session</span>
+          </button>
         </div>
-      ) : (
-        <div className="card p-8 md:p-12 w-full max-w-md flex flex-col items-center text-center gap-6 shadow-2xl relative overflow-hidden mt-4">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-[var(--color-primary-500)]/10 blur-3xl rounded-full"></div>
+      </footer>
 
-          <div className="relative z-10 space-y-2">
-            <h2 className="text-xl font-bold">Connect to Room</h2>
-            <p className="text-sm text-[var(--color-text-3)]">Scan this QR code with your phone to join Room: <strong>{roomId}</strong></p>
-          </div>
+      {/* ── QR Code Popup Modal ── */}
+      {showQrModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="w-full max-w-sm bg-slate-900 border border-white/15 rounded-3xl p-6 flex flex-col items-center text-center gap-5 shadow-2xl relative">
+            <button
+              onClick={() => setShowQrModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
 
-          <div className="bg-white p-4 rounded-2xl relative z-10 shadow-lg ring-1 ring-black/5">
-            <QRCode 
-              value={`${window.location.origin}/share/${roomId}`}
-              size={200}
-              level="H"
-              bgColor="#ffffff"
-              fgColor="#000000"
-            />
-          </div>
-
-          <div className="flex flex-col items-center gap-3 w-full relative z-10">
-            <div className="flex items-center gap-2 text-[var(--color-primary)] bg-[var(--color-primary-500)]/10 px-4 py-2 rounded-full font-medium text-sm">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-ping"></span>
-              Waiting for participants...
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-white">Invite Participants</h3>
+              <p className="text-xs text-slate-400">Scan or share this link to join Room: <strong>{roomId}</strong></p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-2 mt-2">
-              <button onClick={startCamera} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-600)] transition-colors text-sm font-medium text-white">
-                <MonitorUp className="w-4 h-4" /> Start My Camera
-              </button>
-              <button onClick={copyLink} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] transition-colors text-sm font-medium text-[var(--color-text-2)]">
-                <Copy className="w-4 h-4" /> Copy Link
-              </button>
-              <button onClick={handleRecreate} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] transition-colors text-sm font-medium text-[var(--color-text-2)]">
-                <RefreshCw className="w-4 h-4" /> New Room
-              </button>
+            <div className="p-4 bg-white rounded-2xl shadow-lg ring-1 ring-black/5">
+              <QRCode 
+                value={`${window.location.origin}/share/${roomId}`}
+                size={180}
+                level="H"
+                bgColor="#ffffff"
+                fgColor="#000000"
+              />
             </div>
+
+            <button
+              onClick={copyLink}
+              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+              <span>{copied ? 'Link Copied to Clipboard!' : 'Copy Share Link'}</span>
+            </button>
           </div>
         </div>
       )}

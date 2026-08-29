@@ -45,8 +45,8 @@ export default function VideoPreview({ stream, connectionState, rtt }) {
   return (
     <div 
       ref={containerRef}
-      className={`relative bg-black rounded-xl overflow-hidden flex flex-col justify-center items-center ${
-        isFullscreen ? 'w-screen h-screen' : 'w-full aspect-[16/9] shadow-2xl'
+      className={`relative bg-slate-900 rounded-2xl overflow-hidden flex flex-col justify-center items-center ${
+        isFullscreen ? 'w-screen h-screen' : 'w-full h-full min-h-[200px]'
       }`}
     >
       {stream ? (
@@ -55,12 +55,12 @@ export default function VideoPreview({ stream, connectionState, rtt }) {
           autoPlay
           playsInline
           muted={false}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
       ) : (
-        <div className="flex flex-col items-center justify-center text-gray-500 gap-4">
-          <Activity className="w-12 h-12 animate-pulse opacity-50" />
-          <p className="text-sm font-medium">Waiting for video stream...</p>
+        <div className="flex flex-col items-center justify-center text-slate-500 gap-3">
+          <Activity className="w-10 h-10 animate-pulse text-indigo-400 opacity-60" />
+          <p className="text-xs font-medium">Connecting stream...</p>
         </div>
       )}
 

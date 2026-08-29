@@ -394,10 +394,15 @@ services:
     command:
       - -n
       - --log-file=stdout
+      - --lt-cred-mech
+      - --fingerprint
+      - --listening-port=3478
       - --min-port=50000
       - --max-port=50100
       - --user=camtech:camtech_turn_secret
       - --realm=camtech.cam
+      - --no-tls
+      - --no-dtls
       - --verbose
 
 networks:

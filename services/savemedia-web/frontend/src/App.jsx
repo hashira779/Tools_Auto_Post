@@ -91,14 +91,22 @@ function App() {
       {/* Main Layout */}
       <div className="relative min-h-screen flex flex-col">
         {/* Top Navbar */}
-        <AppNavbar
-          activeTool={activeTool}
-          onSelectTool={setActiveTool}
-          onOpenMobileMenu={() => setMobileMenuOpen(true)}
-        />
+        {!(typeof window !== 'undefined' && window.location.pathname.startsWith('/share/')) && (
+          <AppNavbar
+            activeTool={activeTool}
+            onSelectTool={setActiveTool}
+            onOpenMobileMenu={() => setMobileMenuOpen(true)}
+          />
+        )}
 
         {/* Content (For normal tools) */}
-        {(activeTool !== TOOL_PDF) ? (
+        {activeTool === TOOL_SCREEN_SHARE ? (
+          <div className="flex-1 w-full animate-fade-in flex flex-col">
+            <Suspense fallback={<div className="w-full h-96 animate-pulse bg-[var(--color-surface-2)]"></div>}>
+              <LiveCameraContainer />
+            </Suspense>
+          </div>
+        ) : activeTool !== TOOL_PDF ? (
           <div className="flex-1 w-full max-w-[1024px] mx-auto px-5 sm:px-6 lg:px-8 pt-12 pb-20">
             {/* Media Downloader */}
             {activeTool === TOOL_DOWNLOADER && (
@@ -185,15 +193,6 @@ function App() {
                 </Suspense>
               </main>
             )}
-
-            {/* Screen Share */}
-            {activeTool === TOOL_SCREEN_SHARE && (
-              <main className="flex flex-col items-center animate-fade-in w-full">
-                <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
-                  <LiveCameraContainer />
-                </Suspense>
-              </main>
-            )}
           </div>
         ) : (
           /* Full Width/Height Layout for LLM & PDF */
@@ -225,7 +224,7 @@ function App() {
           </div>
         )}
 
-        {activeTool !== TOOL_PDF && <Footer />}
+        {activeTool !== TOOL_PDF && activeTool !== TOOL_SCREEN_SHARE && <Footer />}
       </div>
     </>
   )
