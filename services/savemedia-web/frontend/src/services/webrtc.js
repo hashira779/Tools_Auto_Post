@@ -33,10 +33,23 @@ export class MultipartyWebRTC {
     this.localStream = localStream;
     this.onStreamAdded = onStreamAdded;
     this.onStreamRemoved = onStreamRemoved;
-    
     this.peers = new Map(); // targetId -> RTCPeerConnection
+    this.iceCandidateQueue = new Map(); // targetId -> RTCIceCandidate[]
 
     this.init();
+  }
+
+  processIceQueue(targetId) {
+    const pc = this.peers.get(targetId);
+    const queue = this.iceCandidateQueue.get(targetId);
+    if (pc && pc.remoteDescription && queue) {
+      while (queue.length > 0) {
+        const candidate = queue.shift();
+        pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(err => {
+          console.error("Error adding queued ice candidate:", err);
+        });
+      }
+    }
   }
 
   init() {
@@ -65,6 +78,7 @@ export class MultipartyWebRTC {
         await pc.setRemoteDescription(offer);
         await pc.setLocalDescription();
         socket.emit('webrtc-answer', { targetId: callerId, callerId: socket.id, answer: pc.localDescription });
+        this.processIceQueue(callerId);
       } catch (err) {
         console.error("Error handling offer:", err);
       }
@@ -76,6 +90,7 @@ export class MultipartyWebRTC {
       if (pc) {
         try {
           await pc.setRemoteDescription(answer);
+          this.processIceQueue(callerId);
         } catch (err) {
           console.error("Error setting remote description from answer:", err);
         }
@@ -85,10 +100,17 @@ export class MultipartyWebRTC {
     socket.on('ice-candidate', async ({ callerId, candidate }) => {
       const pc = this.peers.get(callerId);
       if (pc) {
-        try {
-          await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (err) {
-          console.error("Error adding ice candidate:", err);
+        if (!pc.remoteDescription) {
+          if (!this.iceCandidateQueue.has(callerId)) {
+            this.iceCandidateQueue.set(callerId, []);
+          }
+          this.iceCandidateQueue.get(callerId).push(candidate);
+        } else {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (err) {
+            console.error("Error adding ice candidate:", err);
+          }
         }
       }
     });
@@ -151,6 +173,7 @@ export class MultipartyWebRTC {
   destroy() {
     this.peers.forEach((pc) => pc.close());
     this.peers.clear();
+    this.iceCandidateQueue.clear();
     socket.off('all-users');
     socket.off('user-joined');
     socket.off('webrtc-offer');
