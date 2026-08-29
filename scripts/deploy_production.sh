@@ -35,7 +35,14 @@ free -h
 echo "--- Disk Space ---"
 df -h /
 
-# 4. Build Docker images first (without stopping running containers)
+# 4. Configure Firewall for Coturn TURN Server
+echo "🔓 Opening Firewall Ports for Coturn TURN Server..."
+echo "$SUDO_PASS" | sudo -S ufw allow 3478/tcp || true
+echo "$SUDO_PASS" | sudo -S ufw allow 3478/udp || true
+echo "$SUDO_PASS" | sudo -S ufw allow 50000:50100/udp || true
+echo "$SUDO_PASS" | sudo -S ufw reload || true
+
+# 5. Build Docker images first (without stopping running containers)
 echo "🔨 Building Docker images..."
 if ! echo "$SUDO_PASS" | sudo -S docker compose build; then
     echo "===================================================="
