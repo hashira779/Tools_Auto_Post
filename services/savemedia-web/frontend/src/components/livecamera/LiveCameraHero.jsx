@@ -205,7 +205,7 @@ export default function LiveCameraHero() {
   return (
     <div 
       ref={containerRef}
-      className="w-full h-[calc(100vh-64px)] flex flex-col relative select-none bg-[#09090b] overflow-hidden"
+      className="w-full h-full flex-1 flex flex-col relative select-none bg-[#09090b] overflow-hidden"
     >
       {/* Background glowing mesh (hardware accelerated) */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-40 will-change-transform">
@@ -338,57 +338,43 @@ export default function LiveCameraHero() {
             </div>
           ) : (
             /* Lobby State (When nobody has joined yet and host hasn't started camera) */
-            <div className="w-full max-w-md p-8 rounded-3xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col items-center text-center gap-6 relative z-10">
+            <div className="w-full max-w-xl p-10 rounded-[2rem] bg-black/40 border border-white/5 backdrop-blur-3xl shadow-2xl flex flex-col items-center text-center gap-8 relative z-10">
               
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+              {/* Studio Icon/Logo */}
+              <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 flex items-center justify-center border border-white/10 shadow-[0_0_60px_-10px_rgba(99,102,241,0.3)]">
+                <Video className="w-10 h-10 text-indigo-300" />
+              </div>
+
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-widest">
                   <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Ready to Stream</span>
+                  <span>Studio Ready</span>
                 </div>
-                <h3 className="text-2xl font-bold text-white">Join the Live Room</h3>
-                <p className="text-sm text-slate-400">
-                  Scan this QR code with your phone camera or share the link to invite participants.
+                <h3 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 tracking-tight">
+                  Start Your Broadcast
+                </h3>
+                <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
+                  Turn on your camera to begin streaming. You can invite participants using the Room Code or QR button in the top right.
                 </p>
               </div>
 
-              {/* Crisp QR Code */}
-              <div className="p-4 bg-white rounded-2xl shadow-xl ring-1 ring-black/5">
-                <QRCode 
-                  value={`${window.location.origin}/share/${roomId}`}
-                  size={190}
-                  level="H"
-                  bgColor="#ffffff"
-                  fgColor="#000000"
-                />
-              </div>
-
-              <div className="w-full flex flex-col gap-3">
+              <div className="w-full flex gap-4 pt-4 border-t border-white/5">
                 <button
                   onClick={startCamera}
-                  className="w-full py-3.5 px-5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:opacity-95 text-white font-bold flex items-center justify-center gap-2.5 shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex-1 py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-3 shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0"
                 >
                   <Video className="w-5 h-5" />
-                  <span>Start My Camera (Host)</span>
+                  <span>Start Camera</span>
                 </button>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={copyLink}
-                    className="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
-                  >
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-400" />}
-                    <span>{copied ? 'Copied!' : 'Copy Link'}</span>
-                  </button>
-
-                  <button
-                    onClick={handleRecreate}
-                    className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
-                    title="Generate New Room"
-                  >
-                    <RefreshCw className="w-4 h-4 text-slate-400" />
-                    <span>New Code</span>
-                  </button>
-                </div>
+                <button
+                  onClick={handleRecreate}
+                  className="py-4 px-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold flex items-center justify-center gap-3 transition-all"
+                  title="Generate New Room"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                  <span>New Room</span>
+                </button>
               </div>
             </div>
           )}
