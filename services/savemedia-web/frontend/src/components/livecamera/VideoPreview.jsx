@@ -61,7 +61,7 @@ export default function VideoPreview({ stream, connectionState, rtt }) {
           autoPlay
           playsInline
           muted={false}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain bg-black/40"
         />
       ) : (
         <div className="flex flex-col items-center justify-center text-slate-500 gap-3">

@@ -205,7 +205,7 @@ export default function LiveCameraHero() {
   return (
     <div 
       ref={containerRef}
-      className="w-full flex-1 flex flex-col min-h-[calc(100vh-64px)] relative select-none bg-[#09090b] overflow-hidden"
+      className="w-full h-[calc(100vh-64px)] flex flex-col relative select-none bg-[#09090b] overflow-hidden"
     >
       {/* Background glowing mesh (hardware accelerated) */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-40 will-change-transform">
@@ -310,7 +310,7 @@ export default function LiveCameraHero() {
                     autoPlay
                     playsInline
                     muted
-                    className="w-full h-full object-cover transform -scale-x-100"
+                    className="w-full h-full object-contain transform -scale-x-100"
                   />
 
                   {isVideoOff && (
