@@ -38,6 +38,20 @@ export const createPeerConnection = (roomId, onTrack, onConnectionStateChange) =
   if (onConnectionStateChange) {
     pc.onconnectionstatechange = () => {
       onConnectionStateChange(pc.connectionState);
+      
+      // Auto-recover disconnected states
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+        console.log("WebRTC Connection failed. Attempting ICE Restart...");
+        // Re-negotiate with iceRestart
+        pc.createOffer({ iceRestart: true })
+          .then(offer => {
+            return pc.setLocalDescription(offer).then(() => offer);
+          })
+          .then(offer => {
+            socket.emit('webrtc-offer', { roomId, offer });
+          })
+          .catch(e => console.error("ICE restart failed", e));
+      }
     };
   }
 
