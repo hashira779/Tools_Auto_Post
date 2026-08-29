@@ -183,6 +183,20 @@ export default function MobileShare({ roomId }) {
     socket.emit('stop-sharing', { roomId });
   };
 
+  if (supportState === STATE.UNSUPPORTED) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto min-h-[60vh]">
+        <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
+        <h2 className="text-xl font-bold mb-2">Screen Sharing Not Supported</h2>
+        <p className="text-gray-400 text-sm leading-relaxed">
+          Screen sharing is not supported by mobile web browsers (iOS and Android). 
+          <br /><br />
+          To present your screen, please scan the QR code using an <strong>iPad</strong> or open the link on a <strong>Desktop PC/Mac</strong>.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto min-h-[60vh] gap-6 animate-fade-in w-full">
       
