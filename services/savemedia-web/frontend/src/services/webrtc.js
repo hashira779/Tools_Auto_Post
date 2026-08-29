@@ -62,10 +62,9 @@ export class MultipartyWebRTC {
       }
       
       try {
-        await pc.setRemoteDescription(new RTCSessionDescription(offer));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        socket.emit('webrtc-answer', { targetId: callerId, callerId: socket.id, answer });
+        await pc.setRemoteDescription(offer);
+        await pc.setLocalDescription();
+        socket.emit('webrtc-answer', { targetId: callerId, callerId: socket.id, answer: pc.localDescription });
       } catch (err) {
         console.error("Error handling offer:", err);
       }
@@ -76,7 +75,7 @@ export class MultipartyWebRTC {
       const pc = this.peers.get(callerId);
       if (pc) {
         try {
-          await pc.setRemoteDescription(new RTCSessionDescription(answer));
+          await pc.setRemoteDescription(answer);
         } catch (err) {
           console.error("Error setting remote description from answer:", err);
         }
@@ -139,11 +138,9 @@ export class MultipartyWebRTC {
 
     if (isInitiator) {
       pc.createOffer()
-        .then(offer => {
-          return pc.setLocalDescription(offer).then(() => offer);
-        })
-        .then(offer => {
-          socket.emit('webrtc-offer', { targetId, callerId: socket.id, offer });
+        .then(async (offer) => {
+          await pc.setLocalDescription(offer);
+          socket.emit('webrtc-offer', { targetId, callerId: socket.id, offer: pc.localDescription });
         })
         .catch(err => console.error("Error creating offer:", err));
     }
