@@ -47,9 +47,13 @@ export default function MobileShare({ roomId }) {
 
     if (!isSecureContext) {
       setSupportState(STATE.BLOCKED_BY_SECURITY);
-      setErrorMsg('Screen sharing requires a secure HTTPS connection.');
-    } else if (!hasMediaDevices || !hasGetDisplayMedia) {
+      setErrorMsg('Screen sharing requires HTTPS.');
+    } else if (!hasMediaDevices) {
       setSupportState(STATE.UNSUPPORTED);
+      setErrorMsg('Screen sharing API is unavailable (navigator.mediaDevices is undefined).');
+    } else if (!hasGetDisplayMedia) {
+      setSupportState(STATE.UNSUPPORTED);
+      setErrorMsg('Screen sharing API is unavailable (getDisplayMedia is not a function).');
     } else {
       setSupportState(STATE.SUPPORTED);
     }
@@ -183,20 +187,6 @@ export default function MobileShare({ roomId }) {
     socket.emit('stop-sharing', { roomId });
   };
 
-  if (supportState === STATE.UNSUPPORTED) {
-    return (
-      <div className="flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto min-h-[60vh]">
-        <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-        <h2 className="text-xl font-bold mb-2">Screen Sharing Not Supported</h2>
-        <p className="text-gray-400 text-sm leading-relaxed">
-          Screen sharing is not supported by mobile web browsers (iOS and Android). 
-          <br /><br />
-          To present your screen, please scan the QR code using an <strong>iPad</strong> or open the link on a <strong>Desktop PC/Mac</strong>.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto min-h-[60vh] gap-6 animate-fade-in w-full">
       
@@ -241,15 +231,7 @@ export default function MobileShare({ roomId }) {
         </div>
       )}
 
-      {supportState === STATE.UNSUPPORTED && !errorMsg && (
-        <div className="bg-yellow-500/10 border border-yellow-500/50 text-yellow-500 p-5 rounded-xl text-sm w-full text-left flex gap-4 shadow-lg items-start">
-          <AlertCircle className="w-6 h-6 shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            Screen sharing is unavailable in this browser environment.<br/><br/>
-            Please use a supported browser with the latest updates.
-          </p>
-        </div>
-      )}
+
 
       <div className="w-full flex flex-col items-center gap-4 mt-4">
         {!sharing ? (
