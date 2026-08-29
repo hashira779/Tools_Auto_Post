@@ -291,28 +291,22 @@ export default function LiveCameraHero() {
           ))}
         </div>
 
-        {/* Main Stage Grid */}
-        <main className="flex-1 flex flex-col justify-center items-center relative overflow-hidden rounded-3xl bg-slate-900/50 border border-white/10 p-2 sm:p-4">
+        {/* Main Stage */}
+        <main className="flex-1 flex flex-col justify-center items-center relative overflow-hidden rounded-3xl bg-black/20 border border-white/10 p-4 z-10">
           
           {hasActiveSession ? (
-            <div className={`w-full h-full grid gap-3 ${
-              totalParticipants === 1 ? 'grid-cols-1 grid-rows-1' :
-              totalParticipants === 2 ? 'grid-cols-1 md:grid-cols-2' :
-              totalParticipants === 3 ? 'grid-cols-1 md:grid-cols-3' :
-              'grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3'
-            }`}>
+            <div className="w-full h-full flex flex-wrap content-center justify-center gap-4 overflow-y-auto pb-4 scrollbar-none">
               
               {/* Local Host Video Tile */}
               {localStream && (
-                <div className="relative w-full h-full min-h-[220px] rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-2xl flex items-center justify-center group">
+                <div className={`relative aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10 flex items-center justify-center group transition-all duration-300 ${totalParticipants === 1 ? 'w-full max-w-5xl' : 'w-full max-w-[calc(50%-1rem)] min-w-[300px]'}`}>
                   <video
                     ref={localVideoRef}
                     autoPlay
                     playsInline
                     muted
-                    className="w-full h-full object-contain transform -scale-x-100"
+                    className="w-full h-full object-cover transform -scale-x-100"
                   />
-
                   {isVideoOff && (
                     <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center gap-3 text-slate-400 z-10">
                       <div className="w-16 h-16 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-white text-xl font-bold">
@@ -321,7 +315,6 @@ export default function LiveCameraHero() {
                       <span className="text-xs font-medium">Camera is Off</span>
                     </div>
                   )}
-
                   {/* Nameplate & Status Badge */}
                   <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-medium">
                     <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -333,7 +326,7 @@ export default function LiveCameraHero() {
 
               {/* Remote Participant Tiles */}
               {Array.from(streams.entries()).map(([id, stream]) => (
-                <div key={id} className="relative w-full h-full min-h-[220px] rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-2xl flex items-center justify-center">
+                <div key={id} className={`relative aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10 flex items-center justify-center group transition-all duration-300 ${totalParticipants === 1 ? 'w-full max-w-5xl' : 'w-full max-w-[calc(50%-1rem)] min-w-[300px]'}`}>
                   <VideoPreview stream={stream} connectionState="connected" />
                   
                   <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-medium">
@@ -403,7 +396,7 @@ export default function LiveCameraHero() {
 
         {/* Collapsible Live Chat Sidebar */}
         {showChat && (
-          <aside className="w-full lg:w-80 h-72 lg:h-auto rounded-3xl bg-slate-900/90 border border-white/10 backdrop-blur-xl flex flex-col overflow-hidden shadow-2xl flex-shrink-0 animate-fade-in">
+          <aside className="w-full lg:w-80 h-72 lg:h-auto rounded-3xl bg-black/20 border border-white/10 backdrop-blur-xl flex flex-col overflow-hidden shadow-2xl flex-shrink-0 animate-fade-in z-20">
             
             {/* Chat Header */}
             <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/20">
