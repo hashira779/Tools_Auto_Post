@@ -99,10 +99,10 @@ export default function ScreenShareHero() {
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-8 animate-fade-in">
       <div className="text-center space-y-4">
         <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-[var(--color-text)]">
-          Live iPhone Screen Share
+          Live Camera & Audio
         </h1>
         <p className="text-lg text-[var(--color-text-3)] max-w-2xl mx-auto">
-          Present your iPhone screen directly to your PC browser in real-time. No apps required.
+          Stream your mobile camera directly to your PC browser in real-time. No apps required.
         </p>
       </div>
 
@@ -127,8 +127,8 @@ export default function ScreenShareHero() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-[var(--color-primary-500)]/10 blur-3xl rounded-full"></div>
 
           <div className="relative z-10 space-y-2">
-            <h2 className="text-xl font-bold">Connect your iPhone</h2>
-            <p className="text-sm text-[var(--color-text-3)]">Scan this QR code with your iPhone camera to join Room: <strong>{roomId}</strong></p>
+            <h2 className="text-xl font-bold">Connect your Phone</h2>
+            <p className="text-sm text-[var(--color-text-3)]">Scan this QR code with your phone to join Room: <strong>{roomId}</strong></p>
           </div>
 
           <div className="bg-white p-4 rounded-2xl relative z-10 shadow-lg ring-1 ring-black/5">

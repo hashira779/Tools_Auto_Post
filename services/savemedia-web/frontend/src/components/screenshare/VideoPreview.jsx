@@ -54,7 +54,7 @@ export default function VideoPreview({ stream, connectionState, rtt }) {
           ref={videoRef}
           autoPlay
           playsInline
-          muted // Muted by default to avoid feedback, user can unmute if audio exists
+          muted={false}
           className="w-full h-full object-contain"
         />
       ) : (

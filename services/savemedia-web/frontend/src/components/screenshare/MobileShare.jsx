@@ -35,25 +35,25 @@ export default function MobileShare({ roomId }) {
     // 1. Strict Feature Detection
     const isSecureContext = window.isSecureContext;
     const hasMediaDevices = !!navigator.mediaDevices;
-    const hasGetDisplayMedia = typeof navigator.mediaDevices?.getDisplayMedia === 'function';
+    const hasGetUserMedia = typeof navigator.mediaDevices?.getUserMedia === 'function';
     
     setDiagnostics({
       href: location.href,
       secure: isSecureContext,
       mediaDevices: hasMediaDevices,
-      getDisplayMedia: hasGetDisplayMedia ? 'AVAILABLE' : 'UNAVAILABLE',
+      getUserMedia: hasGetUserMedia ? 'AVAILABLE' : 'UNAVAILABLE',
       userAgent: navigator.userAgent
     });
 
     if (!isSecureContext) {
       setSupportState(STATE.BLOCKED_BY_SECURITY);
-      setErrorMsg('Screen sharing requires HTTPS.');
+      setErrorMsg('Live Camera requires HTTPS.');
     } else if (!hasMediaDevices) {
       setSupportState(STATE.UNSUPPORTED);
-      setErrorMsg('Screen sharing API is unavailable (navigator.mediaDevices is undefined).');
-    } else if (!hasGetDisplayMedia) {
+      setErrorMsg('Camera API is unavailable (navigator.mediaDevices is undefined).');
+    } else if (!hasGetUserMedia) {
       setSupportState(STATE.UNSUPPORTED);
-      setErrorMsg('Screen sharing API is unavailable (getDisplayMedia is not a function).');
+      setErrorMsg('Camera API is unavailable (getUserMedia is not a function).');
     } else {
       setSupportState(STATE.SUPPORTED);
     }
@@ -102,16 +102,15 @@ export default function MobileShare({ roomId }) {
       if (!navigator.mediaDevices) {
           throw new Error("MEDIA_DEVICES_UNAVAILABLE");
       }
-      if (typeof navigator.mediaDevices.getDisplayMedia !== "function") {
-          throw new Error("GET_DISPLAY_MEDIA_UNAVAILABLE");
+      if (typeof navigator.mediaDevices.getUserMedia !== "function") {
+          throw new Error("GET_USER_MEDIA_UNAVAILABLE");
       }
 
-      const stream = await navigator.mediaDevices.getDisplayMedia({
+      const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          cursor: "always",
-          displaySurface: "monitor"
+          facingMode: "user"
         },
-        audio: false
+        audio: true
       });
 
       streamRef.current = stream;
@@ -143,7 +142,7 @@ export default function MobileShare({ roomId }) {
       socket.emit('webrtc-offer', { roomId, offer });
 
     } catch (error) {
-      console.error("Screen share failed:", {
+      console.error("Camera access failed:", {
           name: error?.name,
           message: error?.message,
           stack: error?.stack
@@ -152,19 +151,19 @@ export default function MobileShare({ roomId }) {
 
       if (error.name === 'NotAllowedError') {
         setSupportState(STATE.PERMISSION_DENIED);
-        setErrorMsg('Screen sharing permission was denied.\n\nPlease tap "Share My Screen" and allow screen sharing.');
+        setErrorMsg('Camera/Microphone permission was denied.\n\nPlease allow access to talk.');
       } else if (error.name === 'NotFoundError') {
-        setErrorMsg('No screen-sharing source is available.');
+        setErrorMsg('No camera or microphone found on this device.');
       } else if (error.name === 'InvalidStateError') {
-        setErrorMsg('Please tap the Share My Screen button again.');
+        setErrorMsg('Please tap the Start button again.');
       } else if (error.name === 'SecurityError' || error.message === 'HTTPS_REQUIRED') {
         setSupportState(STATE.BLOCKED_BY_SECURITY);
-        setErrorMsg('Screen sharing is blocked by the current security configuration.');
-      } else if (error.message === 'GET_DISPLAY_MEDIA_UNAVAILABLE' || error.message === 'MEDIA_DEVICES_UNAVAILABLE') {
+        setErrorMsg('Camera access is blocked by the current security configuration.');
+      } else if (error.message === 'GET_USER_MEDIA_UNAVAILABLE' || error.message === 'MEDIA_DEVICES_UNAVAILABLE') {
         setSupportState(STATE.UNSUPPORTED);
-        setErrorMsg('Screen sharing is unavailable in this browser environment.\nPlease use a supported browser with the latest updates.');
+        setErrorMsg('Live camera is unavailable in this browser environment.\nPlease use a supported browser with the latest updates.');
       } else {
-        setErrorMsg(`Unable to start screen sharing.\n\nTechnical error: ${error?.name || error?.message || 'Unknown'}`);
+        setErrorMsg(`Unable to start camera.\n\nTechnical error: ${error?.name || error?.message || 'Unknown'}`);
       }
       setSharing(false);
     }
@@ -193,13 +192,13 @@ export default function MobileShare({ roomId }) {
       {showDebug && (
         <div className="w-full bg-black/90 text-green-400 font-mono text-[11px] text-left p-5 rounded-xl overflow-x-auto shadow-2xl border border-green-500/20">
           <h3 className="text-green-500 font-bold mb-3 uppercase tracking-widest text-xs flex items-center gap-2 border-b border-green-500/20 pb-2">
-            <Info className="w-4 h-4"/> Screen Share Diagnostics
+            <Info className="w-4 h-4"/> Talk Mode Diagnostics
           </h3>
           <div className="space-y-1">
             <div className="flex justify-between"><span>HTTPS:</span> <span className="text-white">{diagnostics.secure ? 'YES' : 'NO'}</span></div>
             <div className="flex justify-between"><span>Secure Context:</span> <span className="text-white">{diagnostics.secure ? 'YES' : 'NO'}</span></div>
             <div className="flex justify-between"><span>MediaDevices:</span> <span className="text-white">{diagnostics.mediaDevices ? 'YES' : 'NO'}</span></div>
-            <div className="flex justify-between"><span>getDisplayMedia:</span> <span className="text-white">{diagnostics.getDisplayMedia}</span></div>
+            <div className="flex justify-between"><span>getUserMedia:</span> <span className="text-white">{diagnostics.getUserMedia}</span></div>
             
             <div className="mt-3 pt-3 border-t border-green-500/20 text-gray-400 truncate max-w-full block">
               <span className="block text-green-500/70 mb-1">User Agent:</span> 
@@ -221,7 +220,7 @@ export default function MobileShare({ roomId }) {
       )}
 
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-[var(--color-text)]">Share Your Screen</h1>
+        <h1 className="text-3xl font-bold text-[var(--color-text)]">Live Camera & Audio</h1>
         <p className="text-base text-gray-400">Room: <span className="font-mono text-[var(--color-primary)] font-bold">{roomId}</span></p>
       </div>
 
@@ -246,7 +245,7 @@ export default function MobileShare({ roomId }) {
               }`}
             >
               <MonitorUp className="w-6 h-6" />
-              Share My Screen
+              Start Camera / Talk
             </button>
             <p className="text-sm text-gray-500 font-medium">
               No app required where supported.
@@ -280,7 +279,7 @@ export default function MobileShare({ roomId }) {
               className="w-full py-4 px-6 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50 rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors mt-2"
             >
               <XCircle className="w-6 h-6" />
-              Stop Sharing
+              Stop Camera
             </button>
           </>
         )}
