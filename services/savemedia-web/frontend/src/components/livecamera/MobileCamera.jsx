@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { socket, connectSocket } from '../../services/socket';
 import { MultipartyWebRTC } from '../../services/webrtc';
 import VideoPreview from './VideoPreview';
-import { MonitorUp, XCircle, Send, MessageCircle } from 'lucide-react';
+import { MonitorUp, XCircle, Send, MessageCircle, Mic, MicOff, Video, VideoOff } from 'lucide-react';
 
 const STATE = {
   INITIAL: 'INITIAL',
@@ -20,6 +20,8 @@ export default function MobileCamera({ roomId }) {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [reactions, setReactions] = useState([]);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
   
   const streamRef = useRef(null);
   const webrtcRef = useRef(null);
@@ -138,6 +140,26 @@ export default function MobileCamera({ roomId }) {
     socket.emit('room-reaction', { roomId, emoji, senderId: socket.id });
   };
 
+  const toggleAudio = () => {
+    if (streamRef.current) {
+      const track = streamRef.current.getAudioTracks()[0];
+      if (track) {
+        track.enabled = !track.enabled;
+        setIsAudioMuted(!track.enabled);
+      }
+    }
+  };
+
+  const toggleVideo = () => {
+    if (streamRef.current) {
+      const track = streamRef.current.getVideoTracks()[0];
+      if (track) {
+        track.enabled = !track.enabled;
+        setIsVideoOff(!track.enabled);
+      }
+    }
+  };
+
   if (supportState !== STATE.LIVE) {
     return (
       <div className="flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto min-h-[60vh] gap-6 animate-fade-in w-full">
@@ -209,13 +231,29 @@ export default function MobileCamera({ roomId }) {
           ))}
         </div>
         
-        {/* Leave Button */}
-        <button
-          onClick={stopSharing}
-          className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-red-500/80 transition-colors z-20 backdrop-blur-sm"
-        >
-          <XCircle className="w-6 h-6" />
-        </button>
+        {/* Top Controls Overlay */}
+        <div className="absolute top-4 right-4 flex gap-3 z-20 backdrop-blur-sm">
+          <button
+            onClick={toggleAudio}
+            className={`p-3 rounded-full transition-colors shadow-lg ${isAudioMuted ? 'bg-red-500 text-white' : 'bg-gray-800/80 text-white hover:bg-gray-700'}`}
+          >
+            {isAudioMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </button>
+          
+          <button
+            onClick={toggleVideo}
+            className={`p-3 rounded-full transition-colors shadow-lg ${isVideoOff ? 'bg-red-500 text-white' : 'bg-gray-800/80 text-white hover:bg-gray-700'}`}
+          >
+            {isVideoOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+          </button>
+
+          <button
+            onClick={stopSharing}
+            className="p-3 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors shadow-lg"
+          >
+            <XCircle className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Chat Overlay (Bottom) */}

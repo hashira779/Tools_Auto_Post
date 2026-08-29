@@ -3,7 +3,7 @@ import QRCode from 'react-qr-code';
 import { socket, connectSocket } from '../../services/socket';
 import { MultipartyWebRTC } from '../../services/webrtc';
 import VideoPreview from './VideoPreview';
-import { Copy, RefreshCw, Send, Heart, Flame, ThumbsUp, MessageCircle } from 'lucide-react';
+import { Copy, RefreshCw, Send, Heart, Flame, ThumbsUp, MessageCircle, MonitorUp, Mic, MicOff, Video, VideoOff } from 'lucide-react';
 
 const generateRoomId = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -13,6 +13,11 @@ export default function LiveCameraHero() {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [reactions, setReactions] = useState([]); // Array of floating emojis
+  
+  const [localStream, setLocalStream] = useState(null);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
+  const localVideoRef = useRef(null);
   
   const webrtcRef = useRef(null);
   const chatEndRef = useRef(null);
@@ -27,8 +32,8 @@ export default function LiveCameraHero() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const initSession = () => {
-    const newRoomId = generateRoomId();
+  const initSession = (stream = null, existingRoomId = null) => {
+    const newRoomId = existingRoomId || generateRoomId();
     setRoomId(newRoomId);
     setStreams(new Map());
     setMessages([]);
@@ -38,11 +43,11 @@ export default function LiveCameraHero() {
 
     webrtcRef.current = new MultipartyWebRTC(
       newRoomId,
-      null, // No local stream for the PC host by default
-      (userId, stream) => {
+      stream,
+      (userId, remoteStream) => {
         setStreams(prev => {
           const newMap = new Map(prev);
-          newMap.set(userId, stream);
+          newMap.set(userId, remoteStream);
           return newMap;
         });
       },
@@ -77,8 +82,46 @@ export default function LiveCameraHero() {
   };
 
   const handleRecreate = () => {
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+    }
     cleanupSession();
     initSession();
+  };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setLocalStream(stream);
+      setIsAudioMuted(false);
+      setIsVideoOff(false);
+      cleanupSession();
+      initSession(stream, roomId); // Re-join with the same room ID
+    } catch (err) {
+      console.error(err);
+      alert("Could not access camera or microphone.");
+    }
+  };
+
+  const toggleAudio = () => {
+    if (localStream) {
+      const track = localStream.getAudioTracks()[0];
+      if (track) {
+        track.enabled = !track.enabled;
+        setIsAudioMuted(!track.enabled);
+      }
+    }
+  };
+
+  const toggleVideo = () => {
+    if (localStream) {
+      const track = localStream.getVideoTracks()[0];
+      if (track) {
+        track.enabled = !track.enabled;
+        setIsVideoOff(!track.enabled);
+      }
+    }
   };
 
   const copyLink = () => {
@@ -149,7 +192,33 @@ export default function LiveCameraHero() {
               </button>
             </div>
             
-            <div className={`grid gap-4 w-full ${streams.size > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className={`grid gap-4 w-full ${(streams.size + (localStream ? 1 : 0)) > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              
+              {/* Local PC Stream */}
+              {localStream && (
+                <div className="relative w-full aspect-[16/9] bg-black rounded-xl overflow-hidden flex items-center justify-center border border-[var(--color-surface-3)]">
+                  <video
+                    ref={el => { if (el && localStream) el.srcObject = localStream; }}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover transform -scale-x-100"
+                  />
+                  <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">You</div>
+                  
+                  {/* Host Controls */}
+                  <div className="absolute bottom-2 right-2 flex gap-2">
+                    <button onClick={toggleAudio} className={`p-2 rounded-lg transition-colors ${isAudioMuted ? 'bg-red-500 text-white' : 'bg-black/50 text-white hover:bg-black/70'}`}>
+                      {isAudioMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    </button>
+                    <button onClick={toggleVideo} className={`p-2 rounded-lg transition-colors ${isVideoOff ? 'bg-red-500 text-white' : 'bg-black/50 text-white hover:bg-black/70'}`}>
+                      {isVideoOff ? <VideoOff className="w-4 h-4" /> : <Video className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Remote Streams */}
               {Array.from(streams.entries()).map(([id, stream]) => (
                 <VideoPreview key={id} stream={stream} connectionState="connected" />
               ))}
@@ -228,7 +297,10 @@ export default function LiveCameraHero() {
               Waiting for participants...
             </div>
 
-            <div className="flex gap-2 mt-2">
+            <div className="flex flex-wrap justify-center gap-2 mt-2">
+              <button onClick={startCamera} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-600)] transition-colors text-sm font-medium text-white">
+                <MonitorUp className="w-4 h-4" /> Start My Camera
+              </button>
               <button onClick={copyLink} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] transition-colors text-sm font-medium text-[var(--color-text-2)]">
                 <Copy className="w-4 h-4" /> Copy Link
               </button>
