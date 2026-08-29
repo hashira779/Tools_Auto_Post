@@ -160,37 +160,42 @@ export default function MobileCamera({ roomId }) {
     const nextFacing = facingMode === 'user' ? 'environment' : 'user';
     
     try {
-      // Stop old video track
-      const oldTrack = streamRef.current.getVideoTracks()[0];
-      if (oldTrack) {
-        oldTrack.stop();
-      }
-
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: 1920 },
           height: { ideal: 1080 },
           facingMode: nextFacing
         },
-        audio: false // Keep existing audio
+        audio: false
       });
 
       const newVideoTrack = newStream.getVideoTracks()[0];
-      
-      // Replace video track on the local streamRef
-      streamRef.current.removeTrack(oldTrack);
-      streamRef.current.addTrack(newVideoTrack);
+      if (!newVideoTrack) return;
+
+      const oldTrack = streamRef.current?.getVideoTracks()[0];
+      if (oldTrack && streamRef.current) {
+        try {
+          streamRef.current.removeTrack(oldTrack);
+        } catch (_) {}
+        oldTrack.stop();
+      }
+
+      if (streamRef.current) {
+        streamRef.current.addTrack(newVideoTrack);
+      }
       
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = streamRef.current;
       }
 
-      // Replace track on all active peer connections
+      // Replace track on all active peer connections seamlessly
       if (webrtcRef.current && webrtcRef.current.peers) {
         webrtcRef.current.peers.forEach((pc) => {
-          const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+          const sender = pc.getSenders().find(s => s.track?.kind === 'video' || (s.track === null && s.dtlsTransport));
           if (sender) {
-            sender.replaceTrack(newVideoTrack).catch(err => console.error("Error replacing track:", err));
+            sender.replaceTrack(newVideoTrack).catch(err => {
+              console.debug("Error replacing track on peer:", err?.message);
+            });
           }
         });
       }

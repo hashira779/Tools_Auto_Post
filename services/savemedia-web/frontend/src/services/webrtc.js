@@ -2,9 +2,12 @@ import { socket } from './socket';
 
 const getIceServers = () => {
   const servers = [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
+    { 
+      urls: [
+        'stun:stun.l.google.com:19302',
+        'stun:stun1.l.google.com:19302'
+      ] 
+    },
     {
       urls: [
         'turn:camtech.cam:3478?transport=udp',
@@ -44,9 +47,15 @@ export class MultipartyWebRTC {
     if (pc && pc.remoteDescription && queue) {
       while (queue.length > 0) {
         const candidate = queue.shift();
-        pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(err => {
-          console.error("Error adding queued ice candidate:", err);
-        });
+        if (candidate && candidate.candidate) {
+          try {
+            pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(err => {
+              console.debug("Ignored stale queued candidate:", err?.message);
+            });
+          } catch (err) {
+            console.debug("Ignored candidate format error:", err?.message);
+          }
+        }
       }
     }
   }
@@ -54,7 +63,6 @@ export class MultipartyWebRTC {
   init() {
     socket.on('all-users', (existingUsers) => {
       console.log("[WEBRTC] Existing users in room:", existingUsers);
-      // I am the new guy. I must create an offer for every existing user in the room.
       existingUsers.forEach(userId => {
         this.createPeerConnection(userId, true);
       });
@@ -62,8 +70,6 @@ export class MultipartyWebRTC {
 
     socket.on('user-joined', ({ userId }) => {
       console.log("[WEBRTC] New user joined:", userId);
-      // We don't create the offer here, the new guy will create the offer to us
-      // But we CAN prepare a PeerConnection to receive it. (Usually it's created lazily on receiving offer)
     });
 
     socket.on('webrtc-offer', async ({ callerId, offer }) => {
@@ -74,8 +80,9 @@ export class MultipartyWebRTC {
       }
       
       try {
-        await pc.setRemoteDescription(offer);
-        await pc.setLocalDescription();
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
         socket.emit('webrtc-answer', { targetId: callerId, callerId: socket.id, answer: pc.localDescription });
         this.processIceQueue(callerId);
       } catch (err) {
@@ -88,7 +95,7 @@ export class MultipartyWebRTC {
       const pc = this.peers.get(callerId);
       if (pc) {
         try {
-          await pc.setRemoteDescription(answer);
+          await pc.setRemoteDescription(new RTCSessionDescription(answer));
           this.processIceQueue(callerId);
         } catch (err) {
           console.error("Error setting remote description from answer:", err);
@@ -99,6 +106,9 @@ export class MultipartyWebRTC {
     socket.on('ice-candidate', async ({ callerId, candidate }) => {
       const pc = this.peers.get(callerId);
       if (pc) {
+        if (!candidate || !candidate.candidate) {
+          return;
+        }
         if (!pc.remoteDescription) {
           if (!this.iceCandidateQueue.has(callerId)) {
             this.iceCandidateQueue.set(callerId, []);
@@ -106,9 +116,11 @@ export class MultipartyWebRTC {
           this.iceCandidateQueue.get(callerId).push(candidate);
         } else {
           try {
-            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            await pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(err => {
+              console.debug("Ignored stale ICE candidate:", err?.message);
+            });
           } catch (err) {
-            console.error("Error adding ice candidate:", err);
+            console.debug("Ignored ICE candidate error:", err?.message);
           }
         }
       }
@@ -121,6 +133,7 @@ export class MultipartyWebRTC {
         pc.close();
         this.peers.delete(userId);
       }
+      this.iceCandidateQueue.delete(userId);
       if (this.onStreamRemoved) {
         this.onStreamRemoved(userId);
       }
@@ -145,8 +158,16 @@ export class MultipartyWebRTC {
     }
 
     pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit('ice-candidate', { targetId, callerId: socket.id, candidate: event.candidate });
+      if (event.candidate && event.candidate.candidate) {
+        socket.emit('ice-candidate', { 
+          targetId, 
+          callerId: socket.id, 
+          candidate: event.candidate.toJSON ? event.candidate.toJSON() : {
+            candidate: event.candidate.candidate,
+            sdpMid: event.candidate.sdpMid,
+            sdpMLineIndex: event.candidate.sdpMLineIndex
+          }
+        });
       }
     };
 
