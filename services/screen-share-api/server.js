@@ -90,6 +90,23 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Manual Leave Room
+  socket.on('leave-room', ({ roomId }) => {
+    const room = rooms.get(roomId);
+    if (room && room.has(socket.id)) {
+      room.delete(socket.id);
+      socketToRoom.delete(socket.id);
+      io.to(roomId).emit('user-left', { userId: socket.id });
+      socket.leave(roomId);
+      console.log(`[ROOM] User ${socket.id} manually left room ${roomId}. Remaining: ${room.size}`);
+      
+      if (room.size === 0) {
+        rooms.delete(roomId);
+        console.log(`[CLEANUP] Room ${roomId} deleted (empty).`);
+      }
+    }
+  });
+
   // Disconnect Handling
   socket.on('disconnect', () => {
     console.log(`[DISCONNECT] Client disconnected: ${socket.id}`);

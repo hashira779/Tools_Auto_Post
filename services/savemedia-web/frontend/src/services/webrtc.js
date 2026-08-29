@@ -174,6 +174,7 @@ export class MultipartyWebRTC {
     this.peers.forEach((pc) => pc.close());
     this.peers.clear();
     this.iceCandidateQueue.clear();
+    socket.emit('leave-room', { roomId: this.roomId });
     socket.off('all-users');
     socket.off('user-joined');
     socket.off('webrtc-offer');
