@@ -202,7 +202,7 @@ export default function MobileCamera({ roomId }) {
         {reactions.map(r => (
           <div 
             key={r.id} 
-            className="absolute bottom-0 text-3xl animate-float-up opacity-0"
+            className="absolute bottom-0 text-3xl animate-float-up"
             style={{ left: `${Math.random() * 40 - 20}px` }}
           >
             {r.emoji}
@@ -212,7 +212,11 @@ export default function MobileCamera({ roomId }) {
 
       {/* Main Video Grid */}
       <div className="flex-1 w-full overflow-hidden relative">
-        <div className={`w-full h-full grid gap-1 ${streams.size > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <div className={`w-full h-full grid gap-1 ${
+          streams.size === 1 ? 'grid-rows-2 grid-cols-1' : 
+          streams.size > 1 ? 'grid-cols-2 grid-rows-2' : 
+          'grid-cols-1'
+        }`}>
           {/* Local Stream */}
           <div className="relative w-full h-full bg-gray-900 border border-gray-800 flex items-center justify-center">
             <video

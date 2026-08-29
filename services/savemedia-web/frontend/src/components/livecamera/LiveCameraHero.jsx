@@ -151,7 +151,7 @@ export default function LiveCameraHero() {
     socket.emit('room-reaction', { roomId, emoji, senderId: socket.id });
   };
 
-  const hasStreams = streams.size > 0;
+  const hasStreams = streams.size > 0 || localStream !== null;
 
   return (
     <div className="w-full max-w-6xl mx-auto flex flex-col items-center gap-6 animate-fade-in relative">
@@ -172,8 +172,8 @@ export default function LiveCameraHero() {
         {reactions.map(r => (
           <div 
             key={r.id} 
-            className="absolute bottom-0 text-4xl animate-float-up opacity-0"
-            style={{ left: `${Math.random() * 40 - 20}px` }}
+            className="absolute bottom-0 text-3xl animate-float-up"
+            style={{ left: `${Math.random() * 60 - 30}px` }}
           >
             {r.emoji}
           </div>
@@ -198,7 +198,7 @@ export default function LiveCameraHero() {
               </button>
             </div>
             
-            <div className={`grid gap-4 w-full ${(streams.size + (localStream ? 1 : 0)) > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className={`grid gap-4 w-full ${(streams.size + (localStream ? 1 : 0)) > 1 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
               
               {/* Local PC Stream */}
               {localStream && (
