@@ -92,7 +92,13 @@ export default function LiveCameraHero() {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
+        audio: true
+      });
       setLocalStream(stream);
       setIsAudioMuted(false);
       setIsVideoOff(false);
