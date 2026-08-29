@@ -14,7 +14,7 @@ files_to_sync = {
     "services/savemedia-web/frontend/src/components/AppNavbar.jsx": "CamTech/services/savemedia-web/frontend/src/components/AppNavbar.jsx",
     "services/savemedia-web/frontend/src/App.jsx": "CamTech/services/savemedia-web/frontend/src/App.jsx",
     "services/savemedia-web/frontend/src/hooks/useOllama.js": "CamTech/services/savemedia-web/frontend/src/hooks/useOllama.js",
-    "services/savemedia-web/frontend/src/hooks/useAuth.js": "CamTech/services/savemedia-web/frontend/src/hooks/useAuth.js",
+    "services/savemedia-web/frontend/src/hooks/useAuth.jsx": "CamTech/services/savemedia-web/frontend/src/hooks/useAuth.jsx",
     "services/savemedia-web/frontend/src/lib/supabase.js": "CamTech/services/savemedia-web/frontend/src/lib/supabase.js",
     "services/savemedia-web/frontend/src/components/chat/ChatMessage.jsx": "CamTech/services/savemedia-web/frontend/src/components/chat/ChatMessage.jsx",
     "services/savemedia-web/frontend/src/components/chat/AIChatStudio.jsx": "CamTech/services/savemedia-web/frontend/src/components/chat/AIChatStudio.jsx",
