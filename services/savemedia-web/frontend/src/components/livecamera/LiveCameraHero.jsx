@@ -48,9 +48,15 @@ export default function LiveCameraHero() {
 
   // Bind local video element whenever localStream changes
   useEffect(() => {
-    if (localVideoRef.current && localStream) {
-      localVideoRef.current.srcObject = localStream;
+    const video = localVideoRef.current;
+    if (video && localStream) {
+      video.srcObject = localStream;
     }
+    return () => {
+      if (video) {
+        video.srcObject = null;
+      }
+    };
   }, [localStream]);
 
   const initSession = (stream = null, existingRoomId = null) => {
@@ -115,8 +121,8 @@ export default function LiveCameraHero() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         },
         audio: true
       });
@@ -199,8 +205,14 @@ export default function LiveCameraHero() {
   return (
     <div 
       ref={containerRef}
-      className="w-full flex-1 bg-slate-950 text-slate-100 flex flex-col min-h-[calc(100vh-64px)] relative select-none"
+      className="w-full flex-1 flex flex-col min-h-[calc(100vh-64px)] relative select-none bg-[#09090b] overflow-hidden"
     >
+      {/* Background glowing mesh (hardware accelerated) */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-40 will-change-transform">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/30 rounded-full blur-[100px] mix-blend-screen transform translate-z-0"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-violet-600/30 rounded-full blur-[100px] mix-blend-screen transform translate-z-0"></div>
+        <div className="absolute top-[30%] left-[40%] w-[30%] h-[30%] bg-blue-500/20 rounded-full blur-[80px] mix-blend-screen transform translate-z-0"></div>
+      </div>
       
       {/* ── Studio Header Bar ── */}
       <header className="h-16 px-4 sm:px-6 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between z-30 flex-shrink-0">

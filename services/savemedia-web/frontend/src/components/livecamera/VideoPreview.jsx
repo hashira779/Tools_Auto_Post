@@ -7,9 +7,15 @@ export default function VideoPreview({ stream, connectionState, rtt }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
+    const video = videoRef.current;
+    if (video && stream) {
+      video.srcObject = stream;
     }
+    return () => {
+      if (video) {
+        video.srcObject = null;
+      }
+    };
   }, [stream]);
 
   useEffect(() => {

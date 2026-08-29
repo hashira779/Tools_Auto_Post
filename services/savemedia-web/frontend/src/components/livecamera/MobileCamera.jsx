@@ -66,9 +66,15 @@ export default function MobileCamera({ roomId }) {
 
   // Bind local video element whenever stream changes or component enters live state
   useEffect(() => {
-    if (localVideoRef.current && streamRef.current) {
-      localVideoRef.current.srcObject = streamRef.current;
+    const video = localVideoRef.current;
+    if (video && streamRef.current) {
+      video.srcObject = streamRef.current;
     }
+    return () => {
+      if (video) {
+        video.srcObject = null;
+      }
+    };
   }, [supportState, facingMode]);
 
   const startSharing = async () => {
@@ -77,8 +83,8 @@ export default function MobileCamera({ roomId }) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
           facingMode: facingMode
         },
         audio: true
@@ -162,8 +168,8 @@ export default function MobileCamera({ roomId }) {
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
           facingMode: nextFacing
         },
         audio: false
@@ -359,52 +365,81 @@ export default function MobileCamera({ roomId }) {
         </div>
       </div>
 
-      {/* ── Main Video Grid (Full Viewport Immersion) ── */}
-      <div className="flex-1 w-full h-full relative overflow-hidden bg-slate-950">
-        <div className={`w-full h-full grid gap-1.5 p-1.5 ${
-          totalStreamsCount === 1 ? 'grid-cols-1 grid-rows-1' :
-          totalStreamsCount === 2 ? 'grid-cols-1 grid-rows-2 sm:grid-cols-2 sm:grid-rows-1' :
-          totalStreamsCount === 3 ? 'grid-cols-2 grid-rows-2' :
-          'grid-cols-2 grid-rows-2'
-        }`}>
-          
-          {/* Local User Stream */}
-          <div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-lg flex items-center justify-center">
+      {/* ── Main Video Area (FaceTime / Instagram Live Style Immersion) ── */}
+      <div className="flex-1 w-full h-full relative overflow-hidden bg-black">
+        
+        {totalStreamsCount === 1 ? (
+          /* Solo View - Local Camera Full Screen */
+          <div className="absolute inset-0">
             <video
               ref={localVideoRef}
               autoPlay
               playsInline
               muted
-              className={`w-full h-full object-cover ${facingMode === 'user' ? 'transform -scale-x-100' : ''}`}
+              className={`w-full h-full object-cover transition-transform duration-500 ${facingMode === 'user' ? 'transform -scale-x-100' : ''}`}
             />
-
-            {/* Local User Avatar Placeholder if Video is Off */}
             {isVideoOff && (
-              <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center gap-2 text-slate-400 z-10">
-                <div className="w-16 h-16 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-white text-xl font-bold">
+              <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center text-white/50">
+                <div className="w-24 h-24 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-3xl font-bold mb-4">
                   You
                 </div>
-                <span className="text-xs font-medium">Camera is Off</span>
+                <p>Camera is Off</p>
               </div>
             )}
-
-            {/* Badge overlay */}
-            <div className="absolute bottom-2.5 left-2.5 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px] font-medium">
-              <span>You</span>
-              {isAudioMuted && <MicOff className="w-3 h-3 text-rose-400" />}
-            </div>
           </div>
-
-          {/* Remote Peer Streams */}
-          {Array.from(streams.entries()).map(([id, stream]) => (
-            <div key={id} className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-lg flex items-center justify-center">
-              <VideoPreview stream={stream} connectionState="connected" />
-              <div className="absolute bottom-2.5 left-2.5 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px] font-medium">
-                <span>Guest</span>
+        ) : totalStreamsCount === 2 ? (
+          /* 1-on-1 View (Remote Full Screen, Local PIP) */
+          <>
+            <div className="absolute inset-0 animate-fade-in">
+              <VideoPreview stream={Array.from(streams.values())[0]} connectionState="connected" />
+            </div>
+            
+            {/* Local PIP (Picture-in-Picture) */}
+            <div className="absolute top-16 right-4 sm:right-6 w-28 sm:w-36 aspect-[3/4] rounded-2xl overflow-hidden bg-slate-900 shadow-2xl border-2 border-white/20 z-20 transition-all duration-200 ease-out hover:scale-105 active:scale-95 cursor-pointer will-change-transform">
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`w-full h-full object-cover ${facingMode === 'user' ? 'transform -scale-x-100' : ''}`}
+              />
+              {isVideoOff && (
+                <div className="absolute inset-0 bg-slate-900 flex items-center justify-center">
+                  <VideoOff className="w-8 h-8 text-white/30" />
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          /* Grid View for 3+ Participants */
+          <div className="w-full h-full p-2 grid gap-2 grid-cols-2 grid-rows-2 auto-rows-fr animate-fade-in">
+            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-lg">
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`w-full h-full object-cover ${facingMode === 'user' ? 'transform -scale-x-100' : ''}`}
+              />
+              {isVideoOff && (
+                <div className="absolute inset-0 bg-slate-900 flex items-center justify-center">
+                  <VideoOff className="w-8 h-8 text-white/30" />
+                </div>
+              )}
+              <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-lg text-white text-[10px] font-medium border border-white/10">
+                You
               </div>
             </div>
-          ))}
-        </div>
+            {Array.from(streams.entries()).map(([id, stream]) => (
+              <div key={id} className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-lg">
+                <VideoPreview stream={stream} connectionState="connected" />
+                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-lg text-white text-[10px] font-medium border border-white/10">
+                  Guest
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Floating Reaction Stream (Instagram style right side) ── */}
