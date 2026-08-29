@@ -134,6 +134,29 @@ services:
       - camtech-net
 
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Screen Share Signaling API (WebRTC)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  screen-share-api:
+    build:
+      context: ./services/screen-share-api
+      dockerfile: Dockerfile
+    container_name: camtech-screen-share
+    restart: unless-stopped
+    environment:
+      - ROOM_EXPIRATION_MINUTES=${ROOM_EXPIRATION_MINUTES:-30}
+    # No need to expose ports globally if it goes through nginx, but good for local dev
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - camtech-net
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   #  Cloudflare Tunnel (Secure Public Access)
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

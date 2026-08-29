@@ -7,12 +7,14 @@ export const TOOL_TTS = 'tts'
 export const TOOL_STICKER = 'sticker'
 export const TOOL_ADMIN = 'admin'
 export const TOOL_PDF = 'pdf'
+export const TOOL_SCREEN_SHARE = 'screen-share'
 
 const NAV_TOOLS = [
   { id: TOOL_DOWNLOADER, label: 'Downloader', mobileLabel: 'Download' },
   { id: TOOL_TTS, label: 'Text to Voice', mobileLabel: 'Voice' },
   { id: TOOL_STICKER, label: 'Stickers', mobileLabel: 'Stickers' },
   { id: TOOL_PDF, label: 'PDF Tools', mobileLabel: 'PDF' },
+  { id: TOOL_SCREEN_SHARE, label: 'Screen Share', mobileLabel: 'Share' },
 ]
 
 export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }) {

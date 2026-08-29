@@ -4,7 +4,7 @@ import { useAuth } from './hooks/useAuth'
 import { FORMAT_VIDEO } from './constants/platforms'
 
 import { lazy, Suspense } from 'react'
-import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_ADMIN, TOOL_PDF } from './components/AppNavbar'
+import AppNavbar, { TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_ADMIN, TOOL_PDF, TOOL_SCREEN_SHARE } from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Hero from './components/Hero'
 import SearchCard from './components/SearchCard'
@@ -20,9 +20,15 @@ const TtsStudio = lazy(() => import('./components/tts/TtsStudio'))
 const StickerHero = lazy(() => import('./components/sticker/StickerHero'))
 const StickerStudio = lazy(() => import('./components/sticker/StickerStudio'))
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'))
+const ScreenShareContainer = lazy(() => import('./components/screenshare/ScreenShareContainer'))
 
 function App() {
-  const [activeTool, setActiveTool] = useState(TOOL_DOWNLOADER)
+  const [activeTool, setActiveTool] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/share')) {
+      return TOOL_SCREEN_SHARE;
+    }
+    return TOOL_DOWNLOADER;
+  })
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   const pdfWrapperRef = useRef(null)
@@ -176,6 +182,15 @@ function App() {
               <main className="flex flex-col items-center animate-fade-in w-full">
                 <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
                   <AdminDashboard />
+                </Suspense>
+              </main>
+            )}
+
+            {/* Screen Share */}
+            {activeTool === TOOL_SCREEN_SHARE && (
+              <main className="flex flex-col items-center animate-fade-in w-full">
+                <Suspense fallback={<div className="w-full h-64 animate-pulse bg-[var(--color-surface-2)] rounded-xl mt-8"></div>}>
+                  <ScreenShareContainer />
                 </Suspense>
               </main>
             )}

@@ -9,6 +9,7 @@ echo "pTT!CT01" | sudo -S usermod -aG docker ubuntu-server
 
 # Build and start the bot container
 echo "Starting Bot inside Docker..."
+sleep 5
 echo "pTT!CT01" | sudo -S docker compose up -d --build
 
 echo ""

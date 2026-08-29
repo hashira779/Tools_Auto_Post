@@ -99,6 +99,11 @@ if ! check_health "http://localhost:80/api/sticker/styles" "Sticker API"; then
     DEPLOY_FAILED=1
 fi
 
+# Verify Screen Share API (Signaling Server on port 4000)
+if ! check_health "http://localhost:4000/health" "Screen Share API"; then
+    DEPLOY_FAILED=1
+fi
+
 # 6. Automated Rollback if deployment failed
 if [ "$DEPLOY_FAILED" -eq 1 ]; then
     echo "===================================================="
