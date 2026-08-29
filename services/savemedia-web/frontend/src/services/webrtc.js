@@ -5,19 +5,14 @@ const getIceServers = () => {
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     {
-      urls: 'turn:openrelay.metered.ca:80',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
+      urls: 'turn:camtech.cam:3478',
+      username: 'camtech',
+      credential: 'camtech_turn_secret'
     },
     {
-      urls: 'turn:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
+      urls: 'turn:camtech.cam:3478?transport=tcp',
+      username: 'camtech',
+      credential: 'camtech_turn_secret'
     }
   ];
   

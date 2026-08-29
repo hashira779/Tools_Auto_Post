@@ -383,6 +383,28 @@ services:
     networks:
       - camtech-net
 
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Coturn (TURN/STUN Server for WebRTC ICE Fallback)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  coturn:
+    image: coturn/coturn:latest
+    container_name: camtech-coturn
+    restart: unless-stopped
+    ports:
+      - "3478:3478/tcp"
+      - "3478:3478/udp"
+      - "50000-50100:50000-50100/udp"
+    command:
+      - -n
+      - --log-file=stdout
+      - --min-port=50000
+      - --max-port=50100
+      - --user=camtech:camtech_turn_secret
+      - --realm=camtech.cam
+      - --verbose
+    networks:
+      - camtech-net
+
 networks:
   camtech-net:
     driver: bridge
