@@ -118,9 +118,10 @@ export default function MobileShare({ roomId }) {
       <div className="flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto min-h-[60vh]">
         <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
         <h2 className="text-xl font-bold mb-2">Screen Sharing Not Supported</h2>
-        <p className="text-gray-400">
-          Your browser or device does not support screen sharing via the web.
-          Please use the latest version of Safari on iOS 13+.
+        <p className="text-gray-400 text-sm leading-relaxed">
+          Apple does not allow web-based screen sharing on iPhones. 
+          <br /><br />
+          To present your screen, please scan the QR code using an <strong>Android device</strong>, an <strong>iPad</strong>, or open the link on a desktop PC.
         </p>
       </div>
     );
