@@ -519,7 +519,9 @@
             
             setInterval(() => {
                 const path = window.location.pathname;
-                if ((path.endsWith('/setup') || path.endsWith('/signin') || path.endsWith('/setup/')) && !document.getElementById('google-auth-overlay')) {
+                const isAuthPage = path.endsWith('/setup') || path.endsWith('/signin') || path.endsWith('/setup/');
+                
+                if (isAuthPage && !document.getElementById('google-auth-overlay')) {
                     const overlay = document.createElement('div');
                     overlay.id = 'google-auth-overlay';
                     overlay.innerHTML = `
@@ -552,7 +554,7 @@
                             { theme: "outline", size: "large" }
                         );
                     }
-                } else if (path !== '/setup' && path !== '/signin') {
+                } else if (!isAuthPage) {
                     const overlay = document.getElementById('google-auth-overlay');
                     if (overlay) overlay.remove();
                 }
