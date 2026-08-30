@@ -67,9 +67,9 @@ export default function StickerStudio() {
 
       if (shouldRemoveBg) {
         // Dynamically import to keep initial bundle size small
-        const imglyRemoveBackground = (await import('@imgly/background-removal')).default
+        const { removeBackground } = await import('@imgly/background-removal')
         
-        finalBlob = await imglyRemoveBackground(fileToProcess, {
+        finalBlob = await removeBackground(fileToProcess, {
           progress: (key, current, total) => {
              if (key.startsWith('fetch')) {
                const percentage = Math.round((current / total) * 100) || 0
