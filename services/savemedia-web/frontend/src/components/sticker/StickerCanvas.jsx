@@ -9,8 +9,12 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
   // Dragging State
   const [customPos, setCustomPos] = useState({ x: 256, y: null })
   const [isDragging, setIsDragging] = useState(false)
+  const [dragMode, setDragMode] = useState(null) // 'text' | 'image' | null
   const [dragOffset, setDragOffset] = useState({ dx: 0, dy: 0 })
   const [isHovering, setIsHovering] = useState(false)
+
+  // Image Transform State
+  const [imgTransform, setImgTransform] = useState({ scale: 1, x: 0, y: 0 })
 
   // Sync textConfig position changes from the parent to our internal custom position
   useEffect(() => {
@@ -34,6 +38,7 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
     img.onload = () => {
       imageObjRef.current = img
       setIsImageLoaded(true)
+      setImgTransform({ scale: 1, x: 0, y: 0 }) // Reset zoom/pan on new image
       renderCanvas()
       if (onReady) onReady()
     }
@@ -56,12 +61,11 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
       const { brightness = 100, contrast = 100, saturation = 100 } = adjustments || {}
       ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`
       
-      const size = Math.min(img.width, img.height)
-      const sx = (img.width - size) / 2
-      const sy = (img.height - size) / 2
       const style = baseStickerData?.style || 'original'
 
       ctx.save()
+      
+      // Setup Clipping Mask
       if (style === 'circle') {
         ctx.beginPath()
         ctx.arc(256, 256, 256, 0, Math.PI * 2)
@@ -72,7 +76,26 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
         ctx.clip()
       }
 
-      ctx.drawImage(img, sx, sy, size, size, 0, 0, 512, 512)
+      // Calculate base 'Cover' fit
+      const imgAspect = img.width / img.height
+      let drawW, drawH
+      if (imgAspect > 1) { // Landscape
+        drawH = 512
+        drawW = 512 * imgAspect
+      } else { // Portrait
+        drawW = 512
+        drawH = 512 / imgAspect
+      }
+
+      // Apply Zoom & Pan
+      const centerX = 256
+      const centerY = 256
+      ctx.translate(centerX + imgTransform.x, centerY + imgTransform.y)
+      ctx.scale(imgTransform.scale, imgTransform.scale)
+
+      // Draw centered at 0,0
+      ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH)
+      
       ctx.restore()
       ctx.filter = 'none' // Reset filter for text rendering
     }
@@ -167,7 +190,7 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
         ctx.restore()
       }
     }
-  }, [adjustments, textConfig, customPos])
+  }, [adjustments, textConfig, customPos, imgTransform, baseStickerData])
 
   // Call render when inputs change (requestAnimationFrame for buttery smooth sliders)
   useEffect(() => {
@@ -179,6 +202,23 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
     renderLoop()
     return () => cancelAnimationFrame(animationFrameId)
   }, [renderCanvas])
+
+  // Wheel Zoom Listener (passive: false)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const handleWheel = (e) => {
+      e.preventDefault()
+      const zoomSensitivity = 0.005
+      setImgTransform(prev => {
+        let newScale = prev.scale - e.deltaY * zoomSensitivity
+        newScale = Math.max(0.1, Math.min(10, newScale))
+        return { ...prev, scale: newScale }
+      })
+    }
+    canvas.addEventListener('wheel', handleWheel, { passive: false })
+    return () => canvas.removeEventListener('wheel', handleWheel)
+  }, [])
 
   // Pointer Handlers for Dragging
   const getMousePos = (e) => {
@@ -219,15 +259,19 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
   }
 
   const handlePointerDown = (e) => {
-    const bounds = getTextBounds()
-    if (!bounds) return
     const pos = getMousePos(e)
+    const bounds = getTextBounds()
     
-    if (pos.x >= bounds.left && pos.x <= bounds.right && pos.y >= bounds.top && pos.y <= bounds.bottom) {
+    if (bounds && pos.x >= bounds.left && pos.x <= bounds.right && pos.y >= bounds.top && pos.y <= bounds.bottom) {
+      setDragMode('text')
       setIsDragging(true)
       setDragOffset({ dx: pos.x - customPos.x, dy: pos.y - customPos.y })
-      canvasRef.current?.setPointerCapture(e.pointerId)
+    } else {
+      setDragMode('image')
+      setIsDragging(true)
+      setDragOffset({ dx: pos.x - imgTransform.x, dy: pos.y - imgTransform.y })
     }
+    canvasRef.current?.setPointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e) => {
@@ -242,15 +286,24 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
         setIsHovering(false)
       }
     } else {
-      setCustomPos({
-        x: pos.x - dragOffset.dx,
-        y: pos.y - dragOffset.dy
-      })
+      if (dragMode === 'text') {
+        setCustomPos({
+          x: pos.x - dragOffset.dx,
+          y: pos.y - dragOffset.dy
+        })
+      } else if (dragMode === 'image') {
+        setImgTransform(prev => ({
+          ...prev,
+          x: pos.x - dragOffset.dx,
+          y: pos.y - dragOffset.dy
+        }))
+      }
     }
   }
 
   const handlePointerUp = (e) => {
     setIsDragging(false)
+    setDragMode(null)
     canvasRef.current?.releasePointerCapture(e.pointerId)
   }
 
@@ -289,8 +342,12 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
     }
   }))
 
+  const handleZoomIn = () => setImgTransform(p => ({ ...p, scale: Math.min(10, p.scale + 0.25) }))
+  const handleZoomOut = () => setImgTransform(p => ({ ...p, scale: Math.max(0.1, p.scale - 0.25) }))
+  const handleZoomReset = () => setImgTransform({ scale: 1, x: 0, y: 0 })
+
   return (
-    <div className="w-full aspect-square bg-[var(--color-surface-2)] rounded-2xl overflow-hidden border border-[var(--color-border)] shadow-inner relative flex items-center justify-center checkered-bg">
+    <div className="w-full aspect-square bg-[var(--color-surface-2)] rounded-2xl overflow-hidden border border-[var(--color-border)] shadow-inner relative flex items-center justify-center checkered-bg group">
       {!isImageLoaded && (
          <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--color-text-4)] animate-pulse pointer-events-none">
            <svg className="w-12 h-12 mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -299,6 +356,7 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
            <span className="text-xs font-semibold tracking-wider uppercase opacity-50">Upload to Preview</span>
          </div>
       )}
+      
       <canvas
         ref={canvasRef}
         onPointerDown={handlePointerDown}
@@ -309,6 +367,21 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
           isDragging ? 'cursor-grabbing' : isHovering ? 'cursor-grab' : 'cursor-default'
         }`}
       />
+
+      {/* Floating Zoom Controls */}
+      {isImageLoaded && (
+        <div className="absolute bottom-4 right-4 bg-[var(--color-surface)]/90 backdrop-blur-md rounded-xl border border-[var(--color-border)] shadow-lg flex items-center p-1 gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button onClick={handleZoomOut} className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors focus-ring" title="Zoom Out">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+          </button>
+          <button onClick={handleZoomReset} className="px-2 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors focus-ring" title="Reset Fit">
+            {Math.round(imgTransform.scale * 100)}%
+          </button>
+          <button onClick={handleZoomIn} className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors focus-ring" title="Zoom In">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          </button>
+        </div>
+      )}
     </div>
   )
 })
