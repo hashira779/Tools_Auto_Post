@@ -5,6 +5,20 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
   const canvasRef = useRef(null)
   const imageObjRef = useRef(null)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
+  
+  // Dragging State
+  const [customPos, setCustomPos] = useState({ x: 256, y: null })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ dx: 0, dy: 0 })
+  const [isHovering, setIsHovering] = useState(false)
+
+  // Sync textConfig position changes from the parent to our internal custom position
+  useEffect(() => {
+    let newY = 450
+    if (textConfig?.position === 'top') newY = 65
+    if (textConfig?.position === 'center') newY = 256
+    setCustomPos(prev => ({ ...prev, y: newY, x: 256 })) // Reset X to center on position change
+  }, [textConfig?.position])
 
   // 1. Load image object when baseStickerData changes
   useEffect(() => {
@@ -47,7 +61,7 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
 
     // Draw Text
     if (textConfig && textConfig.text?.trim()) {
-      const { text, font, style, position, fontSize } = textConfig
+      const { text, font, style, fontSize } = textConfig
       const selectedFontObj = FONTS.find((f) => f.id === font) || FONTS[0]
       
       ctx.font = `bold ${fontSize}px ${selectedFontObj.family}`
@@ -55,9 +69,8 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
       ctx.textBaseline = 'middle'
 
       // Y Position
-      let y = 450
-      if (position === 'top') y = 65
-      if (position === 'center') y = 256
+      const y = customPos.y !== null ? customPos.y : 450
+      const x = customPos.x
 
       const textToDraw = text.trim()
       const textMetrics = ctx.measureText(textToDraw)
@@ -76,13 +89,13 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
         ctx.shadowColor = 'rgba(0, 0, 0, 0.4)'
         ctx.shadowBlur = 8
         ctx.beginPath()
-        ctx.roundRect(256 - badgeWidth / 2, y - badgeHeight / 2, badgeWidth, badgeHeight, 14)
+        ctx.roundRect(x - badgeWidth / 2, y - badgeHeight / 2, badgeWidth, badgeHeight, 14)
         ctx.fill()
         ctx.stroke()
         ctx.restore()
 
         ctx.fillStyle = '#0f172a'
-        ctx.fillText(textToDraw, 256, y)
+        ctx.fillText(textToDraw, x, y)
       } else if (style === 'stamp') {
         ctx.save()
         ctx.fillStyle = '#dc2626'
@@ -91,13 +104,13 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
         ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
         ctx.shadowBlur = 10
         ctx.beginPath()
-        ctx.roundRect(256 - badgeWidth / 2, y - badgeHeight / 2, badgeWidth, badgeHeight, 10)
+        ctx.roundRect(x - badgeWidth / 2, y - badgeHeight / 2, badgeWidth, badgeHeight, 10)
         ctx.fill()
         ctx.stroke()
         ctx.restore()
 
         ctx.fillStyle = '#ffffff'
-        ctx.fillText(textToDraw, 256, y)
+        ctx.fillText(textToDraw, x, y)
       } else if (style === 'gold') {
         ctx.save()
         ctx.strokeStyle = '#451a03'
@@ -106,9 +119,9 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
         ctx.miterLimit = 2
         ctx.shadowColor = '#f59e0b'
         ctx.shadowBlur = 14
-        ctx.strokeText(textToDraw, 256, y)
+        ctx.strokeText(textToDraw, x, y)
         ctx.fillStyle = '#fbbf24'
-        ctx.fillText(textToDraw, 256, y)
+        ctx.fillText(textToDraw, x, y)
         ctx.restore()
       } else if (style === 'neon') {
         ctx.save()
@@ -117,9 +130,9 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
         ctx.lineJoin = 'round'
         ctx.shadowColor = '#06b6d4'
         ctx.shadowBlur = 16
-        ctx.strokeText(textToDraw, 256, y)
+        ctx.strokeText(textToDraw, x, y)
         ctx.fillStyle = '#22d3ee'
-        ctx.fillText(textToDraw, 256, y)
+        ctx.fillText(textToDraw, x, y)
         ctx.restore()
       } else {
         // Classic Meme Stroke
@@ -130,13 +143,13 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
         ctx.miterLimit = 2
         ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'
         ctx.shadowBlur = 8
-        ctx.strokeText(textToDraw, 256, y)
+        ctx.strokeText(textToDraw, x, y)
         ctx.fillStyle = '#ffffff'
-        ctx.fillText(textToDraw, 256, y)
+        ctx.fillText(textToDraw, x, y)
         ctx.restore()
       }
     }
-  }, [adjustments, textConfig])
+  }, [adjustments, textConfig, customPos])
 
   // Call render when inputs change (requestAnimationFrame for buttery smooth sliders)
   useEffect(() => {
@@ -149,6 +162,79 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
     return () => cancelAnimationFrame(animationFrameId)
   }, [renderCanvas])
 
+  // Pointer Handlers for Dragging
+  const getMousePos = (e) => {
+    const canvas = canvasRef.current
+    if (!canvas) return { x: 0, y: 0 }
+    const rect = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    }
+  }
+
+  const getTextBounds = () => {
+    if (!textConfig?.text?.trim()) return null
+    const { text, fontSize, font } = textConfig
+    const canvas = canvasRef.current
+    if (!canvas) return null
+    const ctx = canvas.getContext('2d')
+    const selectedFontObj = FONTS.find((f) => f.id === font) || FONTS[0]
+    ctx.font = `bold ${fontSize}px ${selectedFontObj.family}`
+    const textWidth = ctx.measureText(text.trim()).width
+    const paddingX = 18
+    const paddingY = 10
+    const badgeHeight = fontSize + paddingY * 2
+    const badgeWidth = textWidth + paddingX * 2
+    
+    const y = customPos.y !== null ? customPos.y : 450
+    const x = customPos.x
+    
+    return {
+      left: x - badgeWidth / 2,
+      right: x + badgeWidth / 2,
+      top: y - badgeHeight / 2,
+      bottom: y + badgeHeight / 2
+    }
+  }
+
+  const handlePointerDown = (e) => {
+    const bounds = getTextBounds()
+    if (!bounds) return
+    const pos = getMousePos(e)
+    
+    if (pos.x >= bounds.left && pos.x <= bounds.right && pos.y >= bounds.top && pos.y <= bounds.bottom) {
+      setIsDragging(true)
+      setDragOffset({ dx: pos.x - customPos.x, dy: pos.y - customPos.y })
+      canvasRef.current?.setPointerCapture(e.pointerId)
+    }
+  }
+
+  const handlePointerMove = (e) => {
+    const pos = getMousePos(e)
+    
+    if (!isDragging) {
+      const bounds = getTextBounds()
+      if (bounds) {
+        const hovering = (pos.x >= bounds.left && pos.x <= bounds.right && pos.y >= bounds.top && pos.y <= bounds.bottom)
+        setIsHovering(hovering)
+      } else {
+        setIsHovering(false)
+      }
+    } else {
+      setCustomPos({
+        x: pos.x - dragOffset.dx,
+        y: pos.y - dragOffset.dy
+      })
+    }
+  }
+
+  const handlePointerUp = (e) => {
+    setIsDragging(false)
+    canvasRef.current?.releasePointerCapture(e.pointerId)
+  }
 
   // 3. Expose Methods for Exporting
   useImperativeHandle(ref, () => ({
@@ -188,7 +274,7 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
   return (
     <div className="w-full aspect-square bg-[var(--color-surface-2)] rounded-2xl overflow-hidden border border-[var(--color-border)] shadow-inner relative flex items-center justify-center checkered-bg">
       {!isImageLoaded && (
-         <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--color-text-4)] animate-pulse">
+         <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--color-text-4)] animate-pulse pointer-events-none">
            <svg className="w-12 h-12 mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
            </svg>
@@ -197,8 +283,13 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
       )}
       <canvas
         ref={canvasRef}
-        className={`w-full h-full object-contain ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-        style={{ pointerEvents: 'none' }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className={`w-full h-full object-contain touch-none ${isImageLoaded ? 'opacity-100' : 'opacity-0'} ${
+          isDragging ? 'cursor-grabbing' : isHovering ? 'cursor-grab' : 'cursor-default'
+        }`}
       />
     </div>
   )
