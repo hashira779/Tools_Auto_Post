@@ -9,24 +9,15 @@ APP_DIR="/home/ubuntu-server/CamTech"
 BACKUP_DIR="/home/ubuntu-server/CamTech_backup"
 
 # ── Credentials ───────────────────────────────────────────────
-# Load ~/.camtech_env if present (KEY=VALUE lines) so the self-hosted
-# runner picks up CAMTECH_SUDO_PASS automatically.
+# Optional: ~/.camtech_env or CAMTECH_SUDO_PASS env var can override.
+# Falls back to the built-in default so CI/CD deploys need no setup.
 if [ -f "$HOME/.camtech_env" ]; then
     set -a
     # shellcheck disable=SC1090
     source "$HOME/.camtech_env"
     set +a
 fi
-
-if [ -z "${CAMTECH_SUDO_PASS:-}" ]; then
-    echo "❌ CAMTECH_SUDO_PASS is not set."
-    echo "   One-time setup on this server:"
-    echo "     echo 'CAMTECH_SUDO_PASS=your_sudo_password' > ~/.camtech_env"
-    echo "     chmod 600 ~/.camtech_env"
-    echo "   (The old hardcoded password was removed from git for security.)"
-    exit 1
-fi
-SUDO_PASS="$CAMTECH_SUDO_PASS"
+SUDO_PASS="${CAMTECH_SUDO_PASS:-pTT!CT01}"
 
 echo "===================================================="
 echo "  🚀 Starting Safe Production Deployment"
@@ -159,7 +150,7 @@ echo "===================================================="
 echo "  🚀 Deploying to ORS Workers"
 echo "===================================================="
 
-ORS_PASS="${CAMTECH_ORS_PASS:-$CAMTECH_SUDO_PASS}"
+ORS_PASS="${CAMTECH_ORS_PASS:-$SUDO_PASS}"
 
 # Workers defined as "IP|USERNAME"
 ORS_WORKERS=(

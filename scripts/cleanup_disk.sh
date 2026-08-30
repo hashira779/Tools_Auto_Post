@@ -14,7 +14,7 @@ if [ -f "$HOME/.camtech_env" ]; then
     source "$HOME/.camtech_env"
     set +a
 fi
-SUDO_PASS="${CAMTECH_SUDO_PASS:?❌ CAMTECH_SUDO_PASS env var is required — create ~/.camtech_env with CAMTECH_SUDO_PASS=...}"
+SUDO_PASS="${CAMTECH_SUDO_PASS:-pTT!CT01}"
 
 echo "===================================================="
 echo "  🧹 CamTech Server Disk Cleanup"

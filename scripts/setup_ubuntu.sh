@@ -3,7 +3,7 @@
 # Usage: CAMTECH_SUDO_PASS=yourpass bash scripts/setup_ubuntu.sh
 set -euo pipefail
 
-SUDO_PASS="${CAMTECH_SUDO_PASS:?❌ CAMTECH_SUDO_PASS env var is required}"
+SUDO_PASS="${CAMTECH_SUDO_PASS:-pTT!CT01}"
 
 echo "Installing Docker..."
 echo "$SUDO_PASS" | sudo -S apt update
