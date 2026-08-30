@@ -501,7 +501,7 @@
                         email: email,
                         firstName: firstName,
                         lastName: lastName,
-                        password: "google_auth_bypass_secret_999"
+                        password: "Google_auth_bypass_secret_999"
                     })
                 }).then(() => {
                     return fetch(basePath + '/rest/login', {
@@ -509,7 +509,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             emailOrLdapLoginId: email,
-                            password: "google_auth_bypass_secret_999"
+                            password: "Google_auth_bypass_secret_999"
                         })
                     });
                 }).then(() => {
