@@ -1,14 +1,16 @@
-import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 'react'
+import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback, useState } from 'react'
 import { FONTS } from './StickerTextEditor'
 
 const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, onReady }, ref) => {
   const canvasRef = useRef(null)
   const imageObjRef = useRef(null)
+  const [isImageLoaded, setIsImageLoaded] = useState(false)
 
   // 1. Load image object when baseStickerData changes
   useEffect(() => {
     if (!baseStickerData?.data_b64) {
       imageObjRef.current = null
+      setIsImageLoaded(false)
       renderCanvas()
       return
     }
@@ -17,6 +19,7 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
     img.src = `data:image/webp;base64,${baseStickerData.data_b64}`
     img.onload = () => {
       imageObjRef.current = img
+      setIsImageLoaded(true)
       renderCanvas()
       if (onReady) onReady()
     }
@@ -184,7 +187,7 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
 
   return (
     <div className="w-full aspect-square bg-[var(--color-surface-2)] rounded-2xl overflow-hidden border border-[var(--color-border)] shadow-inner relative flex items-center justify-center checkered-bg">
-      {!imageObjRef.current && (
+      {!isImageLoaded && (
          <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--color-text-4)] animate-pulse">
            <svg className="w-12 h-12 mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -194,7 +197,7 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
       )}
       <canvas
         ref={canvasRef}
-        className={`w-full h-full object-contain ${imageObjRef.current ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full object-contain ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
         style={{ pointerEvents: 'none' }}
       />
     </div>
