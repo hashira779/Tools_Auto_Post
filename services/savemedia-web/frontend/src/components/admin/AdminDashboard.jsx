@@ -188,12 +188,6 @@ export default function AdminDashboard() {
           >
             Automations
           </button>
-          <button 
-            onClick={() => setTab('n8n')}
-            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${tab === 'n8n' ? 'bg-[#FF6D5A] text-white shadow-lg shadow-[#FF6D5A]/30' : 'text-gray-400 hover:text-white'}`}
-          >
-            n8n Builder
-          </button>
         </div>
       </div>
 
@@ -447,31 +441,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {tab === 'n8n' && (
-        <div className="bg-[#1a1c23] border border-blue-900/20 rounded-2xl overflow-hidden h-[800px] flex flex-col">
-          <div className="bg-black/20 p-3 border-b border-blue-900/10 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <svg className="w-4 h-4 text-[#FF6D5A]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11.66 0v6.07c-3.13.19-5.63 2.81-5.63 6.02 0 1.94.91 3.68 2.33 4.81l-3.32 4.98C2.08 19.34 0 15.93 0 12.09 0 5.42 5.42 0 12.09 0h-.43zm.68 24v-6.07c3.13-.19 5.63-2.81 5.63-6.02 0-1.94-.91-3.68-2.33-4.81l3.32-4.98c2.96 2.54 5.04 5.95 5.04 9.79 0 6.67-5.42 12.09-12.09 12.09h.43z"/>
-              </svg>
-              n8n Workflow Builder
-            </h3>
-            <a 
-              href="/n8n/" target="_blank" rel="noopener noreferrer"
-              className="text-xs font-bold text-blue-400 hover:text-white transition-all flex items-center gap-1"
-            >
-              Open in New Tab
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            </a>
-          </div>
-          <iframe 
-            src="/n8n/" 
-            className="w-full flex-1 border-0" 
-            title="n8n Admin Builder" 
-            allow="clipboard-write; clipboard-read"
-          />
-        </div>
-      )}
     </div>
   );
 }
