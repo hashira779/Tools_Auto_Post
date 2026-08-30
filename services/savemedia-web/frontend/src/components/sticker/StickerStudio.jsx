@@ -1,58 +1,63 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
-import StickerStepIndicator from './StickerStepIndicator'
 import StickerUploader from './StickerUploader'
 import StickerStyleSelector from './StickerStyleSelector'
-import StickerPreviewCard from './StickerPreviewCard'
 import StickerTextEditor from './StickerTextEditor'
+import StickerAdjustments from './StickerAdjustments'
 import StickerEmojiPicker from './StickerEmojiPicker'
 import StickerTelegramPublish from './StickerTelegramPublish'
-
-const STEPS = [
-  { id: 1, label: 'Upload' },
-  { id: 2, label: 'Style' },
-  { id: 3, label: 'Text' },
-  { id: 4, label: 'Export' },
-]
+import StickerCanvas from './StickerCanvas'
 
 export default function StickerStudio() {
-  const [currentStep, setCurrentStep] = useState(1)
+  const canvasRef = useRef(null)
 
-  // Uploaded file state
+  // ── Global State ──────────────────────────────────────────
   const [sourceImage, setSourceImage] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
-
-  // Selected style (e.g., outline, circle)
-  const [selectedStyle, setSelectedStyle] = useState('original')
-
-  // API response: the raw processed sticker (no text yet)
+  
+  // API response: the raw processed sticker
   const [baseStickerData, setBaseStickerData] = useState(null)
+  const [processingStyle, setProcessingStyle] = useState(false)
+  const [styleError, setStyleError] = useState(null)
 
-  // Current sticker (could be base or with custom text applied)
-  const [currentStickerData, setCurrentStickerData] = useState(null)
+  const [selectedStyle, setSelectedStyle] = useState('original')
+  
+  // Adjustments (Frontend filters)
+  const [adjustments, setAdjustments] = useState({
+    brightness: 100,
+    contrast: 100,
+    saturation: 100,
+  })
 
-  // Selected emoji for Telegram
+  // Text Config
+  const [textConfig, setTextConfig] = useState({
+    text: '',
+    font: 'Koulen',
+    style: 'meme',
+    position: 'bottom',
+    fontSize: 48,
+  })
+
   const [emoji, setEmoji] = useState('😂')
 
-  // Processing state
-  const [processing, setProcessing] = useState(false)
-  const [error, setError] = useState(null)
+  // ── Handlers ──────────────────────────────────────────────
 
-  const handleUpload = (file) => {
+  const handleUpload = async (file) => {
     setSourceImage(file)
-    setImagePreview(URL.createObjectURL(file))
-    setCurrentStep(2)
+    // Auto-apply "original" style via API to crop/scale to 512x512
+    handleStyleGenerate('original', file)
   }
 
-  const handleStyleGenerate = async (styleId) => {
-    if (!sourceImage) return
+  const handleStyleGenerate = async (styleId, overrideFile = null) => {
+    const fileToProcess = overrideFile || sourceImage
+    if (!fileToProcess) return
+
     setSelectedStyle(styleId)
-    setProcessing(true)
-    setError(null)
+    setProcessingStyle(true)
+    setStyleError(null)
 
     try {
       const formData = new FormData()
-      formData.append('file', sourceImage)
+      formData.append('file', fileToProcess)
       formData.append('style', styleId)
 
       const res = await fetch('/api/sticker/process', {
@@ -72,78 +77,164 @@ export default function StickerStudio() {
         throw new Error(data.detail || 'Failed to process image.')
       }
 
-      // Extract sticker data object (support both data.sticker and top-level data)
       const stickerObj = data.sticker || data
       if (!stickerObj || !stickerObj.data_b64) {
         throw new Error('Server returned invalid data format.')
       }
 
       setBaseStickerData(stickerObj)
-      setCurrentStickerData(stickerObj) // initially same
-      setCurrentStep(3)
     } catch (e) {
-      setError(e.message)
+      setStyleError(e.message)
     } finally {
-      setProcessing(false)
+      setProcessingStyle(false)
     }
   }
 
-  const handleReset = () => {
-    setCurrentStep(1)
-    setSourceImage(null)
-    if (imagePreview) URL.revokeObjectURL(imagePreview)
-    setImagePreview(null)
-    setBaseStickerData(null)
-    setCurrentStickerData(null)
-    setError(null)
+  const handlePublishToTelegram = async (publishConfig) => {
+    if (!canvasRef.current) throw new Error("Canvas not ready")
+    const b64 = await canvasRef.current.exportBase64()
+    if (!b64) throw new Error("Failed to export image")
+
+    const formData = new FormData()
+    formData.append('sticker_b64', b64)
+    formData.append('emoji', publishConfig.emoji)
+
+    if (publishConfig.userId) formData.append('user_id', publishConfig.userId)
+    if (publishConfig.packName) formData.append('short_name', publishConfig.packName)
+    if (publishConfig.title) formData.append('title', publishConfig.title)
+
+    const res = await fetch('/api/telegram/create-pack', {
+      method: 'POST',
+      body: formData,
+    })
+
+    const text = await res.text()
+    let data = {}
+    try {
+      data = JSON.parse(text)
+    } catch {
+      throw new Error(`Server returned error (${res.status}). Please try again.`)
+    }
+
+    if (!res.ok) {
+      throw new Error(data.detail || 'Failed to create Telegram sticker pack.')
+    }
+
+    return data
   }
 
+  const handleDownloadPNG = async () => {
+    if (!canvasRef.current) return
+    const blob = await canvasRef.current.exportPNG()
+    if (!blob) return
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `sticker_${Date.now()}.png`
+    link.click()
+  }
+
+  const handleDownloadWebP = async () => {
+    if (!canvasRef.current) return
+    const blob = await canvasRef.current.exportWebP()
+    if (!blob) return
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `sticker_${Date.now()}.webp`
+    link.click()
+  }
+
+  const handleReset = () => {
+    setSourceImage(null)
+    setBaseStickerData(null)
+    setSelectedStyle('original')
+    setAdjustments({ brightness: 100, contrast: 100, saturation: 100 })
+    setTextConfig({ text: '', font: 'Koulen', style: 'meme', position: 'bottom', fontSize: 48 })
+  }
+
+  // ── Render ────────────────────────────────────────────────
   return (
-    <div className="w-full max-w-2xl mx-auto pb-10">
-      <StickerStepIndicator steps={STEPS} currentStep={currentStep} />
-
-      <div className="relative">
-        {currentStep === 1 && (
+    <div className="w-full max-w-[1200px] mx-auto pb-10 flex flex-col lg:flex-row gap-6">
+      
+      {/* ── Left Sidebar (Tools) ── */}
+      <div className="w-full lg:w-[400px] flex-shrink-0 flex flex-col space-y-0 h-auto lg:h-[calc(100vh-140px)] lg:overflow-y-auto custom-scrollbar pr-1">
+        
+        {!sourceImage ? (
           <StickerUploader onUpload={handleUpload} />
-        )}
+        ) : (
+          <>
+            {/* 1. Re-upload option (small) */}
+            <div className="card p-4 mb-4 flex items-center justify-between animate-fade-in border-l-4 border-l-[var(--color-primary-500)]">
+               <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 rounded-lg bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)] flex items-center justify-center">
+                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                   </svg>
+                 </div>
+                 <div>
+                   <h3 className="text-[13px] font-bold text-[var(--color-text)]">Source Image Loaded</h3>
+                   <button onClick={handleReset} className="text-[11px] text-[var(--color-text-3)] hover:text-[var(--color-error)] transition-colors">Change Image</button>
+                 </div>
+               </div>
+            </div>
 
-        {currentStep === 2 && (
-          <StickerStyleSelector
-            imagePreview={imagePreview}
-            selectedStyle={selectedStyle}
-            onSelectStyle={handleStyleGenerate}
-            processing={processing}
-            error={error}
-            onBack={() => setCurrentStep(1)}
-          />
-        )}
-
-        {currentStep === 3 && baseStickerData && currentStickerData && (
-          <div className="animate-fade-in space-y-4">
-            <StickerPreviewCard
-              stickerData={currentStickerData}
-              onBack={() => setCurrentStep(2)}
+            {/* 2. Image Style (Backend) */}
+            <StickerStyleSelector 
+              selectedStyle={selectedStyle} 
+              onSelectStyle={handleStyleGenerate} 
+              processing={processingStyle}
+              error={styleError}
             />
-            <StickerTextEditor
+
+            {/* 3. Image Adjustments (Frontend Filters) */}
+            <StickerAdjustments 
+              adjustments={adjustments} 
+              setAdjustments={setAdjustments} 
+            />
+
+            {/* 4. Text & Memes */}
+            <StickerTextEditor 
+              textConfig={textConfig} 
+              onTextConfigChange={setTextConfig} 
+            />
+
+            {/* 5. Emoji & Export */}
+            <StickerEmojiPicker 
+              selected={emoji} 
+              onSelect={setEmoji} 
+            />
+
+            <StickerTelegramPublish 
+              emoji={emoji}
+              onPublish={handlePublishToTelegram}
+              onDownloadPNG={handleDownloadPNG}
+              onDownloadWebP={handleDownloadWebP}
+              onReset={handleReset}
+            />
+          </>
+        )}
+      </div>
+
+      {/* ── Right Main Area (Canvas Preview) ── */}
+      <div className="flex-1 min-w-0 flex flex-col items-center">
+        <div className="w-full max-w-[600px] sticky top-24">
+           <div className="mb-3 flex justify-between items-end px-1">
+             <h2 className="text-lg font-bold text-[var(--color-text)]">Live Preview</h2>
+             <span className="badge">512×512</span>
+           </div>
+           
+           <StickerCanvas 
+              ref={canvasRef}
               baseStickerData={baseStickerData}
-              onStickerUpdated={setCurrentStickerData}
-            />
-            <StickerEmojiPicker
-              selected={emoji}
-              onSelect={setEmoji}
-              onContinue={() => setCurrentStep(4)}
-            />
-          </div>
-        )}
-
-        {currentStep === 4 && currentStickerData && (
-          <StickerTelegramPublish
-            stickerData={currentStickerData}
-            emoji={emoji}
-            onReset={handleReset}
-            onBack={() => setCurrentStep(3)}
-          />
-        )}
+              adjustments={adjustments}
+              textConfig={textConfig}
+           />
+           
+           {sourceImage && (
+             <p className="text-center text-[11px] text-[var(--color-text-4)] mt-4">
+               Updates in real-time. What you see is exactly what will be exported.
+             </p>
+           )}
+        </div>
       </div>
     </div>
   )

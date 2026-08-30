@@ -13,7 +13,7 @@ const EMOJI_CATEGORIES = [
   },
 ]
 
-export default function StickerEmojiPicker({ selected, onSelect, onContinue }) {
+export default function StickerEmojiPicker({ selected, onSelect }) {
   return (
     <div className="card p-5 sm:p-6 animate-fade-in">
       <div className="mb-5 flex flex-col items-center text-center">
@@ -60,18 +60,6 @@ export default function StickerEmojiPicker({ selected, onSelect, onContinue }) {
           <div className="w-10 h-10 bg-[var(--color-surface-2)] border border-[var(--color-border-2)] rounded-xl flex items-center justify-center text-2xl shadow-inner">
             {selected}
           </div>
-        </div>
-
-        <button
-          onClick={onContinue}
-          className="w-full sm:w-auto px-6 py-2.5 btn-primary text-[13px] font-medium flex items-center justify-center gap-2"
-        >
-          Export to Telegram
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-        </button>
       </div>
     </div>
   )
