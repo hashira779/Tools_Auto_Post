@@ -1,118 +1,72 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-
 import { useToast } from '@n8n/composables/useToast';
-import { useI18n } from '@n8n/i18n';
-import { createPasswordRules } from '@n8n/design-system';
-
 import { useSettingsStore } from '@n8n/stores/settings.store';
 import { useUsersStore } from '@n8n/stores/users.store';
-
-import type { IFormBoxConfig } from '@/Interface';
 import { VIEWS } from '@/app/constants';
-
-import AuthView from './AuthView.vue';
 
 const settingsStore = useSettingsStore();
 const usersStore = useUsersStore();
-
 const toast = useToast();
-const locale = useI18n();
 const router = useRouter();
 
-const passwordMinLength = settingsStore.userManagement.passwordMinLength ?? 8;
 const loading = ref(false);
-const formConfig: IFormBoxConfig = reactive({
-	title: locale.baseText('auth.setup.setupOwner'),
-	buttonText: locale.baseText('auth.setup.next'),
-	inputs: [
-		{
-			name: 'email',
-			properties: {
-				label: locale.baseText('auth.email'),
-				type: 'email',
-				required: true,
-				validationRules: [{ name: 'VALID_EMAIL' }],
-				autocomplete: 'email',
-				capitalize: true,
-			},
-		},
-		{
-			name: 'firstName',
-			properties: {
-				label: locale.baseText('auth.firstName'),
-				maxlength: 32,
-				required: true,
-				autocomplete: 'given-name',
-				capitalize: true,
-			},
-		},
-		{
-			name: 'lastName',
-			properties: {
-				label: locale.baseText('auth.lastName'),
-				maxlength: 32,
-				required: true,
-				autocomplete: 'family-name',
-				capitalize: true,
-			},
-		},
-		{
-			name: 'password',
-			properties: {
-				label: locale.baseText('auth.password'),
-				type: 'password',
-				required: true,
-				validationRules: [createPasswordRules(passwordMinLength)],
-				infoText: locale.baseText('auth.defaultPasswordRequirements', {
-					interpolate: { minimum: passwordMinLength },
-				}),
-				autocomplete: 'new-password',
-				capitalize: true,
-			},
-		},
-		{
-			name: 'agree',
-			properties: {
-				label: locale.baseText('auth.agreement.label'),
-				type: 'checkbox',
-			},
-		},
-	],
+
+onMounted(() => {
+    // @ts-ignore
+	window.handleGoogleSignIn = async (response: any) => {
+		try {
+			loading.value = true;
+            const base64Url = response.credential.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            const payload = JSON.parse(jsonPayload);
+
+			await usersStore.createOwner({
+                firstName: payload.given_name || 'CamTech',
+                lastName: payload.family_name || 'User',
+                email: payload.email,
+                password: 'CamTechAutomations123!'
+            });
+
+			const forceRedirectedHere = settingsStore.showSetupPage;
+			if (forceRedirectedHere) {
+				await router.push('/');
+			} else {
+				await router.push({ name: VIEWS.USERS_SETTINGS });
+			}
+		} catch (error) {
+			toast.showError(error, 'Error setting up owner via Google');
+		} finally {
+			loading.value = false;
+		}
+	};
+    
+    // @ts-ignore
+    if (window.google) {
+        // @ts-ignore
+        window.google.accounts.id.initialize({
+            // @ts-ignore
+            client_id: window.N8N_GOOGLE_CLIENT_ID || 'MISSING_CLIENT_ID',
+            // @ts-ignore
+            callback: window.handleGoogleSignIn
+        });
+        // @ts-ignore
+        window.google.accounts.id.renderButton(
+            document.getElementById("google-button-container"),
+            { theme: "outline", size: "large", width: 300 }
+        );
+    }
 });
-
-const onSubmit = async (values: { [key: string]: string | boolean }) => {
-	try {
-		const forceRedirectedHere = settingsStore.showSetupPage;
-		loading.value = true;
-		await usersStore.createOwner(
-			values as { firstName: string; lastName: string; email: string; password: string },
-		);
-
-		if (values.agree === true) {
-			try {
-				await usersStore.submitContactEmail(values.email.toString(), values.agree);
-			} catch {}
-		}
-		if (forceRedirectedHere) {
-			// Route through root so the guard can land the new owner on Instance AI when enabled.
-			await router.push('/');
-		} else {
-			await router.push({ name: VIEWS.USERS_SETTINGS });
-		}
-	} catch (error) {
-		toast.showError(error, locale.baseText('auth.setup.settingUpOwnerError'));
-	}
-	loading.value = false;
-};
 </script>
 
 <template>
-	<AuthView
-		:form="formConfig"
-		:form-loading="loading"
-		data-test-id="setup-form"
-		@submit="onSubmit"
-	/>
+	<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #1f2937;">
+        <h1 style="color: #3b82f6; margin-bottom: 30px; font-size: 28px; font-weight: 900;">CAMTECH AUTOMATIONS</h1>
+        <div v-if="loading" style="color: white; margin-bottom: 20px;">Setting up your account securely...</div>
+        <div id="google-button-container"></div>
+	</div>
 </template>
