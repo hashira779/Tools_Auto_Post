@@ -388,7 +388,10 @@ services:
   #  n8n — Workflow Automation Engine
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   n8n:
-    image: n8nio/n8n:latest
+    build:
+      context: ./services/n8n-custom
+      dockerfile: docker/images/n8n/Dockerfile
+    image: camtech-n8n-custom
     container_name: camtech-n8n
     restart: unless-stopped
     environment:
