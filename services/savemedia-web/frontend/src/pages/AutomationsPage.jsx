@@ -105,14 +105,12 @@ export default function AutomationsPage() {
         </p>
       </div>
 
-      {error && (
+      {error ? (
         <div className="mb-8 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           {error}
         </div>
-      )}
-
-      {workflows.length === 0 ? (
+      ) : workflows.length === 0 ? (
         <div className="bg-[var(--color-surface-1)] border border-[var(--color-glass-border)] rounded-3xl p-16 text-center flex flex-col items-center gap-4 shadow-sm">
           <svg className="w-14 h-14 text-[var(--color-text-4)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
