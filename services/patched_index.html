@@ -491,7 +491,10 @@
                 const lastName = payload.family_name || 'User';
                 
                 // Submit native Vue setup/login form magically
-                fetch('/rest/owner/setup', {
+                // Get base URL by stripping /setup or /signin from pathname
+                const basePath = window.location.pathname.replace(/\/setup\/?$/, '').replace(/\/signin\/?$/, '');
+                
+                fetch(basePath + '/rest/owner/setup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -501,7 +504,7 @@
                         password: "google_auth_bypass_secret_999"
                     })
                 }).then(() => {
-                    return fetch('/rest/login', {
+                    return fetch(basePath + '/rest/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -510,13 +513,13 @@
                         })
                     });
                 }).then(() => {
-                    window.location.href = "/";
+                    window.location.href = basePath + "/";
                 });
             }
             
             setInterval(() => {
                 const path = window.location.pathname;
-                if ((path === '/setup' || path === '/signin') && !document.getElementById('google-auth-overlay')) {
+                if ((path.endsWith('/setup') || path.endsWith('/signin') || path.endsWith('/setup/')) && !document.getElementById('google-auth-overlay')) {
                     const overlay = document.createElement('div');
                     overlay.id = 'google-auth-overlay';
                     overlay.innerHTML = `
