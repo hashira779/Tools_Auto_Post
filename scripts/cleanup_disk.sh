@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-SUDO_PASS="pTT!CT01"
+SUDO_PASS="${CAMTECH_SUDO_PASS:?❌ CAMTECH_SUDO_PASS env var is required}"
 
 echo "===================================================="
 echo "  🧹 CamTech Server Disk Cleanup"

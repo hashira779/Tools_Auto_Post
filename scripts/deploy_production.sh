@@ -7,7 +7,8 @@ set -euo pipefail
 
 APP_DIR="/home/ubuntu-server/CamTech"
 BACKUP_DIR="/home/ubuntu-server/CamTech_backup"
-SUDO_PASS="pTT!CT01"
+# SUDO_PASS must be provided via environment (set in the self-hosted runner env or ~/.camtech_env)
+SUDO_PASS="${CAMTECH_SUDO_PASS:?❌ CAMTECH_SUDO_PASS env var is required}"
 
 echo "===================================================="
 echo "  🚀 Starting Safe Production Deployment"
@@ -140,7 +141,7 @@ echo "===================================================="
 echo "  🚀 Deploying to ORS Workers"
 echo "===================================================="
 
-ORS_PASS="pTT!CT01"
+ORS_PASS="${CAMTECH_ORS_PASS:-$CAMTECH_SUDO_PASS}"
 
 # Workers defined as "IP|USERNAME"
 ORS_WORKERS=(

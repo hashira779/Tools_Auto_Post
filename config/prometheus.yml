@@ -1,0 +1,42 @@
+# CamTech Prometheus scrape configuration
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Host metrics (disk, CPU, memory)
+  - job_name: node
+    static_configs:
+      - targets: ["node-exporter:9100"]
+
+  # Per-container metrics
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]
+
+  # Service health endpoints (blackbox-style via up metric)
+  # These use each service's /health — scraped as plain HTTP probes.
+  - job_name: savemedia-api
+    metrics_path: /health
+    static_configs:
+      - targets: ["savemedia-api:8000"]
+
+  - job_name: sticker-api
+    metrics_path: /health
+    static_configs:
+      - targets: ["sticker-api:8001"]
+
+  - job_name: screen-share
+    metrics_path: /health
+    static_configs:
+      - targets: ["screen-share-api:4000"]
+
+  - job_name: mms-tts
+    metrics_path: /health
+    static_configs:
+      - targets: ["mms-tts:8002"]

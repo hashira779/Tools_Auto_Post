@@ -8,6 +8,7 @@ Monorepo for CamTech media automation tools.
 CamTech/
 ├── docker-compose.yml              ← Main orchestration (Control Plane + UI)
 ├── docker-compose.ors-worker.yml   ← Worker orchestration (AI Scaling)
+├── docker-compose.monitoring.yml   ← Optional Prometheus + Grafana stack
 ├── .env / .env.example             ← Environment config
 │
 ├── services/
@@ -15,14 +16,63 @@ CamTech/
 │   ├── podcast-api/                ← Khmer → English Localization Engine
 │   ├── auto-post-bot/              ← Telegram bot (download → YouTube/TikTok/FB)
 │   ├── mms-tts/                    ← Offline Khmer TTS
-│   ├── savemedia-web/              ← Web downloader (MP4/MP3)
-│   └── sticker-maker/              ← Sticker generation service
+│   ├── savemedia-web/              ← Web downloader (MP4/MP3) + React SPA
+│   ├── sticker-maker/              ← Sticker generation service
+│   ├── screen-share-api/           ← WebRTC signaling (Live Camera)
+│   └── admin-web/                  ← Admin dashboard
 │
 ├── shared/                         ← Shared Python libraries
 ├── credentials/                    ← OAuth secrets (gitignored)
-├── scripts/                        ← Deploy & setup scripts
+├── scripts/                        ← camtech CLI + deploy scripts
 └── tests/                          ← Test files
 ```
+
+## Frontend Routes
+
+The main web app (`services/savemedia-web/frontend`) uses React Router with real URLs:
+
+| Route | Tool |
+|-------|------|
+| `/` | Media Downloader |
+| `/tts` | Text-to-Voice Studio |
+| `/sticker` | Telegram Sticker Studio |
+| `/pdf-tools` | PDF Tools (Stirling-PDF) |
+| `/live` | Live Camera host studio |
+| `/share/:roomId` | Live Camera guest view |
+| `/admin` | Admin Dashboard (admin users only) |
+
+## Ops CLI
+
+All cluster operations go through a single CLI (credentials via env vars
+or `~/.camtech_env` — never hardcoded):
+
+```bash
+export CAMTECH_HOST=10.1.0.11 CAMTECH_USER=ubuntu-server CAMTECH_PASS=...
+python3 scripts/camtech.py status      # docker ps + disk + memory
+python3 scripts/camtech.py logs camtech-savemedia-api
+python3 scripts/camtech.py health      # check all /health endpoints
+python3 scripts/camtech.py gpu --all   # GPU status incl. ORS workers
+python3 scripts/camtech.py deploy      # trigger production deploy
+```
+
+## Monitoring
+
+Optional Prometheus + Grafana + cAdvisor + node-exporter stack:
+
+```bash
+GRAFANA_ADMIN_PASSWORD=yourpass \
+  docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+# Grafana → http://SERVER_IP:3001 (admin / yourpass)
+```
+
+## CI
+
+Every PR runs `.github/workflows/ci.yml`:
+- Frontend lint (oxlint) + production build
+- Python syntax check across all services
+- podcast-api pytest suite
+- **Secrets guard** — fails the build if cookies.txt, .env files,
+  hardcoded JWTs, or password literals are ever committed
 
 ## Cluster & Scaling
 
@@ -108,3 +158,5 @@ python main.py
 ## License
 
 See [LICENSE](LICENSE).
+> **Note:** GitHub App tokens cannot push workflow files. To enable CI, run:
+> `git mv ci.yml.github-workflow .github/workflows/ci.yml && git commit -m "ci: enable workflow" && git push`

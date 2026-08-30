@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
 import CamtechLogo from './CamtechLogo'
 import { useAuth } from '../hooks/useAuth'
+import {
+  TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER,
+  TOOL_ADMIN, TOOL_PDF, TOOL_SCREEN_SHARE,
+} from '../routes'
 
-export const TOOL_DOWNLOADER = 'downloader'
-export const TOOL_TTS = 'tts'
-export const TOOL_STICKER = 'sticker'
-export const TOOL_ADMIN = 'admin'
-export const TOOL_PDF = 'pdf'
-export const TOOL_SCREEN_SHARE = 'screen-share'
+// Re-export for backwards compatibility with existing imports
+export {
+  TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER,
+  TOOL_ADMIN, TOOL_PDF, TOOL_SCREEN_SHARE,
+}
 
 const NAV_TOOLS = [
   { id: TOOL_DOWNLOADER, label: 'Downloader', mobileLabel: 'Download' },

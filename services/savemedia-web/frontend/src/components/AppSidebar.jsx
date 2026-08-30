@@ -1,12 +1,13 @@
-export const TOOL_DOWNLOADER = 'downloader'
-export const TOOL_TTS = 'tts'
-export const TOOL_STICKER = 'sticker'
+import {
+  TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_PDF, TOOL_SCREEN_SHARE,
+} from '../routes'
 
 const SIDEBAR_TOOLS = [
   { id: TOOL_DOWNLOADER, label: 'Media Downloader' },
   { id: TOOL_TTS, label: 'Text to Voice' },
   { id: TOOL_STICKER, label: 'Telegram Stickers' },
-  { id: 'pdf', label: 'PDF Tools' },
+  { id: TOOL_PDF, label: 'PDF Tools' },
+  { id: TOOL_SCREEN_SHARE, label: 'Live Camera / Screen Share' },
 ]
 
 const BOTS = [
