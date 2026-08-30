@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth'
 import Login from './components/Login'
 import TokenManager from './components/TokenManager'
 import UserManager from './components/UserManager'
+import WorkflowManager from './components/WorkflowManager'
 
 function Centered({ children }) {
   return <div className="min-h-screen flex items-center justify-center px-4 text-center">{children}</div>
@@ -100,6 +101,12 @@ export default function App() {
               >
                 Users
               </button>
+              <button
+                onClick={() => setTab('automations')}
+                className={`px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${tab === 'automations' ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30 shadow-[0_0_15px_rgba(251,146,60,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5 border border-transparent'}`}
+              >
+                Automations
+              </button>
             </div>
             <button
               onClick={logout}
@@ -113,7 +120,7 @@ export default function App() {
       </header>
 
       <main className="relative max-w-6xl mx-auto px-4 py-10 z-10">
-        {tab === 'tokens' ? <TokenManager /> : <UserManager />}
+        {tab === 'tokens' ? <TokenManager /> : tab === 'users' ? <UserManager /> : <WorkflowManager />}
       </main>
     </div>
   )

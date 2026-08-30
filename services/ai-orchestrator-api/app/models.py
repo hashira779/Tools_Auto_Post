@@ -92,3 +92,51 @@ class GeneratedDocument(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="generated_documents")
+
+
+class N8nWorkflow(Base):
+    """Registered n8n workflows that can be triggered from the web UI."""
+    __tablename__ = "n8n_workflows"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    n8n_workflow_id = Column(String(255), nullable=False, unique=True)
+    webhook_path = Column(String(512), nullable=True)          # e.g. /webhook/abc123
+    category = Column(String(100), default="general")          # social, backup, notify…
+    is_active = Column(Integer, default=1)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
+                        onupdate=lambda: datetime.now(timezone.utc))
+
+    logs = relationship("AutomationLog", back_populates="workflow", cascade="all, delete-orphan")
+
+
+class AutomationLog(Base):
+    """Log of every workflow trigger — who ran it, what happened, how long it took."""
+    __tablename__ = "automation_logs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    workflow_id = Column(UUID(as_uuid=True), ForeignKey("n8n_workflows.id"), nullable=False)
+    triggered_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    payload = Column(JSONB, nullable=True)
+    response = Column(JSONB, nullable=True)
+    status = Column(String(50), default="pending")   # pending / success / error
+    duration_ms = Column(Integer, nullable=True)
+    executed_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    workflow = relationship("N8nWorkflow", back_populates="logs")
+
+
+class GoogleConnection(Base):
+    """Future-ready: store per-user Google API tokens for Sheets/Drive/Gmail via n8n."""
+    __tablename__ = "google_connections"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, unique=True)
+    scopes = Column(Text, nullable=True)
+    access_token_enc = Column(Text, nullable=True)       # encrypted at rest
+    refresh_token_enc = Column(Text, nullable=True)       # encrypted at rest
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

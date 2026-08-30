@@ -58,4 +58,42 @@ export const adminApi = {
       headers: await authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(updates),
     })),
+
+  // --- n8n Workflows ---
+  listWorkflows: async () =>
+    handle(await fetch('/api/n8n/workflows', { headers: await authHeaders() })),
+
+  createWorkflow: async (payload) =>
+    handle(await fetch('/api/n8n/workflows', {
+      method: 'POST',
+      headers: await authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload),
+    })),
+
+  updateWorkflow: async (id, updates) =>
+    handle(await fetch(`/api/n8n/workflows/${id}`, {
+      method: 'PATCH',
+      headers: await authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(updates),
+    })),
+
+  deleteWorkflow: async (id) =>
+    handle(await fetch(`/api/n8n/workflows/${id}`, {
+      method: 'DELETE',
+      headers: await authHeaders(),
+    })),
+
+  triggerWorkflow: async (id, payload = {}) =>
+    handle(await fetch(`/api/n8n/trigger/${id}`, {
+      method: 'POST',
+      headers: await authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ payload }),
+    })),
+
+  // --- n8n Automation Logs ---
+  listAllLogs: async (limit = 50) =>
+    handle(await fetch(`/api/n8n/logs?limit=${limit}`, { headers: await authHeaders() })),
+
+  listWorkflowLogs: async (workflowId, limit = 20) =>
+    handle(await fetch(`/api/n8n/logs/${workflowId}?limit=${limit}`, { headers: await authHeaders() })),
 }

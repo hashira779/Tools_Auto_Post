@@ -15,9 +15,10 @@ async def lifespan(app: FastAPI):
     init_db()
     yield
 
-from .routers import admin
+from .routers import admin, n8n
 app = FastAPI(title="CamTech AI Orchestrator", lifespan=lifespan)
 app.include_router(admin.router)
+app.include_router(n8n.router)
 
 @app.get("/health")
 def health_check():

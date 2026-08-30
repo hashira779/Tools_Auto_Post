@@ -121,6 +121,11 @@ if ! check_health "http://localhost:4000/health" "Screen Share API"; then
     DEPLOY_FAILED=1
 fi
 
+# Verify n8n Automation Engine
+if ! check_health "http://localhost:5678/healthz" "n8n Automation"; then
+    DEPLOY_FAILED=1
+fi
+
 # 6. Automated Rollback if deployment failed
 if [ "$DEPLOY_FAILED" -eq 1 ]; then
     echo "===================================================="
