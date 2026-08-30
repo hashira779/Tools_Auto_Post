@@ -398,7 +398,7 @@ services:
       - DB_POSTGRESDB_DATABASE=camtech
       - DB_POSTGRESDB_USER=camtech
       - DB_POSTGRESDB_PASSWORD=camtechpassword
-      - DB_POSTGRESDB_SCHEMA=n8n
+      - DB_POSTGRESDB_SCHEMA=n8n_v2
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
       - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-camtech_n8n}
