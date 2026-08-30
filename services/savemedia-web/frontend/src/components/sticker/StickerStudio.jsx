@@ -184,7 +184,7 @@ export default function StickerStudio() {
   ]
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto pb-24 lg:pb-0 flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-100px)] lg:overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-2xl relative">
+    <div className="w-full max-w-[1400px] mx-auto pb-24 lg:pb-0 flex flex-col lg:flex-row min-h-[600px] lg:h-[calc(100vh-120px)] lg:max-h-[900px] lg:overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-2xl relative">
       
       {/* ── Desktop Left Nav / Mobile Bottom Tab Bar ── */}
       <div className="fixed bottom-0 left-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-[var(--color-border)] z-50 lg:relative lg:w-[100px] lg:h-full lg:border-t-0 lg:border-r lg:bg-transparent lg:backdrop-blur-none flex lg:flex-col justify-around lg:justify-start gap-2 p-2 lg:p-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
@@ -210,7 +210,7 @@ export default function StickerStudio() {
       </div>
 
       {/* ── Active Panel Settings ── */}
-      <div className="w-full lg:w-[350px] shrink-0 h-auto lg:h-full lg:overflow-y-auto custom-scrollbar p-5 lg:p-6 lg:border-r border-[var(--color-border)] order-2 lg:order-none">
+      <div className="w-full lg:w-[350px] shrink-0 h-auto lg:h-full lg:overflow-y-auto p-5 lg:p-6 lg:border-r border-[var(--color-border)] order-2 lg:order-none">
         
         {/* Universal Top Actions */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--color-border)]">
@@ -279,9 +279,11 @@ export default function StickerStudio() {
       </div>
 
       {/* ── Center Stage (Canvas Preview) ── */}
-      <div className="flex-1 min-w-0 flex flex-col relative order-1 lg:order-none bg-[var(--color-background)] lg:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wNykiLz48L3N2Zz4=')]">
-        {/* Dot pattern background is applied via data-uri on Desktop */}
-        <div className="absolute inset-0 flex items-center justify-center p-4 lg:p-10 pointer-events-none">
+      <div className="flex-1 min-w-0 flex flex-col relative order-1 lg:order-none bg-[var(--color-surface-2)] lg:rounded-r-3xl">
+        <div className="absolute inset-0 flex items-center justify-center p-4 lg:p-10 pointer-events-none overflow-hidden">
+          {/* Subtle grid for professional feel */}
+          <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(var(--color-text) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+          
           <div className="w-full max-w-[600px] aspect-square relative shadow-[0_20px_60px_rgba(0,0,0,0.15)] rounded-2xl overflow-hidden pointer-events-auto bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADFJREFUOE9jZGBgEAFifOToJMoQ/xnwYfL0k42mho2mgmE0FwyjuWBY5IJhNMk0U0EAKU8/41ZqG6oAAAAASUVORK5CYII=')]">
              <StickerCanvas 
                 ref={canvasRef}
@@ -293,7 +295,7 @@ export default function StickerStudio() {
         </div>
         
         {/* Top Floating Badge */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-[var(--color-surface)]/80 backdrop-blur-md px-4 py-2 rounded-full border border-[var(--color-border)] shadow-lg flex items-center gap-2 z-10">
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-[var(--color-surface)]/90 backdrop-blur-md px-4 py-2 rounded-full border border-[var(--color-border)] shadow-lg flex items-center gap-2 z-10">
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-primary-400)] opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--color-primary-500)]"></span>

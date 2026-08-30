@@ -97,14 +97,13 @@ function App() {
 
           {/* Telegram Sticker Studio */}
           <Route path="/sticker" element={
-            <ToolShell>
-              <main className="flex flex-col items-center animate-fade-in">
+            <div className="flex-1 w-full max-w-[1400px] mx-auto px-2 sm:px-4 lg:px-8 pt-6 pb-6 flex flex-col items-center">
+              <main className="w-full flex flex-col items-center animate-fade-in flex-1">
                 <Suspense fallback={<Skeleton />}>
-                  <StickerHero />
                   <StickerStudio />
                 </Suspense>
               </main>
-            </ToolShell>
+            </div>
           } />
 
           {/* PDF Tools (Stirling-PDF iframe) */}
