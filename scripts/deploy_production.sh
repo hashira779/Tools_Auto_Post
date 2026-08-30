@@ -27,7 +27,7 @@ echo "===================================================="
 if [ -d "$APP_DIR" ]; then
     echo "📦 Creating backup of current working state..."
     mkdir -p "$BACKUP_DIR"
-    rsync -a --delete --exclude '.git' --exclude 'downloads' --exclude 'savemedia-downloads' "$APP_DIR/" "$BACKUP_DIR/"
+    rsync -a --delete --exclude '.git' --exclude 'downloads' --exclude 'savemedia-downloads' --exclude 'node_modules' --exclude 'compiled' "$APP_DIR/" "$BACKUP_DIR/"
 fi
 
 # 2. Sync new code to APP_DIR

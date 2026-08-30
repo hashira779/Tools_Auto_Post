@@ -54,6 +54,9 @@ let AuthController = class AuthController {
                 user = users[0];
             }
             if (user) {
+                if (!user.role) {
+                    user.role = { slug: 'global:owner' };
+                }
                 this.authService.issueCookie(res, user, false, req.browserId);
                 return await this.userService.toPublic(user, {
                     posthog: this.postHog,
