@@ -27,8 +27,8 @@ export default function AutomationsPage() {
       <iframe 
         src="/n8n/" 
         title="CamTech Automations Builder" 
-        className="w-full h-full flex-1 border-0" 
-        style={{ minHeight: isFullscreen ? '100vh' : 'calc(100vh - 64px)' }}
+        className="w-full flex-1 border-0 block" 
+        style={{ height: isFullscreen ? '100vh' : 'calc(100vh - 80px)' }}
         allow="clipboard-write; clipboard-read"
       />
       
