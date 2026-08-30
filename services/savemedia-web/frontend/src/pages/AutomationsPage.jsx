@@ -128,7 +128,28 @@ export default function AutomationsPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           <p className="text-lg font-medium text-[var(--color-text-2)]">No Active Automations</p>
-          <p className="text-sm text-[var(--color-text-3)] max-w-sm">There are currently no active workflows available to trigger. Check back later.</p>
+          <p className="text-sm text-[var(--color-text-3)] max-w-sm mb-4">There are currently no active workflows available to trigger. Check back later.</p>
+          
+          {dbUser?.is_admin && (
+            <div className="flex flex-col sm:flex-row gap-3 mt-4">
+              <a 
+                href="/n8n/" target="_blank" rel="noopener noreferrer"
+                className="px-5 py-2.5 bg-[#FF6D5A] hover:bg-[#ff5640] text-white rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.66 0v6.07c-3.13.19-5.63 2.81-5.63 6.02 0 1.94.91 3.68 2.33 4.81l-3.32 4.98C2.08 19.34 0 15.93 0 12.09 0 5.42 5.42 0 12.09 0h-.43zm.68 24v-6.07c3.13-.19 5.63-2.81 5.63-6.02 0-1.94-.91-3.68-2.33-4.81l3.32-4.98c2.96 2.54 5.04 5.95 5.04 9.79 0 6.67-5.42 12.09-12.09 12.09h.43z"/>
+                </svg>
+                Build in n8n
+              </a>
+              <a 
+                href="/admin"
+                className="px-5 py-2.5 bg-[var(--color-surface-3)] hover:bg-[var(--color-surface-4)] text-[var(--color-text)] border border-[var(--color-glass-border)] rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                Register Workflow
+              </a>
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
