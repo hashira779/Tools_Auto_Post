@@ -10,6 +10,7 @@ export const TOOL_STICKER = 'sticker'
 export const TOOL_ADMIN = 'admin'
 export const TOOL_PDF = 'pdf'
 export const TOOL_SCREEN_SHARE = 'screen-share'
+export const TOOL_AUTOMATION = 'automation'
 
 export const TOOL_PATHS = {
   [TOOL_DOWNLOADER]: '/',
@@ -18,6 +19,7 @@ export const TOOL_PATHS = {
   [TOOL_PDF]: '/pdf-tools',
   [TOOL_SCREEN_SHARE]: '/live',
   [TOOL_ADMIN]: '/admin',
+  [TOOL_AUTOMATION]: '/automations',
 }
 
 /** Resolve the active tool id from a pathname. */
@@ -28,5 +30,6 @@ export function toolFromPath(pathname) {
   if (pathname.startsWith('/sticker')) return TOOL_STICKER
   if (pathname.startsWith('/pdf-tools')) return TOOL_PDF
   if (pathname.startsWith('/admin')) return TOOL_ADMIN
+  if (pathname.startsWith('/automations')) return TOOL_AUTOMATION
   return TOOL_DOWNLOADER
 }

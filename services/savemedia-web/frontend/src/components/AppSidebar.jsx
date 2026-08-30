@@ -1,5 +1,5 @@
 import {
-  TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_PDF, TOOL_SCREEN_SHARE,
+  TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER, TOOL_PDF, TOOL_SCREEN_SHARE, TOOL_AUTOMATION
 } from '../routes'
 
 const SIDEBAR_TOOLS = [
@@ -8,6 +8,7 @@ const SIDEBAR_TOOLS = [
   { id: TOOL_STICKER, label: 'Telegram Stickers' },
   { id: TOOL_PDF, label: 'PDF Tools' },
   { id: TOOL_SCREEN_SHARE, label: 'Live Camera / Screen Share' },
+  { id: TOOL_AUTOMATION, label: 'Workflow Automations' },
 ]
 
 const BOTS = [

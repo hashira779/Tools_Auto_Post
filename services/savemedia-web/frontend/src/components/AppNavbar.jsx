@@ -4,12 +4,14 @@ import { useAuth } from '../hooks/useAuth'
 import {
   TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER,
   TOOL_ADMIN, TOOL_PDF, TOOL_SCREEN_SHARE,
+  TOOL_AUTOMATION
 } from '../routes'
 
 // Re-export for backwards compatibility with existing imports
 export {
   TOOL_DOWNLOADER, TOOL_TTS, TOOL_STICKER,
   TOOL_ADMIN, TOOL_PDF, TOOL_SCREEN_SHARE,
+  TOOL_AUTOMATION
 }
 
 const NAV_TOOLS = [
@@ -18,6 +20,7 @@ const NAV_TOOLS = [
   { id: TOOL_STICKER, label: 'Stickers', mobileLabel: 'Stickers' },
   { id: TOOL_PDF, label: 'PDF Tools', mobileLabel: 'PDF' },
   { id: TOOL_SCREEN_SHARE, label: 'Screen Share', mobileLabel: 'Share' },
+  { id: TOOL_AUTOMATION, label: 'Automations', mobileLabel: 'Auto' },
 ]
 
 export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }) {

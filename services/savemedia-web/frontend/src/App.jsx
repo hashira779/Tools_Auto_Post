@@ -9,6 +9,7 @@ import Footer from './components/Footer'
 import VerificationOverlay from './components/VerificationOverlay'
 import DownloaderPage from './pages/DownloaderPage'
 import PdfToolsPage from './pages/PdfToolsPage'
+import AutomationsPage from './pages/AutomationsPage'
 
 // Lazy load heavy tool chunks so the main downloader loads instantly
 const TtsStudio = lazy(() => import('./components/tts/TtsStudio'))
@@ -108,6 +109,13 @@ function App() {
 
           {/* PDF Tools (Stirling-PDF iframe) */}
           <Route path="/pdf-tools" element={<PdfToolsPage />} />
+
+          {/* Workflow Automations */}
+          <Route path="/automations" element={
+            <ToolShell>
+              <AutomationsPage />
+            </ToolShell>
+          } />
 
           {/* Live Camera — host studio */}
           <Route path="/live" element={

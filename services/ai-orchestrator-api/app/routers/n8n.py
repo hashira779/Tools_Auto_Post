@@ -125,9 +125,23 @@ def list_workflows(
     admin: models.User = Depends(get_admin_user),
     db: Session = Depends(get_db),
 ):
-    """List all registered n8n workflows."""
+    """List all registered n8n workflows (Admin only)."""
     return (
         db.query(models.N8nWorkflow)
+        .order_by(models.N8nWorkflow.created_at.desc())
+        .all()
+    )
+
+
+@router.get("/active", response_model=List[WorkflowResponse])
+def list_active_workflows(
+    user: models.User = Depends(get_verified_user),
+    db: Session = Depends(get_db),
+):
+    """List all active workflows for verified users."""
+    return (
+        db.query(models.N8nWorkflow)
+        .filter(models.N8nWorkflow.is_active == 1)
         .order_by(models.N8nWorkflow.created_at.desc())
         .all()
     )
