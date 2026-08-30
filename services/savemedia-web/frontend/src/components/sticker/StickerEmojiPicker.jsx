@@ -15,7 +15,7 @@ const EMOJI_CATEGORIES = [
 
 export default function StickerEmojiPicker({ selected, onSelect }) {
   return (
-    <div className="card p-5 sm:p-6 animate-fade-in">
+    <div className="card p-5 sm:p-6 mb-4 animate-fade-in">
       <div className="mb-5 flex flex-col items-center text-center">
         <h3 className="text-[15px] font-semibold text-[var(--color-text)]">
           Pick Emoji
