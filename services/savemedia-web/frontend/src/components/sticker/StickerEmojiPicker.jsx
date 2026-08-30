@@ -60,6 +60,7 @@ export default function StickerEmojiPicker({ selected, onSelect }) {
           <div className="w-10 h-10 bg-[var(--color-surface-2)] border border-[var(--color-border-2)] rounded-xl flex items-center justify-center text-2xl shadow-inner">
             {selected}
           </div>
+        </div>
       </div>
     </div>
   )
