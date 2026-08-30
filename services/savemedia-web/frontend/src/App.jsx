@@ -111,7 +111,11 @@ function App() {
           <Route path="/pdf-tools" element={<PdfToolsPage />} />
 
           {/* Workflow Automations */}
-          <Route path="/automations" element={<AutomationsPage />} />
+          <Route path="/automations" element={
+            <ToolShell>
+              <AutomationsPage />
+            </ToolShell>
+          } />
 
           {/* Live Camera — host studio */}
           <Route path="/live" element={
@@ -150,7 +154,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
-        {activeTool !== 'pdf' && activeTool !== 'screen-share' && activeTool !== 'automation' && <Footer />}
+        {activeTool !== 'pdf' && activeTool !== 'screen-share' && <Footer />}
       </div>
     </>
   )
