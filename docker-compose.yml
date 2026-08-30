@@ -402,7 +402,8 @@ services:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
       - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-camtech_n8n}
-      - WEBHOOK_URL=http://n8n:5678/
+      - N8N_PATH=/n8n/
+      - WEBHOOK_URL=https://camtech.cam/n8n/
       - GENERIC_TIMEZONE=Asia/Phnom_Penh
     ports:
       - "5678:5678"
