@@ -406,6 +406,7 @@ services:
       - WEBHOOK_URL=https://camtech.cam/n8n/
       - N8N_HOST=camtech.cam
       - N8N_PROTOCOL=https
+      - N8N_PROXY_HOPS=1
       - GENERIC_TIMEZONE=Asia/Phnom_Penh
     ports:
       - "5678:5678"
