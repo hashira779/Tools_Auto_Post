@@ -55,7 +55,25 @@ const StickerCanvas = forwardRef(({ baseStickerData, adjustments, textConfig, on
     if (img) {
       const { brightness = 100, contrast = 100, saturation = 100 } = adjustments || {}
       ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`
-      ctx.drawImage(img, 0, 0, 512, 512)
+      
+      const size = Math.min(img.width, img.height)
+      const sx = (img.width - size) / 2
+      const sy = (img.height - size) / 2
+      const style = baseStickerData?.style || 'original'
+
+      ctx.save()
+      if (style === 'circle') {
+        ctx.beginPath()
+        ctx.arc(256, 256, 256, 0, Math.PI * 2)
+        ctx.clip()
+      } else if (style === 'rounded') {
+        ctx.beginPath()
+        ctx.roundRect(0, 0, 512, 512, 64)
+        ctx.clip()
+      }
+
+      ctx.drawImage(img, sx, sy, size, size, 0, 0, 512, 512)
+      ctx.restore()
       ctx.filter = 'none' // Reset filter for text rendering
     }
 

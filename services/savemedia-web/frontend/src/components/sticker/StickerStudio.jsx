@@ -42,6 +42,8 @@ export default function StickerStudio() {
 
   const [emoji, setEmoji] = useState('😂')
 
+  const [loadingProgress, setLoadingProgress] = useState('')
+
   // ── Handlers ──────────────────────────────────────────────
 
   const handleUpload = async (file) => {
@@ -58,41 +60,42 @@ export default function StickerStudio() {
     setRemoveBg(shouldRemoveBg)
     setProcessingStyle(true)
     setStyleError(null)
+    setLoadingProgress(shouldRemoveBg ? 'Initializing AI Engine...' : 'Processing...')
 
     try {
-      const formData = new FormData()
-      formData.append('file', fileToProcess)
-      formData.append('style', styleId)
-      // Send the remove_bg flag (API defaults to True, so we must explicitly pass it)
-      formData.append('remove_bg', shouldRemoveBg ? 'true' : 'false')
+      let finalBlob = fileToProcess;
 
-      const res = await fetch('/api/sticker/process', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const text = await res.text()
-      let data = {}
-      try {
-        data = JSON.parse(text)
-      } catch (e) {
-        throw new Error(`Server returned error (${res.status}). Please try again.`)
+      if (shouldRemoveBg) {
+        // Dynamically import to keep initial bundle size small
+        const imglyRemoveBackground = (await import('@imgly/background-removal')).default
+        
+        finalBlob = await imglyRemoveBackground(fileToProcess, {
+          progress: (key, current, total) => {
+             if (key.startsWith('fetch')) {
+               const percentage = Math.round((current / total) * 100) || 0
+               setLoadingProgress(`Downloading AI Brain (${percentage}%)...`)
+             } else if (key.startsWith('compute')) {
+               setLoadingProgress('Analyzing pixels...')
+             }
+          }
+        });
       }
 
-      if (!res.ok) {
-        throw new Error(data.detail || 'Failed to process image.')
+      // Convert Blob to Base64 for the canvas
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64data = reader.result.split(',')[1]
+        setBaseStickerData({ data_b64: base64data, style: styleId })
+        setProcessingStyle(false)
+        setLoadingProgress('')
       }
+      reader.readAsDataURL(finalBlob)
 
-      const stickerObj = data.sticker || data
-      if (!stickerObj || !stickerObj.data_b64) {
-        throw new Error('Server returned invalid data format.')
-      }
-
-      setBaseStickerData(stickerObj)
     } catch (e) {
-      setStyleError(e.message)
-    } finally {
+      console.error(e)
+      setStyleError(e.message || 'Failed to process image.')
       setProcessingStyle(false)
+      setLoadingProgress('')
     }
   }
 
@@ -219,6 +222,7 @@ export default function StickerStudio() {
               selectedStyle={selectedStyle} 
               onSelectStyle={handleStyleGenerate} 
               processing={processingStyle}
+              loadingProgress={loadingProgress}
               error={styleError}
             />
 

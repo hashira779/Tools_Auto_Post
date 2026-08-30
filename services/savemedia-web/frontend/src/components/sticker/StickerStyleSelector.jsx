@@ -1,12 +1,10 @@
 const STYLES = [
   { id: 'original', name: 'Original Fit', desc: 'Keep proportions', badge: 'Popular' },
-  { id: 'outline', name: 'White Outline', desc: 'Add crisp border', badge: 'Classic' },
   { id: 'circle', name: 'Circle Badge', desc: 'Circular avatar crop', badge: 'Avatar' },
   { id: 'rounded', name: 'Rounded Card', desc: 'Smooth curved corners', badge: 'Clean' },
-  { id: 'cartoon', name: 'Cartoon FX', desc: 'Artistic edge lines', badge: 'Artistic' },
 ]
 
-export default function StickerStyleSelector({ selectedStyle, onSelectStyle, processing }) {
+export default function StickerStyleSelector({ selectedStyle, onSelectStyle, processing, loadingProgress }) {
   return (
     <div className="card p-5 mb-4 animate-fade-in">
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border)]">
@@ -16,7 +14,7 @@ export default function StickerStyleSelector({ selectedStyle, onSelectStyle, pro
         {processing && (
           <span className="flex items-center gap-1.5 text-[10px] font-medium text-[var(--color-primary-500)] bg-[var(--color-primary-500)]/10 px-2 py-1 rounded-md">
             <div className="w-2.5 h-2.5 border border-[var(--color-primary-500)] border-t-transparent rounded-full animate-spin" />
-            Processing...
+            {loadingProgress || 'Processing...'}
           </span>
         )}
       </div>
