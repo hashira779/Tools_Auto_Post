@@ -111,11 +111,7 @@ function App() {
           <Route path="/pdf-tools" element={<PdfToolsPage />} />
 
           {/* Workflow Automations */}
-          <Route path="/automations" element={
-            <ToolShell>
-              <AutomationsPage />
-            </ToolShell>
-          } />
+          <Route path="/automations" element={<AutomationsPage />} />
 
           {/* Live Camera — host studio */}
           <Route path="/live" element={
