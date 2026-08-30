@@ -43,6 +43,8 @@ export default function StickerStudio() {
   const [emoji, setEmoji] = useState('😂')
 
   const [loadingProgress, setLoadingProgress] = useState('')
+  const [activeTab, setActiveTab] = useState('image') // 'image', 'adjust', 'text', 'export'
+
 
   // ── Handlers ──────────────────────────────────────────────
 
@@ -166,117 +168,140 @@ export default function StickerStudio() {
   }
 
   // ── Render ────────────────────────────────────────────────
+  if (!sourceImage) {
+    return (
+      <div className="w-full max-w-[1200px] mx-auto pb-10">
+        <StickerUploader onUpload={handleUpload} />
+      </div>
+    )
+  }
+
+  const TABS = [
+    { id: 'image', label: 'Image', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg> },
+    { id: 'adjust', label: 'Adjust', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg> },
+    { id: 'text', label: 'Text', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg> },
+    { id: 'export', label: 'Export', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> },
+  ]
+
   return (
-    <div className="w-full max-w-[1200px] mx-auto pb-10 flex flex-col-reverse lg:flex-row gap-6">
+    <div className="w-full max-w-[1400px] mx-auto pb-24 lg:pb-0 flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-100px)] lg:overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-2xl relative">
       
-      {/* ── Left Sidebar (Tools) ── */}
-      <div className="w-full lg:w-[400px] flex-shrink-0 flex flex-col space-y-0 h-auto lg:h-[calc(100vh-140px)] lg:overflow-y-auto custom-scrollbar pr-1 mt-6 lg:mt-0">
-        
-        {!sourceImage ? (
-          <StickerUploader onUpload={handleUpload} />
-        ) : (
-          <>
-            {/* 1. Re-upload option (small) */}
-            <div className="card p-4 mb-4 flex items-center justify-between animate-fade-in border-l-4 border-l-[var(--color-primary-500)]">
-               <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 rounded-lg bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)] flex items-center justify-center">
-                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                   </svg>
-                 </div>
-                 <div>
-                   <h3 className="text-[13px] font-bold text-[var(--color-text)]">Source Image Loaded</h3>
-                   <button onClick={handleReset} className="text-[11px] text-[var(--color-text-3)] hover:text-[var(--color-error)] transition-colors">Change Image</button>
-                 </div>
-               </div>
-            </div>
-
-            {/* AI Background Removal Toggle */}
-            <div className="card p-4 mb-4 animate-fade-in flex items-center justify-between">
-              <div>
-                <h3 className="text-[13px] font-bold text-[var(--color-text)] flex items-center gap-2">
-                  ✨ AI Background Eraser
-                </h3>
-                <p className="text-[11px] text-[var(--color-text-4)] mt-0.5">
-                  Runs offline directly on your device
-                </p>
-              </div>
-              <button
-                onClick={handleToggleBg}
-                disabled={processingStyle}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-ring ${
-                  removeBg ? 'bg-[var(--color-primary-500)]' : 'bg-[var(--color-surface-4)]'
-                } ${processingStyle ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    removeBg ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* 2. Image Style (Backend) */}
-            <StickerStyleSelector 
-              selectedStyle={selectedStyle} 
-              onSelectStyle={handleStyleGenerate} 
-              processing={processingStyle}
-              loadingProgress={loadingProgress}
-              error={styleError}
-            />
-
-            {/* 3. Image Adjustments (Frontend Filters) */}
-            <StickerAdjustments 
-              adjustments={adjustments} 
-              setAdjustments={setAdjustments} 
-            />
-
-            {/* 4. Text & Memes */}
-            <StickerTextEditor 
-              textConfig={textConfig} 
-              onTextConfigChange={setTextConfig} 
-            />
-
-            {/* 5. Emoji & Export */}
-            <StickerEmojiPicker 
-              selected={emoji} 
-              onSelect={setEmoji} 
-            />
-
-            <StickerTelegramPublish 
-              emoji={emoji}
-              onPublish={handlePublishToTelegram}
-              onDownloadPNG={handleDownloadPNG}
-              onDownloadWebP={handleDownloadWebP}
-              onReset={handleReset}
-            />
-          </>
-        )}
+      {/* ── Desktop Left Nav / Mobile Bottom Tab Bar ── */}
+      <div className="fixed bottom-0 left-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-[var(--color-border)] z-50 lg:relative lg:w-[100px] lg:h-full lg:border-t-0 lg:border-r lg:bg-transparent lg:backdrop-blur-none flex lg:flex-col justify-around lg:justify-start gap-2 p-2 lg:p-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
+        {TABS.map(tab => {
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 lg:flex-none flex flex-col items-center justify-center gap-1.5 p-2 lg:py-5 rounded-2xl transition-all duration-200 cursor-pointer ${
+                isActive 
+                  ? 'bg-[var(--color-primary-500)] text-white shadow-lg lg:shadow-[0_10px_30px_rgba(134,59,255,0.4)] scale-105' 
+                  : 'text-[var(--color-text-3)] hover:text-[var(--color-primary-500)] hover:bg-[rgba(134,59,255,0.1)]'
+              }`}
+            >
+              <div className="w-5 h-5 lg:w-7 lg:h-7">{tab.icon}</div>
+              <span className={`text-[10px] lg:text-[11px] font-bold tracking-wider ${isActive ? 'text-white' : ''}`}>
+                {tab.label}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
-      {/* ── Right Main Area (Canvas Preview) ── */}
-      <div className="flex-1 min-w-0 flex flex-col items-center">
-        <div className="w-full max-w-[600px] sticky top-20 lg:top-24 z-10 bg-[var(--color-background)] pt-4 pb-4 lg:pt-0 lg:pb-0 shadow-[0_10px_20px_rgba(0,0,0,0.4)] lg:shadow-none">
-           <div className="mb-3 flex justify-between items-end px-1">
-             <h2 className="text-lg font-bold text-[var(--color-text)]">Live Preview</h2>
-             <span className="badge">512×512</span>
+      {/* ── Active Panel Settings ── */}
+      <div className="w-full lg:w-[350px] shrink-0 h-auto lg:h-full lg:overflow-y-auto custom-scrollbar p-5 lg:p-6 lg:border-r border-[var(--color-border)] order-2 lg:order-none">
+        
+        {/* Universal Top Actions */}
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--color-border)]">
+           <div className="flex items-center gap-2.5">
+             <div className="w-8 h-8 rounded-full bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)] flex items-center justify-center">
+               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+             </div>
+             <div>
+               <h3 className="text-[13px] font-bold text-[var(--color-text)]">Source Active</h3>
+             </div>
            </div>
-           
-           <StickerCanvas 
-              ref={canvasRef}
-              baseStickerData={baseStickerData}
-              adjustments={adjustments}
-              textConfig={textConfig}
-           />
-           
-           {sourceImage && (
-             <p className="text-center text-[11px] text-[var(--color-text-4)] mt-4">
-               Updates in real-time. What you see is exactly what will be exported.
-             </p>
-           )}
+           <button onClick={handleReset} className="text-[11px] font-medium text-[var(--color-error)] hover:bg-[var(--color-error)]/10 px-3 py-1.5 rounded-lg transition-colors">
+             New Image
+           </button>
+        </div>
+
+        {/* Dynamic Content based on Tab */}
+        <div className="animate-fade-in space-y-6">
+          {activeTab === 'image' && (
+            <>
+              <div className="card-elevated p-5 rounded-2xl flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[14px] font-bold text-[var(--color-text)] flex items-center gap-2">
+                    ✨ AI Eraser
+                  </h3>
+                  <button
+                    onClick={handleToggleBg}
+                    disabled={processingStyle}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus-ring ${
+                      removeBg ? 'bg-[var(--color-primary-500)]' : 'bg-[var(--color-surface-4)]'
+                    } ${processingStyle ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${removeBg ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+                <p className="text-[11px] text-[var(--color-text-3)] leading-relaxed">Runs completely offline via WebAssembly. No data leaves your device.</p>
+              </div>
+              <StickerStyleSelector 
+                selectedStyle={selectedStyle} 
+                onSelectStyle={handleStyleGenerate} 
+                processing={processingStyle}
+                loadingProgress={loadingProgress}
+                error={styleError}
+              />
+            </>
+          )}
+
+          {activeTab === 'adjust' && (
+            <StickerAdjustments adjustments={adjustments} setAdjustments={setAdjustments} />
+          )}
+
+          {activeTab === 'text' && (
+            <StickerTextEditor textConfig={textConfig} onTextConfigChange={setTextConfig} />
+          )}
+
+          {activeTab === 'export' && (
+            <>
+              <StickerEmojiPicker selected={emoji} onSelect={setEmoji} />
+              <StickerTelegramPublish 
+                emoji={emoji} onPublish={handlePublishToTelegram}
+                onDownloadPNG={handleDownloadPNG} onDownloadWebP={handleDownloadWebP} onReset={handleReset}
+              />
+            </>
+          )}
         </div>
       </div>
+
+      {/* ── Center Stage (Canvas Preview) ── */}
+      <div className="flex-1 min-w-0 flex flex-col relative order-1 lg:order-none bg-[var(--color-background)] lg:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wNykiLz48L3N2Zz4=')]">
+        {/* Dot pattern background is applied via data-uri on Desktop */}
+        <div className="absolute inset-0 flex items-center justify-center p-4 lg:p-10 pointer-events-none">
+          <div className="w-full max-w-[600px] aspect-square relative shadow-[0_20px_60px_rgba(0,0,0,0.15)] rounded-2xl overflow-hidden pointer-events-auto bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADFJREFUOE9jZGBgEAFifOToJMoQ/xnwYfL0k42mho2mgmE0FwyjuWBY5IJhNMk0U0EAKU8/41ZqG6oAAAAASUVORK5CYII=')]">
+             <StickerCanvas 
+                ref={canvasRef}
+                baseStickerData={baseStickerData}
+                adjustments={adjustments}
+                textConfig={textConfig}
+             />
+          </div>
+        </div>
+        
+        {/* Top Floating Badge */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-[var(--color-surface)]/80 backdrop-blur-md px-4 py-2 rounded-full border border-[var(--color-border)] shadow-lg flex items-center gap-2 z-10">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-primary-400)] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--color-primary-500)]"></span>
+          </span>
+          <span className="text-[11px] font-bold text-[var(--color-text)] tracking-wider">LIVE PREVIEW</span>
+        </div>
+      </div>
+
     </div>
   )
 }
