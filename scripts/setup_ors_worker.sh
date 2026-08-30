@@ -9,6 +9,9 @@
 #    4. Pull the LLM models
 #
 #  Usage:
+#    SUPABASE_URL=https://YOUR_REF.supabase.co \
+#    SUPABASE_ANON_KEY=your_anon_key \
+#    DATABASE_URL=postgresql://user:pass@MAIN_SERVER_IP:5432/camtech \
 #    bash setup_ors_worker.sh
 # ══════════════════════════════════════════════════════════════════
 
@@ -57,16 +60,22 @@ else
 fi
 
 # ── 3. Create .env file with Supabase credentials ────────────
+# Credentials MUST come from environment variables — never hardcode them here.
 if [ ! -f "$APP_DIR/.env" ]; then
+    : "${SUPABASE_URL:?❌ SUPABASE_URL env var is required (see Usage at top of script)}"
+    : "${SUPABASE_ANON_KEY:?❌ SUPABASE_ANON_KEY env var is required}"
+    : "${DATABASE_URL:?❌ DATABASE_URL env var is required}"
+
     echo "📝 Creating .env file..."
-    cat > "$APP_DIR/.env" << 'EOF'
+    cat > "$APP_DIR/.env" << EOF
 # ── Supabase Auth (Required for JWT validation) ──
-SUPABASE_URL=https://icouardbzhytnozaordc.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imljb3VhcmRiemh5dG5vemFvcmRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NzY3NjAsImV4cCI6MjEwMjQ1Mjc2MH0.rDHOKRw-Kw6W7jHRrmIvaqelCwzDMaZshio-4d2p2hw
+SUPABASE_URL=${SUPABASE_URL}
+SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
 
 # ── Database points to Main Server ──
-DATABASE_URL=postgresql://camtech:camtechpassword@10.1.0.11:5432/camtech
+DATABASE_URL=${DATABASE_URL}
 EOF
+    chmod 600 "$APP_DIR/.env"
     echo "✅ .env file created"
 else
     echo "✅ .env file already exists"

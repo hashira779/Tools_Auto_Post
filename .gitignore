@@ -1,7 +1,12 @@
 # Environment
 .env
 *.env
-# cookies.txt (Temporarily tracked to deploy to Ubuntu servers)
+!.env.example
+
+# Session cookies (NEVER commit - contains live session credentials)
+cookies.txt
+*.cookies
+cookies*.txt
 
 # Deploy scripts (contain server credentials)
 update.py

@@ -64,6 +64,15 @@ def create_app() -> FastAPI:
     # Routes
     app.include_router(media_router)
 
+    # Health check — used by Docker healthchecks, Nginx failover & monitoring
+    @app.get("/health", tags=["ops"])
+    def health():
+        return {"status": "ok", "service": "savemedia-api", "version": app.version}
+
+    @app.get("/api/health", tags=["ops"])
+    def api_health():
+        return {"status": "ok", "service": "savemedia-api", "version": app.version}
+
     return app
 
 

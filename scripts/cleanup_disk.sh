@@ -7,7 +7,14 @@
 
 set -euo pipefail
 
-SUDO_PASS="pTT!CT01"
+# Load ~/.camtech_env if present so CAMTECH_SUDO_PASS is picked up automatically
+if [ -f "$HOME/.camtech_env" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "$HOME/.camtech_env"
+    set +a
+fi
+SUDO_PASS="${CAMTECH_SUDO_PASS:?❌ CAMTECH_SUDO_PASS env var is required — create ~/.camtech_env with CAMTECH_SUDO_PASS=...}"
 
 echo "===================================================="
 echo "  🧹 CamTech Server Disk Cleanup"

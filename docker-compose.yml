@@ -120,6 +120,7 @@ services:
       - .env
     volumes:
       - ./credentials:/app/credentials:ro
+      # cookies.txt is gitignored — create it locally on the server (yt-dlp session cookies)
       - ./cookies.txt:/app/cookies.txt:ro
       - bot-downloads:/app/downloads
     healthcheck:
