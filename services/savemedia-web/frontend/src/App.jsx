@@ -100,15 +100,28 @@ function App() {
         )}
 
         {/* Content (For normal tools) */}
-        {activeTool === TOOL_SCREEN_SHARE ? (
-          <div className="flex-1 w-full animate-fade-in flex flex-col">
-            <Suspense fallback={<div className="w-full h-96 animate-pulse bg-[var(--color-surface-2)]"></div>}>
-              <LiveCameraContainer />
-            </Suspense>
-          </div>
-        ) : activeTool !== TOOL_PDF ? (
-          <div className="flex-1 w-full max-w-[1024px] mx-auto px-5 sm:px-6 lg:px-8 pt-12 pb-20">
-            {/* Media Downloader */}
+        {activeTool !== TOOL_PDF ? (
+          <>
+            {/* Guest View: Mobile Camera (Fullscreen) */}
+            {activeTool === TOOL_SCREEN_SHARE && typeof window !== 'undefined' && window.location.pathname.startsWith('/share/') && (
+              <div className="flex-1 w-full h-full flex flex-col absolute inset-0 z-50 bg-[#000000]">
+                <Suspense fallback={<div className="w-full h-full animate-pulse bg-zinc-900"></div>}>
+                  <LiveCameraContainer />
+                </Suspense>
+              </div>
+            )}
+
+            <div className="flex-1 w-full max-w-[1024px] mx-auto px-5 sm:px-6 lg:px-8 pt-12 pb-20">
+              {/* Host View: Live Camera Studio (Standard Layout) */}
+              {activeTool === TOOL_SCREEN_SHARE && !(typeof window !== 'undefined' && window.location.pathname.startsWith('/share/')) && (
+                <main className="flex flex-col items-center animate-fade-in w-full">
+                  <Suspense fallback={<div className="w-full h-96 animate-pulse bg-[var(--color-surface-2)] rounded-2xl"></div>}>
+                    <LiveCameraContainer />
+                  </Suspense>
+                </main>
+              )}
+
+              {/* Media Downloader */}
             {activeTool === TOOL_DOWNLOADER && (
               <main className="flex flex-col items-center animate-fade-in">
                 <Hero />

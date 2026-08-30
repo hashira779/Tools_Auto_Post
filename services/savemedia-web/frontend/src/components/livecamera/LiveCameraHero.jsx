@@ -205,61 +205,54 @@ export default function LiveCameraHero() {
   return (
     <div 
       ref={containerRef}
-      className="w-full h-full flex-1 flex flex-col relative select-none bg-[#09090b] overflow-hidden"
+      className="w-full card p-5 sm:p-6 mb-8 flex flex-col relative select-none min-h-[70vh] lg:min-h-[600px] overflow-hidden gap-5 animate-fade-in"
     >
-      {/* Background glowing mesh (hardware accelerated) */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-40 will-change-transform">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/30 rounded-full blur-[100px] mix-blend-screen transform translate-z-0"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-violet-600/30 rounded-full blur-[100px] mix-blend-screen transform translate-z-0"></div>
-        <div className="absolute top-[30%] left-[40%] w-[30%] h-[30%] bg-blue-500/20 rounded-full blur-[80px] mix-blend-screen transform translate-z-0"></div>
-      </div>
-      
       {/* ── Studio Header Bar ── */}
-      <header className="h-16 px-4 sm:px-6 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between z-30 flex-shrink-0">
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-[var(--color-border)] pb-4 gap-4">
         
         {/* Left: Studio Identity & Room Info */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20">
+            <div className="w-9 h-9 rounded-xl bg-[var(--color-primary-500)] flex items-center justify-center shadow-sm">
               <Radio className="w-5 h-5 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h2 className="text-sm font-bold text-white leading-tight">Live Studio</h2>
-              <p className="text-[11px] text-slate-400">CamTech Multiparty Mesh</p>
+              <h2 className="text-sm font-bold text-[var(--color-text)] leading-tight">Live Studio</h2>
+              <p className="text-[11px] text-[var(--color-text-3)]">CamTech Multiparty Mesh</p>
             </div>
           </div>
 
-          <div className="h-6 w-px bg-white/10 hidden sm:block"></div>
+          <div className="h-6 w-px bg-[var(--color-border)] hidden sm:block"></div>
 
           {/* Status Badge */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-bold">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--color-error-dim)] border border-[var(--color-error)]/20 text-[var(--color-error)] text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-[var(--color-error)] animate-pulse"></span>
               <span>LIVE</span>
             </div>
 
             {/* Room Code Badge */}
             <button
               onClick={copyLink}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 text-xs font-mono text-slate-300 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] border border-[var(--color-border-2)] text-xs font-mono text-[var(--color-text-2)] transition-colors"
               title="Click to copy invite link"
             >
-              <span>Room: <strong>{roomId}</strong></span>
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
+              <span>Room: <strong className="text-[var(--color-text)]">{roomId}</strong></span>
+              {copied ? <Check className="w-3.5 h-3.5 text-[var(--color-success)]" /> : <Copy className="w-3.5 h-3.5 text-[var(--color-text-3)]" />}
             </button>
           </div>
         </div>
 
         {/* Right: Participants Counter & Tools */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/60 border border-white/10 text-xs font-medium text-slate-300">
-            <Users className="w-4 h-4 text-indigo-400" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium text-[var(--color-text-2)]">
+            <Users className="w-4 h-4 text-[var(--color-primary-500)]" />
             <span>{totalParticipants} {totalParticipants === 1 ? 'Participant' : 'Participants'}</span>
           </div>
 
           <button
             onClick={() => setShowQrModal(true)}
-            className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-white/10 text-slate-300 hover:text-white transition-colors"
+            className="btn-secondary p-2"
             title="Show QR Code / Invite"
           >
             <QrCode className="w-4 h-4" />
@@ -267,7 +260,7 @@ export default function LiveCameraHero() {
 
           <button
             onClick={toggleFullscreen}
-            className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-white/10 text-slate-300 hover:text-white transition-colors hidden sm:block"
+            className="btn-secondary p-2 hidden sm:block"
             title="Toggle Fullscreen"
           >
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
@@ -276,7 +269,7 @@ export default function LiveCameraHero() {
       </header>
 
       {/* ── Main Workspace ── */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative p-3 sm:p-4 gap-4">
+      <div className="flex-1 flex flex-col lg:flex-row relative gap-5 overflow-hidden">
         
         {/* Floating Reactions Stream (Overlay on right side of stage) */}
         <div className="pointer-events-none absolute bottom-24 right-6 sm:right-80 w-20 h-96 z-40 flex flex-col justify-end items-center overflow-visible">
@@ -292,7 +285,7 @@ export default function LiveCameraHero() {
         </div>
 
         {/* Main Stage */}
-        <main className="flex-1 flex flex-col justify-center items-center relative overflow-hidden rounded-3xl bg-black/20 border border-white/10 p-4 z-10">
+        <main className="flex-1 flex flex-col justify-center items-center relative overflow-y-auto overflow-x-hidden rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border-2)] p-4 z-10">
           
           {hasActiveSession ? (
             <div className="w-full h-full flex flex-wrap content-center justify-center gap-4 overflow-y-auto pb-4 scrollbar-none">
@@ -338,30 +331,30 @@ export default function LiveCameraHero() {
             </div>
           ) : (
             /* Lobby State (When nobody has joined yet and host hasn't started camera) */
-            <div className="w-full max-w-xl p-10 rounded-[2rem] bg-black/40 border border-white/5 backdrop-blur-3xl shadow-2xl flex flex-col items-center text-center gap-8 relative z-10">
+            <div className="w-full max-w-xl p-8 rounded-2xl bg-[var(--color-surface-1)] border border-[var(--color-border)] shadow-md flex flex-col items-center text-center gap-8 relative z-10">
               
               {/* Studio Icon/Logo */}
-              <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 flex items-center justify-center border border-white/10 shadow-[0_0_60px_-10px_rgba(99,102,241,0.3)]">
-                <Video className="w-10 h-10 text-indigo-300" />
+              <div className="w-20 h-20 rounded-full bg-[var(--color-primary-100)] dark:bg-[var(--color-primary-900)] flex items-center justify-center border border-[var(--color-primary-200)] dark:border-[var(--color-primary-800)]">
+                <Video className="w-8 h-8 text-[var(--color-primary-600)] dark:text-[var(--color-primary-400)]" />
               </div>
 
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-widest">
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-primary-50)] dark:bg-[var(--color-primary-900)] border border-[var(--color-primary-200)] dark:border-[var(--color-primary-800)] text-[var(--color-primary-600)] dark:text-[var(--color-primary-400)] text-xs font-bold uppercase tracking-widest">
+                  <Sparkles className="w-3.5 h-3.5" />
                   <span>Studio Ready</span>
                 </div>
-                <h3 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 tracking-tight">
+                <h3 className="text-3xl font-bold text-[var(--color-text)]">
                   Start Your Broadcast
                 </h3>
-                <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
+                <p className="text-[var(--color-text-3)] text-sm max-w-sm mx-auto leading-relaxed">
                   Turn on your camera to begin streaming. You can invite participants using the Room Code or QR button in the top right.
                 </p>
               </div>
 
-              <div className="w-full flex gap-4 pt-4 border-t border-white/5">
+              <div className="w-full flex gap-4 pt-4 border-t border-[var(--color-border-2)]">
                 <button
                   onClick={startCamera}
-                  className="flex-1 py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-3 shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0"
+                  className="btn-primary flex-1 py-3 px-6 flex items-center justify-center gap-3"
                 >
                   <Video className="w-5 h-5" />
                   <span>Start Camera</span>
@@ -369,7 +362,7 @@ export default function LiveCameraHero() {
 
                 <button
                   onClick={handleRecreate}
-                  className="py-4 px-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold flex items-center justify-center gap-3 transition-all"
+                  className="btn-secondary py-3 px-6 flex items-center justify-center gap-3"
                   title="Generate New Room"
                 >
                   <RefreshCw className="w-5 h-5" />
@@ -382,21 +375,21 @@ export default function LiveCameraHero() {
 
         {/* Collapsible Live Chat Sidebar */}
         {showChat && (
-          <aside className="w-full lg:w-80 h-72 lg:h-auto rounded-3xl bg-black/20 border border-white/10 backdrop-blur-xl flex flex-col overflow-hidden shadow-2xl flex-shrink-0 animate-fade-in z-20">
+          <aside className="w-full lg:w-80 h-72 lg:h-auto rounded-xl bg-[var(--color-surface-1)] border border-[var(--color-border-2)] flex flex-col overflow-hidden shadow-sm flex-shrink-0 animate-fade-in z-20">
             
             {/* Chat Header */}
-            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/20">
+            <div className="p-4 border-b border-[var(--color-border-2)] flex items-center justify-between bg-[var(--color-surface-2)]">
               <div className="flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-indigo-400" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Live Chat</h4>
+                <MessageCircle className="w-4 h-4 text-[var(--color-primary-500)]" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">Live Chat</h4>
               </div>
-              <span className="text-[10px] text-slate-500 font-mono">{messages.length} messages</span>
+              <span className="text-[10px] text-[var(--color-text-3)] font-mono">{messages.length} messages</span>
             </div>
 
             {/* Messages List */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-500 gap-2">
+                <div className="h-full flex flex-col items-center justify-center text-center p-4 text-[var(--color-text-4)] gap-2">
                   <MessageCircle className="w-8 h-8 opacity-30" />
                   <p className="text-xs">No messages yet.<br/>Be the first to say hi!</p>
                 </div>
@@ -406,11 +399,11 @@ export default function LiveCameraHero() {
                     key={msg.id} 
                     className={`flex flex-col ${msg.senderId === socket.id ? 'items-end' : 'items-start'}`}
                   >
-                    <span className="text-[10px] text-slate-400 mb-1 px-1">{msg.senderName}</span>
-                    <div className={`px-3.5 py-2 rounded-2xl max-w-[85%] text-xs shadow-md ${
+                    <span className="text-[10px] text-[var(--color-text-4)] mb-1 px-1">{msg.senderName}</span>
+                    <div className={`px-3.5 py-2 rounded-2xl max-w-[85%] text-xs shadow-sm ${
                       msg.senderId === socket.id 
-                        ? 'bg-indigo-600 text-white rounded-br-none' 
-                        : 'bg-slate-800 text-slate-200 border border-white/10 rounded-bl-none'
+                        ? 'bg-[var(--color-primary-600)] text-white rounded-br-none' 
+                        : 'bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)] rounded-bl-none'
                     }`}>
                       {msg.message}
                     </div>
@@ -421,7 +414,7 @@ export default function LiveCameraHero() {
             </div>
 
             {/* Reactions Bar & Message Form */}
-            <div className="p-3 bg-black/40 border-t border-white/10 space-y-2.5">
+            <div className="p-3 bg-[var(--color-surface-2)] border-t border-[var(--color-border-2)] space-y-2.5">
               
               {/* Quick Emojis */}
               <div className="flex justify-between px-1">
@@ -443,12 +436,12 @@ export default function LiveCameraHero() {
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 bg-slate-800/90 border border-white/10 text-white text-xs placeholder:text-slate-500 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="input-field flex-1 px-3.5 py-2.5 text-xs"
                 />
                 <button
                   type="submit"
                   disabled={!chatInput.trim()}
-                  className="p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl disabled:opacity-40 transition-colors shadow-md shadow-indigo-600/20"
+                  className="btn-primary p-2.5 disabled:opacity-40"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>
@@ -459,8 +452,8 @@ export default function LiveCameraHero() {
       </div>
 
       {/* ── Bottom Control Dock (Zoom / Teams Style) ── */}
-      <footer className="h-20 px-4 bg-slate-900/90 backdrop-blur-xl border-t border-white/10 flex items-center justify-center z-30 flex-shrink-0">
-        <div className="flex items-center gap-3 sm:gap-4 p-2 rounded-2xl bg-black/40 border border-white/10 shadow-2xl">
+      <footer className="pt-4 border-t border-[var(--color-border)] flex items-center justify-center flex-shrink-0 mt-auto">
+        <div className="flex items-center gap-3 sm:gap-4 p-1.5 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border-2)] shadow-sm">
           
           {/* Host Camera Start / Toggle */}
           {localStream ? (
@@ -468,10 +461,10 @@ export default function LiveCameraHero() {
               {/* Mic Toggle */}
               <button
                 onClick={toggleAudio}
-                className={`p-3.5 rounded-xl border transition-all ${
+                className={`p-3 rounded-lg border transition-all ${
                   isAudioMuted 
-                    ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-600/30' 
-                    : 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-white/10'
+                    ? 'bg-[var(--color-error)] text-white border-[var(--color-error)] shadow-md shadow-[var(--color-error-dim)]' 
+                    : 'btn-secondary'
                 }`}
                 title={isAudioMuted ? "Unmute Mic" : "Mute Mic"}
               >
@@ -481,10 +474,10 @@ export default function LiveCameraHero() {
               {/* Video Toggle */}
               <button
                 onClick={toggleVideo}
-                className={`p-3.5 rounded-xl border transition-all ${
+                className={`p-3 rounded-lg border transition-all ${
                   isVideoOff 
-                    ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-600/30' 
-                    : 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-white/10'
+                    ? 'bg-[var(--color-error)] text-white border-[var(--color-error)] shadow-md shadow-[var(--color-error-dim)]' 
+                    : 'btn-secondary'
                 }`}
                 title={isVideoOff ? "Turn On Video" : "Turn Off Video"}
               >
@@ -494,16 +487,16 @@ export default function LiveCameraHero() {
               {/* Stop Camera button */}
               <button
                 onClick={stopCamera}
-                className="p-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-white/10 transition-colors"
+                className="btn-secondary p-3"
                 title="Disconnect Webcam"
               >
-                <MonitorUp className="w-5 h-5 text-indigo-400" />
+                <MonitorUp className="w-5 h-5 text-[var(--color-primary-500)]" />
               </button>
             </>
           ) : (
             <button
               onClick={startCamera}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 text-white text-xs font-bold shadow-lg shadow-indigo-600/25 transition-all"
+              className="btn-primary px-4 py-2 flex items-center gap-2"
             >
               <Video className="w-4 h-4" />
               <span>Turn On My Camera</span>
@@ -513,10 +506,10 @@ export default function LiveCameraHero() {
           {/* Chat Toggle */}
           <button
             onClick={() => setShowChat(prev => !prev)}
-            className={`p-3.5 rounded-xl border transition-all ${
+            className={`p-3 rounded-lg border transition-all ${
               showChat 
-                ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-600/20' 
-                : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-white/10'
+                ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-500)] shadow-md shadow-[var(--color-primary-200)]' 
+                : 'btn-secondary'
             }`}
             title={showChat ? "Hide Chat" : "Open Chat"}
           >
@@ -526,7 +519,7 @@ export default function LiveCameraHero() {
           {/* End Session Button */}
           <button
             onClick={handleRecreate}
-            className="p-3.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 transition-all flex items-center gap-2"
+            className="p-3 rounded-lg bg-[var(--color-error-dim)] hover:bg-[var(--color-error)] text-[var(--color-error)] hover:text-white border border-[var(--color-error)]/30 transition-all flex items-center gap-2"
             title="End Call & Reset Room"
           >
             <PhoneOff className="w-5 h-5" />
@@ -537,21 +530,21 @@ export default function LiveCameraHero() {
 
       {/* ── QR Code Popup Modal ── */}
       {showQrModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="w-full max-w-sm bg-slate-900 border border-white/15 rounded-3xl p-6 flex flex-col items-center text-center gap-5 shadow-2xl relative">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="w-full max-w-sm bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 flex flex-col items-center text-center gap-5 shadow-2xl relative">
             <button
               onClick={() => setShowQrModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-[var(--color-surface-2)] text-[var(--color-text-3)] hover:text-[var(--color-text)] transition-colors"
             >
               ✕
             </button>
 
             <div className="space-y-1">
-              <h3 className="text-lg font-bold text-white">Invite Participants</h3>
-              <p className="text-xs text-slate-400">Scan or share this link to join Room: <strong>{roomId}</strong></p>
+              <h3 className="text-lg font-bold text-[var(--color-text)]">Invite Participants</h3>
+              <p className="text-xs text-[var(--color-text-3)]">Scan or share this link to join Room: <strong className="text-[var(--color-text)]">{roomId}</strong></p>
             </div>
 
-            <div className="p-4 bg-white rounded-2xl shadow-lg ring-1 ring-black/5">
+            <div className="p-4 bg-white rounded-xl shadow-sm ring-1 ring-black/5">
               <QRCode 
                 value={`${window.location.origin}/share/${roomId}`}
                 size={180}
@@ -563,9 +556,9 @@ export default function LiveCameraHero() {
 
             <button
               onClick={copyLink}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+              className="btn-primary w-full py-3 px-4 flex items-center justify-center gap-2"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
               <span>{copied ? 'Link Copied to Clipboard!' : 'Copy Share Link'}</span>
             </button>
           </div>
