@@ -21,6 +21,9 @@ export default function StickerStudio() {
 
   const [selectedStyle, setSelectedStyle] = useState('original')
   
+  // NEW: Background Removal State
+  const [removeBg, setRemoveBg] = useState(false)
+  
   // Adjustments (Frontend filters)
   const [adjustments, setAdjustments] = useState({
     brightness: 100,
@@ -44,14 +47,15 @@ export default function StickerStudio() {
   const handleUpload = async (file) => {
     setSourceImage(file)
     // Auto-apply "original" style via API to crop/scale to 512x512
-    handleStyleGenerate('original', file)
+    handleStyleGenerate('original', file, removeBg)
   }
 
-  const handleStyleGenerate = async (styleId, overrideFile = null) => {
+  const handleStyleGenerate = async (styleId, overrideFile = null, shouldRemoveBg = removeBg) => {
     const fileToProcess = overrideFile || sourceImage
     if (!fileToProcess) return
 
     setSelectedStyle(styleId)
+    setRemoveBg(shouldRemoveBg)
     setProcessingStyle(true)
     setStyleError(null)
 
@@ -59,6 +63,8 @@ export default function StickerStudio() {
       const formData = new FormData()
       formData.append('file', fileToProcess)
       formData.append('style', styleId)
+      // Send the remove_bg flag (API defaults to True, so we must explicitly pass it)
+      formData.append('remove_bg', shouldRemoveBg ? 'true' : 'false')
 
       const res = await fetch('/api/sticker/process', {
         method: 'POST',
@@ -88,6 +94,10 @@ export default function StickerStudio() {
     } finally {
       setProcessingStyle(false)
     }
+  }
+
+  const handleToggleBg = () => {
+    handleStyleGenerate(selectedStyle, sourceImage, !removeBg)
   }
 
   const handlePublishToTelegram = async (publishConfig) => {
@@ -147,6 +157,7 @@ export default function StickerStudio() {
     setSourceImage(null)
     setBaseStickerData(null)
     setSelectedStyle('original')
+    setRemoveBg(false)
     setAdjustments({ brightness: 100, contrast: 100, saturation: 100 })
     setTextConfig({ text: '', font: 'Koulen', style: 'meme', position: 'bottom', fontSize: 48 })
   }
@@ -167,7 +178,7 @@ export default function StickerStudio() {
                <div className="flex items-center gap-3">
                  <div className="w-10 h-10 rounded-lg bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)] flex items-center justify-center">
                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                    </svg>
                  </div>
                  <div>
@@ -175,6 +186,32 @@ export default function StickerStudio() {
                    <button onClick={handleReset} className="text-[11px] text-[var(--color-text-3)] hover:text-[var(--color-error)] transition-colors">Change Image</button>
                  </div>
                </div>
+            </div>
+
+            {/* AI Background Removal Toggle */}
+            <div className="card p-4 mb-4 animate-fade-in flex items-center justify-between">
+              <div>
+                <h3 className="text-[13px] font-bold text-[var(--color-text)] flex items-center gap-2">
+                  ✨ AI Background Eraser
+                </h3>
+                <p className="text-[11px] text-[var(--color-text-4)] mt-0.5">
+                  Automatically cuts out the subject (takes ~5s)
+                </p>
+              </div>
+              <button
+                onClick={handleToggleBg}
+                disabled={processingStyle}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-ring ${
+                  removeBg ? 'bg-[var(--color-primary-500)]' : 'bg-[var(--color-surface-4)]'
+                } ${processingStyle ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    removeBg ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
 
             {/* 2. Image Style (Backend) */}
