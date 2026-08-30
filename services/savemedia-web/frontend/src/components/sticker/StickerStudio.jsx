@@ -167,10 +167,10 @@ export default function StickerStudio() {
 
   // ── Render ────────────────────────────────────────────────
   return (
-    <div className="w-full max-w-[1200px] mx-auto pb-10 flex flex-col lg:flex-row gap-6">
+    <div className="w-full max-w-[1200px] mx-auto pb-10 flex flex-col-reverse lg:flex-row gap-6">
       
       {/* ── Left Sidebar (Tools) ── */}
-      <div className="w-full lg:w-[400px] flex-shrink-0 flex flex-col space-y-0 h-auto lg:h-[calc(100vh-140px)] lg:overflow-y-auto custom-scrollbar pr-1">
+      <div className="w-full lg:w-[400px] flex-shrink-0 flex flex-col space-y-0 h-auto lg:h-[calc(100vh-140px)] lg:overflow-y-auto custom-scrollbar pr-1 mt-6 lg:mt-0">
         
         {!sourceImage ? (
           <StickerUploader onUpload={handleUpload} />
@@ -198,7 +198,7 @@ export default function StickerStudio() {
                   ✨ AI Background Eraser
                 </h3>
                 <p className="text-[11px] text-[var(--color-text-4)] mt-0.5">
-                  Automatically cuts out the subject (takes ~5s)
+                  Runs offline directly on your device
                 </p>
               </div>
               <button
@@ -257,7 +257,7 @@ export default function StickerStudio() {
 
       {/* ── Right Main Area (Canvas Preview) ── */}
       <div className="flex-1 min-w-0 flex flex-col items-center">
-        <div className="w-full max-w-[600px] sticky top-24">
+        <div className="w-full max-w-[600px] sticky top-20 lg:top-24 z-10 bg-[var(--color-background)] pt-4 pb-4 lg:pt-0 lg:pb-0 shadow-[0_10px_20px_rgba(0,0,0,0.4)] lg:shadow-none">
            <div className="mb-3 flex justify-between items-end px-1">
              <h2 className="text-lg font-bold text-[var(--color-text)]">Live Preview</h2>
              <span className="badge">512×512</span>
