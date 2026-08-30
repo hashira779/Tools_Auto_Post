@@ -5,8 +5,10 @@ export default function AdminDashboard() {
   const { session } = useAuth();
   const [tokens, setTokens] = useState([]);
   const [users, setUsers] = useState([]);
+  const [workflows, setWorkflows] = useState([]);
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState('tokens'); // 'tokens', 'users'
+  const [tab, setTab] = useState('tokens'); // 'tokens', 'users', 'automations'
 
   // Token Form State
   const [desc, setDesc] = useState('');
@@ -18,13 +20,17 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [tokenRes, userRes] = await Promise.all([
+      const [tokenRes, userRes, wfRes, logRes] = await Promise.all([
         fetch('/api/admin/tokens', { headers: { 'Authorization': `Bearer ${session.access_token}` } }),
-        fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${session.access_token}` } })
+        fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${session.access_token}` } }),
+        fetch('/api/n8n/workflows', { headers: { 'Authorization': `Bearer ${session.access_token}` } }),
+        fetch('/api/n8n/logs?limit=10', { headers: { 'Authorization': `Bearer ${session.access_token}` } })
       ]);
       
       if (tokenRes.ok) setTokens(await tokenRes.json());
       if (userRes.ok) setUsers(await userRes.json());
+      if (wfRes.ok) setWorkflows(await wfRes.json());
+      if (logRes.ok) setLogs(await logRes.json());
     } catch (e) {
       console.error("Fetch admin data error:", e);
     } finally {
@@ -93,7 +99,66 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading && tokens.length === 0) {
+  // Workflow Form State
+  const [wfName, setWfName] = useState('');
+  const [wfDesc, setWfDesc] = useState('');
+  const [wfN8nId, setWfN8nId] = useState('');
+  const [wfWebhook, setWfWebhook] = useState('');
+  const [wfCategory, setWfCategory] = useState('general');
+  const [wfCreating, setWfCreating] = useState(false);
+
+  const handleCreateWorkflow = async (e) => {
+    e.preventDefault();
+    setWfCreating(true);
+    try {
+      const resp = await fetch('/api/n8n/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({
+          name: wfName, description: wfDesc, n8n_workflow_id: wfN8nId, webhook_path: wfWebhook, category: wfCategory
+        })
+      });
+      if (resp.ok) {
+        setWfName(''); setWfDesc(''); setWfN8nId(''); setWfWebhook('');
+        fetchData();
+      } else {
+        const data = await resp.json();
+        alert(data.detail || 'Error creating workflow');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setWfCreating(false);
+    }
+  };
+
+  const handleToggleWorkflow = async (id, currentStatus) => {
+    try {
+      await fetch(`/api/n8n/workflows/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ is_active: !currentStatus })
+      });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteWorkflow = async (id) => {
+    if (!window.confirm("Delete this workflow?")) return;
+    try {
+      await fetch(`/api/n8n/workflows/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  if (loading && tokens.length === 0 && workflows.length === 0) {
     return <div className="w-full max-w-4xl mx-auto p-8 animate-pulse text-gray-500">Loading Admin Control Plane...</div>;
   }
 
@@ -116,6 +181,12 @@ export default function AdminDashboard() {
             className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${tab === 'users' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30' : 'text-gray-400 hover:text-white'}`}
           >
             User Directory
+          </button>
+          <button 
+            onClick={() => setTab('automations')}
+            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${tab === 'automations' ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/30' : 'text-gray-400 hover:text-white'}`}
+          >
+            Automations
           </button>
         </div>
       </div>
@@ -269,6 +340,104 @@ export default function AdminDashboard() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {tab === 'automations' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Create Workflow Form */}
+          <div className="lg:col-span-1">
+            <div className="bg-[#1a1c23] border border-orange-900/20 rounded-2xl p-6 sticky top-24">
+              <h3 className="text-xl font-semibold text-white mb-6">Register Workflow</h3>
+              <form onSubmit={handleCreateWorkflow} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5 ml-1">Workflow Name</label>
+                  <input 
+                    type="text" required
+                    value={wfName} onChange={e => setWfName(e.target.value)}
+                    className="w-full bg-[#0d0e12] border border-orange-900/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5 ml-1">Description</label>
+                  <input 
+                    type="text" 
+                    value={wfDesc} onChange={e => setWfDesc(e.target.value)}
+                    className="w-full bg-[#0d0e12] border border-orange-900/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5 ml-1">n8n Workflow ID</label>
+                  <input 
+                    type="text" required
+                    value={wfN8nId} onChange={e => setWfN8nId(e.target.value)}
+                    className="w-full bg-[#0d0e12] border border-orange-900/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5 ml-1">Webhook Path</label>
+                  <input 
+                    type="text" placeholder="/webhook/..." required
+                    value={wfWebhook} onChange={e => setWfWebhook(e.target.value)}
+                    className="w-full bg-[#0d0e12] border border-orange-900/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5 ml-1">Category</label>
+                  <input 
+                    type="text" required
+                    value={wfCategory} onChange={e => setWfCategory(e.target.value)}
+                    className="w-full bg-[#0d0e12] border border-orange-900/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+                <button 
+                  type="submit" disabled={wfCreating}
+                  className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 rounded-xl transition-all mt-4 flex items-center justify-center gap-2"
+                >
+                  {wfCreating ? 'Registering...' : 'Register Workflow'}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Workflows List */}
+          <div className="lg:col-span-2 space-y-4">
+            {workflows.length === 0 ? (
+              <div className="bg-[#1a1c23] rounded-2xl p-12 text-center text-gray-500 border border-dashed border-gray-800">
+                No workflows registered yet.
+              </div>
+            ) : workflows.map(wf => (
+              <div key={wf.id} className="bg-[#1a1c23] border border-orange-900/10 rounded-2xl p-5 flex items-center justify-between group hover:border-orange-900/30 transition-all">
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h4 className="text-lg font-bold text-white">{wf.name}</h4>
+                    <span className="bg-gray-800 text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">{wf.category}</span>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-2">{wf.description || 'No description'}</p>
+                  <div className="flex gap-4 text-xs font-mono text-gray-500">
+                    <span>ID: <b className="text-orange-400/70">{wf.n8n_workflow_id}</b></span>
+                    <span>Webhook: <b className="text-orange-400/70">{wf.webhook_path}</b></span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => handleToggleWorkflow(wf.id, wf.is_active)}
+                    className={`w-12 h-6 rounded-full relative transition-all ${wf.is_active ? 'bg-orange-500' : 'bg-gray-700'}`}
+                  >
+                    <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${wf.is_active ? 'right-1' : 'left-1'}`} />
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteWorkflow(wf.id)}
+                    className="p-2.5 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
