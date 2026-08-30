@@ -68,6 +68,9 @@ function App() {
 
       {/* Main Layout */}
       <div className="relative min-h-screen flex flex-col">
+        {/* The Animated Mesh Gradient Background */}
+        <div className="mesh-bg"></div>
+
         {/* Top Navbar (hidden for fullscreen guest camera view) */}
         {!isGuestShare && (
           <AppNavbar
