@@ -18,16 +18,23 @@ import sys
 import time
 
 def run_ssh(client, cmd, desc=""):
-    """Execute a command via SSH and print output."""
+    """Execute a command via SSH and print output line by line."""
     if desc:
         print(f"\n  ⏳ {desc}...")
     stdin, stdout, stderr = client.exec_command(cmd, timeout=600)
-    out = stdout.read().decode().strip()
+    
+    # Stream stdout line by line
+    out_lines = []
+    for line in iter(stdout.readline, ""):
+        line = line.strip()
+        if line:
+            print(f"     {line}")
+            out_lines.append(line)
+            
+    out = "\n".join(out_lines)
     err = stderr.read().decode().strip()
     exit_code = stdout.channel.recv_exit_status()
-    if out:
-        for line in out.split('\n')[-10:]:  # Show last 10 lines
-            print(f"     {line}")
+    
     if exit_code != 0 and err:
         print(f"  ⚠️  stderr: {err[:500]}")
     return exit_code, out
@@ -108,6 +115,7 @@ def main():
     # 6. Pull LLM models
     print("\n  🧠 Waiting 15 seconds for Ollama to start...")
     time.sleep(15)
+    print("  ⬇️  Downloading llama3.2 model (this may take a few minutes)...")
     run_ssh(client,
         f"echo '{sudo_pass}' | sudo -S docker exec ors-ollama ollama pull llama3.2",
         "Pulling llama3.2 model")
