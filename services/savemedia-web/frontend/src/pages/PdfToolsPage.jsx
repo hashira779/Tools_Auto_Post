@@ -1,10 +1,39 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import VerificationOverlay from '../components/VerificationOverlay'
 
 export default function PdfToolsPage() {
   const { dbUser, session, loading: authLoading, loginWithGoogle } = useAuth()
   const [activeCategory, setActiveCategory] = useState('all')
+
+  // Interactive Live Simulator State
+  const [activeDemo, setActiveDemo] = useState('compress')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [demoProgress, setDemoProgress] = useState(100)
+  const [rotatedPages, setRotatedPages] = useState({ 1: 0, 2: 0, 3: 0, 4: 0 })
+
+  const runSimulation = () => {
+    setIsProcessing(true)
+    setDemoProgress(0)
+    let p = 0
+    const interval = setInterval(() => {
+      p += 15
+      if (p >= 100) {
+        setDemoProgress(100)
+        setIsProcessing(false)
+        clearInterval(interval)
+      } else {
+        setDemoProgress(p)
+      }
+    }, 150)
+  }
+
+  const rotatePage = (pageNum) => {
+    setRotatedPages(prev => ({
+      ...prev,
+      [pageNum]: (prev[pageNum] + 90) % 360
+    }))
+  }
 
   const categories = [
     { id: 'all', label: 'All 50+ Tools' },
@@ -92,7 +121,7 @@ export default function PdfToolsPage() {
     <div className="w-full flex flex-col items-center pb-24 text-slate-200">
       
       {/* ── 1. HERO BANNER SECTION ─────────────────────────────────── */}
-      <section className="w-full max-w-5xl mx-auto px-4 pt-10 pb-12 text-center relative">
+      <section className="w-full max-w-5xl mx-auto px-4 pt-10 pb-8 text-center relative">
         {/* Glow Aura */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-red-600/15 rounded-full blur-[110px] pointer-events-none -z-10" />
 
@@ -106,29 +135,208 @@ export default function PdfToolsPage() {
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-rose-400">PDF Powerhouse</span>
         </h1>
 
-        <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-10">
+        <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-8">
           50+ offline-ready tools to edit, convert, merge, compress, OCR scan, sign, and sanitize documents with <span className="text-slate-200 font-semibold">zero file size limits</span> and 100% private on-premises security.
         </p>
 
-        {/* ── PRODUCT SHOWCASE HERO BANNER IMAGE ───────────────────── */}
-        <div className="relative mx-auto mb-12 rounded-3xl overflow-hidden border border-red-500/30 shadow-[0_0_50px_rgba(239,68,68,0.25)] group">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050B14] via-transparent to-transparent z-10 pointer-events-none"></div>
-          <img
-            src="/images/pdf-hero-banner.jpg"
-            alt="CamTech Stirling-PDF Studio Suite"
-            className="w-full h-auto object-cover transform group-hover:scale-[1.02] transition-transform duration-700"
-          />
-          <div className="absolute bottom-4 left-6 right-6 z-20 flex flex-wrap items-center justify-between gap-3 text-left">
-            <div>
-              <span className="text-xs font-mono font-bold uppercase tracking-widest text-red-400 bg-black/60 px-3 py-1 rounded-full border border-red-500/30 backdrop-blur-md">
-                Live Studio Engine
+        {/* ── 2. REAL INTERACTIVE CODE-DRIVEN SIMULATOR / PLAYGROUND ──── */}
+        <div className="relative mx-auto mb-10 rounded-3xl overflow-hidden border border-red-500/30 bg-[#0B1221]/95 shadow-[0_0_50px_rgba(239,68,68,0.2)] backdrop-blur-2xl text-left p-6 sm:p-8">
+          
+          {/* Header Controls */}
+          <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-red-950/80">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-red-500/80"></span>
+                <span className="w-3 h-3 rounded-full bg-yellow-500/80"></span>
+                <span className="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+              </div>
+              <span className="text-xs font-mono font-bold text-slate-400 ml-2">
+                Stirling-PDF · Interactive Workspace Studio
               </span>
-              <h4 className="text-lg font-bold text-white mt-1 shadow-sm">Interactive High-Precision Document Editor</h4>
             </div>
-            <span className="text-xs text-slate-400 font-medium bg-black/50 px-3 py-1.5 rounded-xl border border-white/10 backdrop-blur-md">
-              ⚡ 50+ Native Modules
-            </span>
+
+            {/* Interactive Module Selector */}
+            <div className="flex items-center gap-1 bg-[#050B14] p-1 rounded-xl border border-red-950">
+              {[
+                { id: 'compress', label: '🗜️ Compress' },
+                { id: 'ocr', label: '🔍 AI OCR' },
+                { id: 'reorder', label: '📑 Page Organizer' },
+                { id: 'convert', label: '📄 PDF to Word' },
+              ].map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => { setActiveDemo(m.id); runSimulation(); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeDemo === m.id
+                      ? 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-sm'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* Interactive Workspace Body */}
+          <div className="py-6">
+            {activeDemo === 'compress' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center animate-fade-in">
+                <div className="space-y-4">
+                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-red-400 bg-red-950/60 px-3 py-1 rounded-full border border-red-900/40">
+                    Smart Vector Compression
+                  </span>
+                  <h3 className="text-2xl font-bold text-white">
+                    Shrink Heavy PDFs up to 90%
+                  </h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Preserve crystal-clear vector fonts, table formatting, and hi-res image resolutions while purging redundant internal metadata streams.
+                  </p>
+
+                  <div className="space-y-2 pt-2">
+                    <div className="flex justify-between text-xs font-mono">
+                      <span className="text-slate-400">Original: 48.2 MB</span>
+                      <span className="text-emerald-400 font-bold">Optimized: 4.6 MB (-90.4%)</span>
+                    </div>
+                    <div className="w-full h-3 bg-black/60 rounded-full overflow-hidden border border-white/5 p-0.5">
+                      <div 
+                        className="h-full bg-gradient-to-r from-red-500 to-emerald-500 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                        style={{ width: `${demoProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={runSimulation}
+                    disabled={isProcessing}
+                    className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <span>{isProcessing ? '⚡ Optimizing…' : '🔄 Run Test Compression'}</span>
+                  </button>
+                </div>
+
+                {/* Animated File Visualizer */}
+                <div className="bg-[#050B14] border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-inner relative overflow-hidden">
+                  <div className="w-20 h-24 bg-gradient-to-b from-red-950/80 to-slate-900 border border-red-500/40 rounded-xl flex flex-col items-center justify-center p-2 mb-3 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                    <span className="text-2xl mb-1">📄</span>
+                    <span className="text-[10px] font-mono font-bold text-red-300">ANNUAL.PDF</span>
+                  </div>
+                  <span className="text-xs font-bold text-white mb-1">Corporate_Annual_Report_2026.pdf</span>
+                  <span className="text-[11px] text-emerald-400 font-mono">⚡ 124 Pages Processed in 0.48s</span>
+                </div>
+              </div>
+            )}
+
+            {activeDemo === 'ocr' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center animate-fade-in">
+                <div className="space-y-4">
+                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-400 bg-cyan-950/60 px-3 py-1 rounded-full border border-cyan-900/40">
+                    Neural Deep OCR (Khmer + English)
+                  </span>
+                  <h3 className="text-2xl font-bold text-white">
+                    Convert Scanned Photos to Selectable Text
+                  </h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Trained on specialized Khmer language fonts and complex table structures. Turn unselectable image scans into searchable, copyable documents.
+                  </p>
+                  <button
+                    onClick={runSimulation}
+                    disabled={isProcessing}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <span>{isProcessing ? '🔍 Scanning Document…' : '⚡ Simulate OCR Extraction'}</span>
+                  </button>
+                </div>
+
+                {/* Scanned Image to Text Live Comparison */}
+                <div className="bg-[#050B14] border border-cyan-500/30 rounded-2xl p-5 font-mono text-xs text-slate-300 space-y-2 shadow-inner">
+                  <div className="flex items-center justify-between text-[11px] text-cyan-400 pb-2 border-b border-white/5">
+                    <span>STATUS: OCR_RECOGNITION_ACTIVE</span>
+                    <span>CONFIDENCE: 99.4%</span>
+                  </div>
+                  <p className="text-slate-400">=== EXTRACTED TEXT STREAM ===</p>
+                  <p className="text-cyan-200 bg-cyan-950/30 p-2 rounded border border-cyan-900/40 select-all">
+                    កិច្ចសន្យាផ្តល់សេវាកម្ម / Service Level Agreement (SLA)<br />
+                    Agreement Date: 2026-08-31 | Status: Verified Active
+                  </p>
+                  <p className="text-emerald-400 text-[11px]">✓ 1,420 words extracted to searchable PDF text layer</p>
+                </div>
+              </div>
+            )}
+
+            {activeDemo === 'reorder' && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Visual Page Organizer</h3>
+                    <p className="text-xs text-slate-400">Click any page thumbnail below to rotate it 90° live!</p>
+                  </div>
+                  <span className="text-xs font-mono text-slate-400 bg-black/40 px-3 py-1 rounded-lg border border-white/10">
+                    4 Pages in Workspace
+                  </span>
+                </div>
+
+                {/* Interactive Clickable Page Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                  {[1, 2, 3, 4].map((pNum) => (
+                    <div
+                      key={pNum}
+                      onClick={() => rotatePage(pNum)}
+                      className="bg-[#050B14] border border-white/10 hover:border-red-500/50 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 group"
+                    >
+                      <div
+                        className="w-16 h-20 bg-slate-900 border border-white/20 rounded-lg flex flex-col items-center justify-center p-2 mb-2 transition-transform duration-300 shadow-md"
+                        style={{ transform: `rotate(${rotatedPages[pNum]}deg)` }}
+                      >
+                        <span className="text-xs font-bold text-slate-400">P.{pNum}</span>
+                        <div className="w-8 h-0.5 bg-white/20 mt-1 rounded"></div>
+                        <div className="w-6 h-0.5 bg-white/20 mt-0.5 rounded"></div>
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-300 group-hover:text-red-400 flex items-center gap-1">
+                        <span>Rotate</span>
+                        <span className="font-mono text-slate-500">({rotatedPages[pNum]}°)</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeDemo === 'convert' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center animate-fade-in">
+                <div className="space-y-4">
+                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-blue-400 bg-blue-950/60 px-3 py-1 rounded-full border border-blue-900/40">
+                    High-Fidelity Document Conversion
+                  </span>
+                  <h3 className="text-2xl font-bold text-white">
+                    Convert to DOCX, Excel & Images
+                  </h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Convert complex multi-column PDFs into fully editable Word DOCX files while preserving exact paragraph spacing, margins, and embedded charts.
+                  </p>
+                </div>
+
+                <div className="bg-[#050B14] border border-blue-500/30 rounded-2xl p-6 flex items-center justify-around shadow-inner">
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-20 bg-red-950/80 border border-red-500/40 rounded-xl flex items-center justify-center text-xl shadow-lg mb-2">
+                      PDF
+                    </div>
+                    <span className="text-xs text-slate-400 font-medium">Input File</span>
+                  </div>
+
+                  <span className="text-2xl text-blue-400 animate-pulse">➔</span>
+
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-20 bg-blue-950/80 border border-blue-500/40 rounded-xl flex items-center justify-center text-xl shadow-lg mb-2">
+                      DOCX
+                    </div>
+                    <span className="text-xs text-slate-400 font-medium">Editable Word</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* ── AUTH / ACCESS STATUS CARD ────────────────────────────── */}
@@ -147,10 +355,10 @@ export default function PdfToolsPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-white">Sign In to Launch Studio</h3>
+                <h3 className="text-xl font-bold text-white">Sign In to Launch Full Studio</h3>
               </div>
               <p className="text-slate-400 text-sm mb-6">
-                Sign in with your Google account to unlock complete document editing and conversion privileges.
+                Sign in with your Google account to unlock complete document editing, batch exports, and 50+ modules.
               </p>
               <button
                 onClick={loginWithGoogle}
@@ -198,7 +406,7 @@ export default function PdfToolsPage() {
         </div>
       </section>
 
-      {/* ── 2. VISUAL WORKFLOW FLOWCHART ───────────────────────────── */}
+      {/* ── 3. VISUAL WORKFLOW FLOWCHART ───────────────────────────── */}
       <section className="w-full max-w-5xl mx-auto px-4 py-12">
         <div className="bg-gradient-to-b from-[#0B1221]/90 via-[#070D18]/90 to-[#050B14]/90 border border-red-950/80 rounded-3xl p-8 sm:p-10 shadow-2xl backdrop-blur-md">
           <div className="text-center max-w-xl mx-auto mb-10">
@@ -228,7 +436,7 @@ export default function PdfToolsPage() {
         </div>
       </section>
 
-      {/* ── 3. INTERACTIVE TOOLS SHOWCASE ──────────────────────────── */}
+      {/* ── 4. INTERACTIVE TOOLS SHOWCASE ──────────────────────────── */}
       <section className="w-full max-w-5xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
@@ -293,7 +501,7 @@ export default function PdfToolsPage() {
         </div>
       </section>
 
-      {/* ── 4. WHY CAMTECH PDF TOOLS (ADVANTAGES) ────────────────────── */}
+      {/* ── 5. WHY CAMTECH PDF TOOLS (ADVANTAGES) ────────────────────── */}
       <section className="w-full max-w-5xl mx-auto px-4 py-12">
         <div className="text-center max-w-xl mx-auto mb-10">
           <h3 className="text-2xl font-bold text-white mb-2">Why Use CamTech PDF Suite?</h3>
