@@ -60,26 +60,26 @@ export default function AutomationsPage() {
   }
 
   return (
-    <div ref={wrapperRef} className="flex-1 min-h-0 w-full animate-fade-in flex flex-col relative group bg-[#101014]">
-      <iframe
-        src="/n8n/"
-        title="CamTech Automations Builder"
-        className="w-full h-full flex-1 min-h-0 border-0 block bg-[#101014]"
-        allow="clipboard-write; clipboard-read"
-      />
+    <div className="flex-1 w-full flex flex-col items-center justify-center pt-20 px-4 animate-fade-in text-center">
+      <div className="w-20 h-20 rounded-2xl bg-orange-500/10 flex items-center justify-center mb-6 border border-orange-500/20">
+        <svg className="w-10 h-10 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <h2 className="text-3xl font-extrabold text-[var(--color-text)] mb-3">Automation Workspace</h2>
+      <p className="text-[var(--color-text-2)] max-w-md mb-8 text-lg">Your workflow builder is ready. Launch the automation workspace in a standalone window for the best experience.</p>
       
-      {/* Floating Fullscreen Toggle Button */}
-      <button
-        onClick={toggleFullscreen}
-        className="absolute bottom-6 right-8 p-3 rounded-full bg-[var(--color-primary)] text-white shadow-lg opacity-50 hover:opacity-100 transition-opacity z-50 flex items-center justify-center group-hover:opacity-100"
-        title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+      <a 
+        href="/n8n/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-8 rounded-xl transition-all flex items-center gap-3 shadow-lg hover:shadow-xl cursor-pointer text-lg group"
       >
-        {isFullscreen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-        )}
-      </button>
+        <span>Launch Standalone Workspace</span>
+        <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
     </div>
   )
 }
