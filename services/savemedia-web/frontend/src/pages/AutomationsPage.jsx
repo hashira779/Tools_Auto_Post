@@ -66,28 +66,32 @@ export default function AutomationsPage() {
       title: 'Instantaneous Webhook Ingestion',
       badge: '< 50ms Latency',
       desc: 'High-throughput event gateways capture webhooks from Telegram, Discord, GitHub, and custom APIs without dropping packets.',
-      stats: '50,000 req/sec'
+      stats: '50,000 req/sec',
+      image: null
     },
     {
       id: 1,
       title: 'Local Neural LLM & Voiceover',
       badge: 'Zero API Fees',
       desc: 'Executes Ollama 3B/8B and Kokoro-82M TTS directly on local GPU/CPU hardware. Instant Khmer translation & studio-quality speech.',
-      stats: '0.34s Speech Synthesis'
+      stats: '0.34s Speech Synthesis',
+      image: null
     },
     {
       id: 2,
       title: 'PostgreSQL Vector Search Sync',
       badge: 'pgvector Database',
       desc: 'Automatically vectorizes unstructured content and builds high-speed cosine similarity indexes for instant semantic retrieval.',
-      stats: '1,536-dim Vector Embeddings'
+      stats: '1,536-dim Vector Embeddings',
+      image: null
     },
     {
       id: 3,
       title: 'Autonomous Multi-Channel Publisher',
       badge: '24/7 Background Robot',
       desc: 'Dispatches scheduled broadcasts, Telegram posts, Discord embeds, and Google Drive backups with automated retry logic.',
-      stats: '100% Reliable Delivery'
+      stats: '100% Reliable Delivery',
+      image: '/images/automation-bot-card.jpg'
     }
   ]
 
@@ -97,6 +101,7 @@ export default function AutomationsPage() {
       title: 'Auto-Post Bot Pipeline',
       badge: 'Popular',
       desc: 'Monitors YouTube, TikTok, or RSS feeds, downloads high-res media with yt-dlp, and auto-posts to Telegram channels with captions.',
+      image: '/images/automation-bot-card.jpg',
       nodes: ['Webhook', 'yt-dlp Engine', 'Telegram Bot', 'Redis Queue'],
       color: 'border-orange-500/40 text-orange-400'
     },
@@ -131,62 +136,62 @@ export default function AutomationsPage() {
     : templates.filter(t => t.category === activeTab)
 
   return (
-    <div className="w-full flex flex-col items-center pb-24 text-slate-200">
+    <div className="w-full flex flex-col items-center pb-24 text-slate-200 overflow-x-hidden">
       
-      {/* ── 1. HERO BANNER SECTION (APPLE-INSPIRED PERSPECTIVE) ─────── */}
-      <section className="w-full max-w-5xl mx-auto px-4 pt-10 pb-8 text-center relative">
+      {/* ── 1. HERO BANNER SECTION (RESPONSIVE) ─────────────────────── */}
+      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-8 text-center relative">
         {/* Ambient Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-orange-600/15 rounded-full blur-[130px] pointer-events-none -z-10 animate-pulse-glow" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[600px] h-[350px] bg-orange-600/15 rounded-full blur-[120px] pointer-events-none -z-10 animate-pulse-glow" />
 
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs font-bold uppercase tracking-wider mb-6 shadow-[0_0_20px_rgba(249,115,22,0.2)] animate-fade-in">
           <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping"></span>
           AI-Powered n8n Workflow Automation · 400+ Connectors
         </div>
 
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-orange-100 to-amber-300 tracking-tight leading-[1.15] mb-6">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-orange-100 to-amber-300 tracking-tight leading-tight mb-6 break-words">
           Automate Any Task. <br className="hidden sm:inline" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">Connect 400+ Apps With AI</span>
         </h1>
 
-        <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-8">
+        <p className="text-sm sm:text-base lg:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-8 px-2">
           Visual drag-and-drop workflow builder connected natively to CamTech AI models (Ollama, Kokoro-82M, Telegram Bot, Celery). Build self-running bots and pipelines with <span className="text-slate-200 font-semibold">zero coding required</span>.
         </p>
 
         {/* ── 2. REAL INTERACTIVE CODE-DRIVEN WORKFLOW SIMULATOR ──────── */}
-        <div className="relative mx-auto mb-10 rounded-3xl overflow-hidden border border-orange-500/30 bg-[#0B1221]/95 shadow-[0_0_50px_rgba(249,115,22,0.2)] backdrop-blur-2xl text-left p-6 sm:p-8">
+        <div className="w-full relative mx-auto mb-10 rounded-3xl overflow-hidden border border-orange-500/30 bg-[#0B1221]/95 shadow-[0_0_50px_rgba(249,115,22,0.2)] backdrop-blur-2xl text-left p-4 sm:p-8">
           
           {/* Header Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-orange-950/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-orange-950/80">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-red-500/80"></span>
                 <span className="w-3 h-3 rounded-full bg-yellow-500/80"></span>
                 <span className="w-3 h-3 rounded-full bg-emerald-500/80"></span>
               </div>
-              <span className="text-xs font-mono font-bold text-slate-400 ml-2">
-                n8n Live Workflow Visualizer · Real-Time Canvas
+              <span className="text-xs font-mono font-bold text-slate-400">
+                n8n Live Workflow Visualizer
               </span>
             </div>
 
             <button
               onClick={runTestPipeline}
               disabled={isRunningSim}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-bold text-xs shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-all cursor-pointer hover:scale-105 active:scale-100 disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-bold text-xs shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-all cursor-pointer hover:scale-105 active:scale-100 disabled:opacity-60"
             >
               <span>{isRunningSim ? '⚡ Pipeline Running…' : '▶ Simulate Live Test Run'}</span>
             </button>
           </div>
 
-          {/* Interactive Visual Node Diagram */}
-          <div className="py-6 overflow-x-auto">
-            <div className="min-w-[700px] flex items-center justify-between gap-3">
+          {/* Fully Responsive Node Diagram (Horizontal on Desktop, Vertical Stack on Mobile) */}
+          <div className="py-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative">
               
               {/* Node 1: Trigger */}
               <div 
                 onClick={() => setSelectedNode('trigger')}
-                className={`flex-1 bg-[#131B2E] rounded-2xl p-4 transition-all duration-300 cursor-pointer border ${
+                className={`bg-[#131B2E] rounded-2xl p-4 transition-all duration-300 cursor-pointer border ${
                   activeStep === 1 || selectedNode === 'trigger' 
-                    ? 'border-orange-400 shadow-[0_0_25px_rgba(249,115,22,0.3)] scale-105' 
+                    ? 'border-orange-400 shadow-[0_0_25px_rgba(249,115,22,0.3)] scale-[1.02]' 
                     : 'border-orange-500/30 hover:border-orange-400/60'
                 }`}
               >
@@ -199,18 +204,12 @@ export default function AutomationsPage() {
                 <div className="text-[11px] text-slate-400 mt-0.5">Telegram Post Received</div>
               </div>
 
-              {/* Connector 1 */}
-              <div className={`flex items-center font-mono text-xs transition-colors duration-300 ${activeStep >= 2 ? 'text-orange-400 font-bold' : 'text-slate-700'}`}>
-                <span className={`w-6 h-0.5 transition-all duration-500 ${activeStep >= 2 ? 'bg-orange-400 shadow-[0_0_8px_rgba(249,115,22,0.8)]' : 'bg-slate-800'}`}></span>
-                <span>▶</span>
-              </div>
-
               {/* Node 2: AI Processor */}
               <div 
                 onClick={() => setSelectedNode('ai')}
-                className={`flex-1 bg-[#131B2E] rounded-2xl p-4 transition-all duration-300 cursor-pointer border ${
+                className={`bg-[#131B2E] rounded-2xl p-4 transition-all duration-300 cursor-pointer border ${
                   activeStep === 2 || selectedNode === 'ai' 
-                    ? 'border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.3)] scale-105' 
+                    ? 'border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.3)] scale-[1.02]' 
                     : 'border-cyan-500/30 hover:border-cyan-400/60'
                 }`}
               >
@@ -223,18 +222,12 @@ export default function AutomationsPage() {
                 <div className="text-[11px] text-slate-400 mt-0.5">Translate & Voiceover</div>
               </div>
 
-              {/* Connector 2 */}
-              <div className={`flex items-center font-mono text-xs transition-colors duration-300 ${activeStep >= 3 ? 'text-cyan-400 font-bold' : 'text-slate-700'}`}>
-                <span className={`w-6 h-0.5 transition-all duration-500 ${activeStep >= 3 ? 'bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]' : 'bg-slate-800'}`}></span>
-                <span>▶</span>
-              </div>
-
               {/* Node 3: Storage */}
               <div 
                 onClick={() => setSelectedNode('db')}
-                className={`flex-1 bg-[#131B2E] rounded-2xl p-4 transition-all duration-300 cursor-pointer border ${
+                className={`bg-[#131B2E] rounded-2xl p-4 transition-all duration-300 cursor-pointer border ${
                   activeStep === 4 || selectedNode === 'db' 
-                    ? 'border-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.3)] scale-105' 
+                    ? 'border-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.3)] scale-[1.02]' 
                     : 'border-emerald-500/30 hover:border-emerald-400/60'
                 }`}
               >
@@ -247,18 +240,12 @@ export default function AutomationsPage() {
                 <div className="text-[11px] text-slate-400 mt-0.5">Vector Search Archive</div>
               </div>
 
-              {/* Connector 3 */}
-              <div className={`flex items-center font-mono text-xs transition-colors duration-300 ${activeStep >= 5 ? 'text-emerald-400 font-bold' : 'text-slate-700'}`}>
-                <span className={`w-6 h-0.5 transition-all duration-500 ${activeStep >= 5 ? 'bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-slate-800'}`}></span>
-                <span>▶</span>
-              </div>
-
               {/* Node 4: Action */}
               <div 
                 onClick={() => setSelectedNode('action')}
-                className={`flex-1 bg-[#131B2E] rounded-2xl p-4 transition-all duration-300 cursor-pointer border ${
+                className={`bg-[#131B2E] rounded-2xl p-4 transition-all duration-300 cursor-pointer border ${
                   activeStep === 5 || selectedNode === 'action' 
-                    ? 'border-purple-400 shadow-[0_0_25px_rgba(168,85,247,0.3)] scale-105' 
+                    ? 'border-purple-400 shadow-[0_0_25px_rgba(168,85,247,0.3)] scale-[1.02]' 
                     : 'border-purple-500/30 hover:border-purple-400/60'
                 }`}
               >
@@ -275,38 +262,40 @@ export default function AutomationsPage() {
           </div>
 
           {/* Real-time Terminal Execution Log */}
-          <div className="mt-2 bg-[#050B14] border border-white/10 rounded-2xl p-4 font-mono text-xs space-y-1.5 shadow-inner">
+          <div className="mt-2 bg-[#050B14] border border-white/10 rounded-2xl p-4 font-mono text-xs space-y-1.5 shadow-inner overflow-hidden">
             <div className="flex items-center justify-between text-[11px] text-slate-400 pb-2 border-b border-white/5">
-              <span>LIVE_EXECUTION_STREAM: /api/v1/workflows/run</span>
-              <span className="text-emerald-400">● ENGINE_ONLINE</span>
+              <span className="truncate">LIVE_EXECUTION_STREAM: /api/v1/workflows/run</span>
+              <span className="text-emerald-400 whitespace-nowrap ml-2">● ONLINE</span>
             </div>
-            {logs.map((l, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-slate-300">
-                <span className="text-slate-500 select-none">[{l.time}]</span>
-                <span className="text-orange-400 font-bold">[{l.tag}]</span>
-                <span className="text-slate-300">{l.text}</span>
-              </div>
-            ))}
+            <div className="max-h-40 overflow-y-auto space-y-1.5">
+              {logs.map((l, idx) => (
+                <div key={idx} className="flex items-start gap-2 text-slate-300 text-[11px] sm:text-xs">
+                  <span className="text-slate-500 select-none shrink-0">[{l.time}]</span>
+                  <span className="text-orange-400 font-bold shrink-0">[{l.tag}]</span>
+                  <span className="text-slate-300 break-words">{l.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
         </div>
 
         {/* ── 3. APPLE-STYLE SCROLLYTELLING INTERACTIVE STAGES ───────── */}
-        <div className="my-16 text-left">
+        <div className="my-12 sm:my-16 text-left">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-xs font-mono uppercase tracking-widest text-orange-400 font-bold">Autonomous Engine</span>
-            <h2 className="text-3xl font-bold text-white mt-1">Autonomous Intelligence in Motion</h2>
-            <p className="text-sm text-slate-400 mt-2">How CamTech AI and n8n power automated pipelines that run 24/7.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mt-1">Autonomous Intelligence in Motion</h2>
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 px-2">How CamTech AI and n8n power automated pipelines that run 24/7.</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#070D18]/90 border border-orange-900/30 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
-            {/* Left Nav List (Apple-style interactive selector) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center bg-[#070D18]/90 border border-orange-900/30 rounded-3xl p-5 sm:p-10 shadow-2xl backdrop-blur-xl">
+            {/* Left Nav List */}
             <div className="lg:col-span-5 space-y-3">
               {storyStages.map((st) => (
                 <div
                   key={st.id}
                   onClick={() => setStoryStage(st.id)}
-                  className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                  className={`p-4 sm:p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${
                     storyStage === st.id
                       ? 'bg-[#131B2E] border-orange-500/50 shadow-[0_0_25px_rgba(249,115,22,0.2)]'
                       : 'bg-black/30 border-white/5 hover:border-white/15 opacity-70 hover:opacity-100'
@@ -316,60 +305,58 @@ export default function AutomationsPage() {
                     <span className="text-xs font-mono font-bold text-orange-400 uppercase tracking-widest">
                       Stage 0{st.id + 1}
                     </span>
-                    <span className="text-[11px] font-semibold text-slate-400 bg-black/50 px-2 py-0.5 rounded border border-white/5">
+                    <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 bg-black/50 px-2 py-0.5 rounded border border-white/5">
                       {st.badge}
                     </span>
                   </div>
-                  <h4 className="text-base font-bold text-white mb-1">{st.title}</h4>
+                  <h4 className="text-sm sm:text-base font-bold text-white mb-1">{st.title}</h4>
                   <p className="text-xs text-slate-400 leading-relaxed">{st.desc}</p>
                 </div>
               ))}
             </div>
 
-            {/* Right Dynamic Live Graphic Display */}
-            <div className="lg:col-span-7 bg-[#050B14] border border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center min-h-[380px] text-center relative overflow-hidden shadow-inner">
+            {/* Right Dynamic Live Graphic Display with Rich Images */}
+            <div className="lg:col-span-7 bg-[#050B14] border border-white/10 rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center min-h-[340px] sm:min-h-[380px] text-center relative overflow-hidden shadow-inner">
               
-              {/* Dynamic SVG Visuals corresponding to active stage */}
               {storyStage === 0 && (
                 <div className="space-y-4 animate-fade-in w-full max-w-sm">
-                  <div className="relative w-36 h-36 mx-auto bg-gradient-to-b from-orange-950/60 to-slate-900 border border-orange-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.3)]">
-                    <span className="text-4xl animate-bounce">⚡</span>
+                  <div className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto bg-gradient-to-b from-orange-950/60 to-slate-900 border border-orange-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.3)]">
+                    <span className="text-3xl sm:text-4xl animate-bounce">⚡</span>
                     <span className="text-xs font-mono font-bold text-orange-300 mt-2">&lt; 50ms TRIGGER</span>
                   </div>
-                  <h4 className="text-lg font-bold text-white">Instantaneous Event Ingestion</h4>
+                  <h4 className="text-base sm:text-lg font-bold text-white">Instantaneous Event Ingestion</h4>
                   <p className="text-xs text-slate-400">Non-blocking async webhooks queued into Redis brokers.</p>
                 </div>
               )}
 
               {storyStage === 1 && (
                 <div className="space-y-4 animate-fade-in w-full max-w-sm">
-                  <div className="relative w-36 h-36 mx-auto bg-gradient-to-b from-cyan-950/60 to-slate-900 border border-cyan-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.3)]">
-                    <span className="text-4xl animate-pulse">🧠</span>
+                  <div className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto bg-gradient-to-b from-cyan-950/60 to-slate-900 border border-cyan-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.3)]">
+                    <span className="text-3xl sm:text-4xl animate-pulse">🧠</span>
                     <span className="text-xs font-mono font-bold text-cyan-300 mt-2">Ollama + Kokoro TTS</span>
                   </div>
-                  <h4 className="text-lg font-bold text-white">Local Neural Processing</h4>
+                  <h4 className="text-base sm:text-lg font-bold text-white">Local Neural Processing</h4>
                   <p className="text-xs text-slate-400">0.34s natural voice synthesis & automated summarization.</p>
                 </div>
               )}
 
               {storyStage === 2 && (
                 <div className="space-y-4 animate-fade-in w-full max-w-sm">
-                  <div className="relative w-36 h-36 mx-auto bg-gradient-to-b from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-                    <span className="text-4xl">🗄️</span>
+                  <div className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto bg-gradient-to-b from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                    <span className="text-3xl sm:text-4xl">🗄️</span>
                     <span className="text-xs font-mono font-bold text-emerald-300 mt-2">pgvector Embeddings</span>
                   </div>
-                  <h4 className="text-lg font-bold text-white">Vector Storage & Search</h4>
+                  <h4 className="text-base sm:text-lg font-bold text-white">Vector Storage & Search</h4>
                   <p className="text-xs text-slate-400">1,536-dimensional similarity vectors for semantic lookups.</p>
                 </div>
               )}
 
               {storyStage === 3 && (
-                <div className="space-y-4 animate-fade-in w-full max-w-sm">
-                  <div className="relative w-36 h-36 mx-auto bg-gradient-to-b from-purple-950/60 to-slate-900 border border-purple-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.3)]">
-                    <span className="text-4xl animate-pulse">🚀</span>
-                    <span className="text-xs font-mono font-bold text-purple-300 mt-2">Telegram Channels</span>
+                <div className="space-y-4 animate-fade-in w-full max-w-md">
+                  <div className="relative rounded-2xl overflow-hidden border border-orange-500/40 shadow-[0_0_30px_rgba(249,115,22,0.25)]">
+                    <img src="/images/automation-bot-card.jpg" alt="Automated Telegram Bot" className="w-full h-44 object-cover" />
                   </div>
-                  <h4 className="text-lg font-bold text-white">Multi-Channel Broadcasting</h4>
+                  <h4 className="text-base sm:text-lg font-bold text-white">Multi-Channel Broadcasting Bot</h4>
                   <p className="text-xs text-slate-400">Automated media distribution with zero manual intervention.</p>
                 </div>
               )}
@@ -379,7 +366,7 @@ export default function AutomationsPage() {
         </div>
 
         {/* ── AUTH / ACCESS STATUS CARD ────────────────────────────── */}
-        <div className="max-w-xl mx-auto mt-8">
+        <div className="w-full max-w-xl mx-auto mt-8">
           {authLoading ? (
             <div className="bg-[#0B1221]/90 border border-orange-900/30 rounded-3xl p-8 flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"></div>
@@ -387,21 +374,21 @@ export default function AutomationsPage() {
             </div>
           ) : !session ? (
             /* STEP 1: Not signed in */
-            <div className="bg-gradient-to-b from-[#0B1221]/95 to-[#050B14]/95 border border-orange-900/40 rounded-3xl p-8 shadow-[0_0_40px_rgba(249,115,22,0.15)] backdrop-blur-xl animate-fade-in">
+            <div className="bg-gradient-to-b from-[#0B1221]/95 to-[#050B14]/95 border border-orange-900/40 rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(249,115,22,0.15)] backdrop-blur-xl animate-fade-in">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center border border-orange-500/30 text-orange-400">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-white">Sign In to Launch Workspace</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-white">Sign In to Launch Workspace</h3>
               </div>
-              <p className="text-slate-400 text-sm mb-6">
+              <p className="text-slate-400 text-xs sm:text-sm mb-6">
                 Sign in with your Google account to access your personal n8n automation workspace and execute background workflows.
               </p>
               <button
                 onClick={loginWithGoogle}
-                className="w-full bg-white/10 hover:bg-white/15 text-white font-bold py-4 px-6 rounded-2xl border border-white/15 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:border-orange-500/40 cursor-pointer text-base hover:-translate-y-0.5"
+                className="w-full bg-white/10 hover:bg-white/15 text-white font-bold py-3.5 sm:py-4 px-6 rounded-2xl border border-white/15 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:border-orange-500/40 cursor-pointer text-sm sm:text-base hover:-translate-y-0.5"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="#EA4335" d="M12 5c1.6 0 3 .5 4.1 1.5l3.1-3.1C17.3 1.6 14.8.7 12 .7 7.5.7 3.7 3.3 1.9 7.1l3.7 2.8C6.5 6.9 9 5 12 5z"/>
@@ -420,20 +407,20 @@ export default function AutomationsPage() {
             />
           ) : (
             /* STEP 3: Verified & Ready to Launch */
-            <div className="bg-gradient-to-b from-[#0B1221]/95 to-[#050B14]/95 border border-orange-500/40 rounded-3xl p-8 shadow-[0_0_50px_rgba(249,115,22,0.25)] backdrop-blur-xl animate-fade-in text-center">
+            <div className="bg-gradient-to-b from-[#0B1221]/95 to-[#050B14]/95 border border-orange-500/40 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(249,115,22,0.25)] backdrop-blur-xl animate-fade-in text-center">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30 text-xs font-bold mb-4">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
                 Automation Engine Ready
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">n8n Automation Studio is Active</h3>
-              <p className="text-slate-400 text-sm mb-6 max-w-md mx-auto">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">n8n Automation Studio is Active</h3>
+              <p className="text-slate-400 text-xs sm:text-sm mb-6 max-w-md mx-auto">
                 Launch the complete visual editor to configure triggers, drag AI nodes, and connect external services.
               </p>
               <a
                 href="/n8n/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-[0_0_25px_rgba(249,115,22,0.4)] hover:shadow-[0_0_35px_rgba(249,115,22,0.6)] cursor-pointer text-base hover:-translate-y-0.5 active:translate-y-0"
+                className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-bold py-3.5 sm:py-4 px-6 sm:px-8 rounded-2xl transition-all duration-300 shadow-[0_0_25px_rgba(249,115,22,0.4)] hover:shadow-[0_0_35px_rgba(249,115,22,0.6)] cursor-pointer text-sm sm:text-base hover:-translate-y-0.5 active:translate-y-0"
               >
                 <span>Launch Standalone Workspace</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -445,12 +432,12 @@ export default function AutomationsPage() {
         </div>
       </section>
 
-      {/* ── 4. FEATURED AUTOMATION TEMPLATES ────────────────────────── */}
-      <section className="w-full max-w-5xl mx-auto px-4 py-8">
+      {/* ── 4. FEATURED AUTOMATION TEMPLATES (WITH EMBEDDED IMAGES) ─── */}
+      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-white tracking-tight">Ready-to-Use Workflows</h2>
-            <p className="text-slate-400 text-sm mt-1">Deploy battle-tested automation templates with a single click.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Ready-to-Use Workflows</h2>
+            <p className="text-slate-400 text-xs sm:text-sm mt-1">Deploy battle-tested automation templates with a single click.</p>
           </div>
 
           {/* Category Tabs */}
@@ -481,19 +468,25 @@ export default function AutomationsPage() {
           {filteredTemplates.map((t, idx) => (
             <div
               key={idx}
-              className="bg-gradient-to-b from-[#0B1221]/80 to-[#050B14]/80 border border-orange-950/60 rounded-3xl p-7 hover:border-orange-500/40 hover:shadow-[0_0_25px_rgba(249,115,22,0.12)] transition-all duration-300 flex flex-col justify-between"
+              className="bg-gradient-to-b from-[#0B1221]/80 to-[#050B14]/80 border border-orange-950/60 rounded-3xl p-5 sm:p-7 hover:border-orange-500/40 hover:shadow-[0_0_25px_rgba(249,115,22,0.12)] transition-all duration-300 flex flex-col justify-between overflow-hidden group"
             >
               <div>
+                {t.image && (
+                  <div className="mb-4 rounded-2xl overflow-hidden border border-white/10 shadow-inner">
+                    <img src={t.image} alt={t.title} className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between mb-4">
                   <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border bg-black/40 ${t.color}`}>
                     {t.badge}
                   </span>
                   <span className="text-xs text-slate-500 font-mono">Template #{idx + 1}</span>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
                   {t.title}
                 </h3>
-                <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
                   {t.desc}
                 </p>
 
@@ -525,33 +518,33 @@ export default function AutomationsPage() {
       </section>
 
       {/* ── 5. ENTERPRISE CAPABILITIES ─────────────────────────────── */}
-      <section className="w-full max-w-5xl mx-auto px-4 py-12">
+      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12">
         <div className="text-center max-w-xl mx-auto mb-10">
-          <h3 className="text-2xl font-bold text-white mb-2">Built for Speed, Reliability & Scale</h3>
-          <p className="text-sm text-slate-400">Enterprise background workers ensure your automations never drop a single task.</p>
+          <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">Built for Speed, Reliability & Scale</h3>
+          <p className="text-xs sm:text-sm text-slate-400">Enterprise background workers ensure your automations never drop a single task.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[#0B1221]/60 border border-white/5 rounded-3xl p-7 hover:border-orange-500/30 transition-all">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          <div className="bg-[#0B1221]/60 border border-white/5 rounded-3xl p-6 sm:p-7 hover:border-orange-500/30 transition-all">
             <div className="text-3xl mb-4">⚡</div>
-            <h4 className="text-lg font-bold text-white mb-2">&lt; 50ms Webhook Trigger</h4>
-            <p className="text-slate-400 text-sm leading-relaxed">
+            <h4 className="text-base sm:text-lg font-bold text-white mb-2">&lt; 50ms Webhook Trigger</h4>
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
               Instantaneous event ingestion through dedicated Redis message brokers and high-performance FastAPI gateways.
             </p>
           </div>
 
-          <div className="bg-[#0B1221]/60 border border-white/5 rounded-3xl p-7 hover:border-orange-500/30 transition-all">
+          <div className="bg-[#0B1221]/60 border border-white/5 rounded-3xl p-6 sm:p-7 hover:border-orange-500/30 transition-all">
             <div className="text-3xl mb-4">🔄</div>
-            <h4 className="text-lg font-bold text-white mb-2">24/7 Persistent Workers</h4>
-            <p className="text-slate-400 text-sm leading-relaxed">
+            <h4 className="text-base sm:text-lg font-bold text-white mb-2">24/7 Persistent Workers</h4>
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
               Runs in isolated Docker microservices with auto-restart policies and automated database transaction backups.
             </p>
           </div>
 
-          <div className="bg-[#0B1221]/60 border border-white/5 rounded-3xl p-7 hover:border-orange-500/30 transition-all">
+          <div className="bg-[#0B1221]/60 border border-white/5 rounded-3xl p-6 sm:p-7 hover:border-orange-500/30 transition-all">
             <div className="text-3xl mb-4">🤖</div>
-            <h4 className="text-lg font-bold text-white mb-2">Private AI Model Hooks</h4>
-            <p className="text-slate-400 text-sm leading-relaxed">
+            <h4 className="text-base sm:text-lg font-bold text-white mb-2">Private AI Model Hooks</h4>
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
               Plug directly into your local Ollama LLMs and Kokoro TTS models without paying external API per-token fees.
             </p>
           </div>
