@@ -15,6 +15,9 @@ export default function AutomationsPage() {
     { time: '10:42:02', tag: 'INFO', text: 'Redis Celery queue ready: 4 worker threads active' }
   ])
 
+  // Apple-Style Scrollytelling Active Stage State
+  const [storyStage, setStoryStage] = useState(0)
+
   const runTestPipeline = () => {
     setIsRunningSim(true)
     setActiveStep(1)
@@ -56,6 +59,37 @@ export default function AutomationsPage() {
       setIsRunningSim(false)
     }, 3600)
   }
+
+  const storyStages = [
+    {
+      id: 0,
+      title: 'Instantaneous Webhook Ingestion',
+      badge: '< 50ms Latency',
+      desc: 'High-throughput event gateways capture webhooks from Telegram, Discord, GitHub, and custom APIs without dropping packets.',
+      stats: '50,000 req/sec'
+    },
+    {
+      id: 1,
+      title: 'Local Neural LLM & Voiceover',
+      badge: 'Zero API Fees',
+      desc: 'Executes Ollama 3B/8B and Kokoro-82M TTS directly on local GPU/CPU hardware. Instant Khmer translation & studio-quality speech.',
+      stats: '0.34s Speech Synthesis'
+    },
+    {
+      id: 2,
+      title: 'PostgreSQL Vector Search Sync',
+      badge: 'pgvector Database',
+      desc: 'Automatically vectorizes unstructured content and builds high-speed cosine similarity indexes for instant semantic retrieval.',
+      stats: '1,536-dim Vector Embeddings'
+    },
+    {
+      id: 3,
+      title: 'Autonomous Multi-Channel Publisher',
+      badge: '24/7 Background Robot',
+      desc: 'Dispatches scheduled broadcasts, Telegram posts, Discord embeds, and Google Drive backups with automated retry logic.',
+      stats: '100% Reliable Delivery'
+    }
+  ]
 
   const templates = [
     {
@@ -99,13 +133,13 @@ export default function AutomationsPage() {
   return (
     <div className="w-full flex flex-col items-center pb-24 text-slate-200">
       
-      {/* ── 1. HERO BANNER SECTION ─────────────────────────────────── */}
+      {/* ── 1. HERO BANNER SECTION (APPLE-INSPIRED PERSPECTIVE) ─────── */}
       <section className="w-full max-w-5xl mx-auto px-4 pt-10 pb-8 text-center relative">
-        {/* Glow Aura */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-orange-600/15 rounded-full blur-[110px] pointer-events-none -z-10" />
+        {/* Ambient Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-orange-600/15 rounded-full blur-[130px] pointer-events-none -z-10 animate-pulse-glow" />
 
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs font-bold uppercase tracking-wider mb-6 shadow-[0_0_15px_rgba(249,115,22,0.15)] animate-fade-in">
-          <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs font-bold uppercase tracking-wider mb-6 shadow-[0_0_20px_rgba(249,115,22,0.2)] animate-fade-in">
+          <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping"></span>
           AI-Powered n8n Workflow Automation · 400+ Connectors
         </div>
 
@@ -257,8 +291,95 @@ export default function AutomationsPage() {
 
         </div>
 
+        {/* ── 3. APPLE-STYLE SCROLLYTELLING INTERACTIVE STAGES ───────── */}
+        <div className="my-16 text-left">
+          <div className="text-center max-w-xl mx-auto mb-10">
+            <span className="text-xs font-mono uppercase tracking-widest text-orange-400 font-bold">Autonomous Engine</span>
+            <h2 className="text-3xl font-bold text-white mt-1">Autonomous Intelligence in Motion</h2>
+            <p className="text-sm text-slate-400 mt-2">How CamTech AI and n8n power automated pipelines that run 24/7.</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#070D18]/90 border border-orange-900/30 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
+            {/* Left Nav List (Apple-style interactive selector) */}
+            <div className="lg:col-span-5 space-y-3">
+              {storyStages.map((st) => (
+                <div
+                  key={st.id}
+                  onClick={() => setStoryStage(st.id)}
+                  className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                    storyStage === st.id
+                      ? 'bg-[#131B2E] border-orange-500/50 shadow-[0_0_25px_rgba(249,115,22,0.2)]'
+                      : 'bg-black/30 border-white/5 hover:border-white/15 opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-mono font-bold text-orange-400 uppercase tracking-widest">
+                      Stage 0{st.id + 1}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 bg-black/50 px-2 py-0.5 rounded border border-white/5">
+                      {st.badge}
+                    </span>
+                  </div>
+                  <h4 className="text-base font-bold text-white mb-1">{st.title}</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">{st.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Dynamic Live Graphic Display */}
+            <div className="lg:col-span-7 bg-[#050B14] border border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center min-h-[380px] text-center relative overflow-hidden shadow-inner">
+              
+              {/* Dynamic SVG Visuals corresponding to active stage */}
+              {storyStage === 0 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-36 h-36 mx-auto bg-gradient-to-b from-orange-950/60 to-slate-900 border border-orange-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.3)]">
+                    <span className="text-4xl animate-bounce">⚡</span>
+                    <span className="text-xs font-mono font-bold text-orange-300 mt-2">&lt; 50ms TRIGGER</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white">Instantaneous Event Ingestion</h4>
+                  <p className="text-xs text-slate-400">Non-blocking async webhooks queued into Redis brokers.</p>
+                </div>
+              )}
+
+              {storyStage === 1 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-36 h-36 mx-auto bg-gradient-to-b from-cyan-950/60 to-slate-900 border border-cyan-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.3)]">
+                    <span className="text-4xl animate-pulse">🧠</span>
+                    <span className="text-xs font-mono font-bold text-cyan-300 mt-2">Ollama + Kokoro TTS</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white">Local Neural Processing</h4>
+                  <p className="text-xs text-slate-400">0.34s natural voice synthesis & automated summarization.</p>
+                </div>
+              )}
+
+              {storyStage === 2 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-36 h-36 mx-auto bg-gradient-to-b from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                    <span className="text-4xl">🗄️</span>
+                    <span className="text-xs font-mono font-bold text-emerald-300 mt-2">pgvector Embeddings</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white">Vector Storage & Search</h4>
+                  <p className="text-xs text-slate-400">1,536-dimensional similarity vectors for semantic lookups.</p>
+                </div>
+              )}
+
+              {storyStage === 3 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-36 h-36 mx-auto bg-gradient-to-b from-purple-950/60 to-slate-900 border border-purple-500/40 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+                    <span className="text-4xl animate-pulse">🚀</span>
+                    <span className="text-xs font-mono font-bold text-purple-300 mt-2">Telegram Channels</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white">Multi-Channel Broadcasting</h4>
+                  <p className="text-xs text-slate-400">Automated media distribution with zero manual intervention.</p>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+
         {/* ── AUTH / ACCESS STATUS CARD ────────────────────────────── */}
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-xl mx-auto mt-8">
           {authLoading ? (
             <div className="bg-[#0B1221]/90 border border-orange-900/30 rounded-3xl p-8 flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"></div>
@@ -324,7 +445,7 @@ export default function AutomationsPage() {
         </div>
       </section>
 
-      {/* ── 3. FEATURED AUTOMATION TEMPLATES ────────────────────────── */}
+      {/* ── 4. FEATURED AUTOMATION TEMPLATES ────────────────────────── */}
       <section className="w-full max-w-5xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
@@ -403,7 +524,7 @@ export default function AutomationsPage() {
         </div>
       </section>
 
-      {/* ── 4. ENTERPRISE CAPABILITIES ─────────────────────────────── */}
+      {/* ── 5. ENTERPRISE CAPABILITIES ─────────────────────────────── */}
       <section className="w-full max-w-5xl mx-auto px-4 py-12">
         <div className="text-center max-w-xl mx-auto mb-10">
           <h3 className="text-2xl font-bold text-white mb-2">Built for Speed, Reliability & Scale</h3>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import VerificationOverlay from '../components/VerificationOverlay'
 
@@ -11,6 +11,9 @@ export default function PdfToolsPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [demoProgress, setDemoProgress] = useState(100)
   const [rotatedPages, setRotatedPages] = useState({ 1: 0, 2: 0, 3: 0, 4: 0 })
+
+  // Apple-Style Scrollytelling Active Stage State
+  const [storyStage, setStoryStage] = useState(0)
 
   const runSimulation = () => {
     setIsProcessing(true)
@@ -34,6 +37,41 @@ export default function PdfToolsPage() {
       [pageNum]: (prev[pageNum] + 90) % 360
     }))
   }
+
+  const storyStages = [
+    {
+      id: 0,
+      title: 'Neural Deep OCR Engine',
+      badge: 'Khmer & English Recognition',
+      desc: 'High-speed OCR scanner automatically detects scanned image layers, deskews warped documents, and creates selectable, searchable Unicode text overlays.',
+      accent: 'from-cyan-500 to-blue-500',
+      stats: '99.4% Character Accuracy'
+    },
+    {
+      id: 1,
+      title: 'Multi-Layer Vector Optimizer',
+      badge: 'Up to 90% Compression',
+      desc: 'Strikes down bloat by deduplicating font streams, re-encoding raster assets to modern WebP/JPEG XL, and flattening unused structural objects with 0 dpi loss.',
+      accent: 'from-red-500 to-rose-500',
+      stats: '48MB ➔ 4.6MB Lossless'
+    },
+    {
+      id: 2,
+      title: 'Cryptographic Privacy & Redactor',
+      badge: 'Zero-Knowledge Security',
+      desc: 'Permanently burns black redaction boxes directly into vector paths so redacted text can never be recovered through copy-paste or decompilation.',
+      accent: 'from-purple-500 to-indigo-500',
+      stats: 'AES-256 Military Encryption'
+    },
+    {
+      id: 3,
+      title: 'Instant Multi-Format Transpiler',
+      badge: 'Native Office Export',
+      desc: 'Reconstructs complex PDF tables, nested grids, and paragraph margins directly into editable Microsoft Word (DOCX) and Excel (XLSX) sheets.',
+      accent: 'from-emerald-500 to-teal-500',
+      stats: 'Pixel-Perfect Reconstruction'
+    }
+  ]
 
   const categories = [
     { id: 'all', label: 'All 50+ Tools' },
@@ -120,13 +158,13 @@ export default function PdfToolsPage() {
   return (
     <div className="w-full flex flex-col items-center pb-24 text-slate-200">
       
-      {/* ── 1. HERO BANNER SECTION ─────────────────────────────────── */}
+      {/* ── 1. HERO BANNER SECTION (APPLE-INSPIRED PERSPECTIVE) ─────── */}
       <section className="w-full max-w-5xl mx-auto px-4 pt-10 pb-8 text-center relative">
-        {/* Glow Aura */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-red-600/15 rounded-full blur-[110px] pointer-events-none -z-10" />
+        {/* Ambient Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-red-600/15 rounded-full blur-[130px] pointer-events-none -z-10 animate-pulse-glow" />
 
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-bold uppercase tracking-wider mb-6 shadow-[0_0_15px_rgba(239,68,68,0.15)] animate-fade-in">
-          <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-bold uppercase tracking-wider mb-6 shadow-[0_0_20px_rgba(239,68,68,0.2)] animate-fade-in">
+          <span className="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
           Enterprise Stirling-PDF Suite · 50+ Tools
         </div>
 
@@ -139,7 +177,7 @@ export default function PdfToolsPage() {
           50+ offline-ready tools to edit, convert, merge, compress, OCR scan, sign, and sanitize documents with <span className="text-slate-200 font-semibold">zero file size limits</span> and 100% private on-premises security.
         </p>
 
-        {/* ── 2. REAL INTERACTIVE CODE-DRIVEN SIMULATOR / PLAYGROUND ──── */}
+        {/* ── 2. REAL INTERACTIVE CODE-DRIVEN PLAYGROUND ──────────────── */}
         <div className="relative mx-auto mb-10 rounded-3xl overflow-hidden border border-red-500/30 bg-[#0B1221]/95 shadow-[0_0_50px_rgba(239,68,68,0.2)] backdrop-blur-2xl text-left p-6 sm:p-8">
           
           {/* Header Controls */}
@@ -248,8 +286,9 @@ export default function PdfToolsPage() {
                   </button>
                 </div>
 
-                {/* Scanned Image to Text Live Comparison */}
-                <div className="bg-[#050B14] border border-cyan-500/30 rounded-2xl p-5 font-mono text-xs text-slate-300 space-y-2 shadow-inner">
+                {/* Scanned Image to Text Live Comparison with Laser Scan Effect */}
+                <div className="bg-[#050B14] border border-cyan-500/30 rounded-2xl p-5 font-mono text-xs text-slate-300 space-y-2 shadow-inner relative overflow-hidden">
+                  <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-scanline shadow-[0_0_12px_rgba(34,211,238,0.8)] pointer-events-none"></div>
                   <div className="flex items-center justify-between text-[11px] text-cyan-400 pb-2 border-b border-white/5">
                     <span>STATUS: OCR_RECOGNITION_ACTIVE</span>
                     <span>CONFIDENCE: 99.4%</span>
@@ -339,8 +378,105 @@ export default function PdfToolsPage() {
 
         </div>
 
+        {/* ── 3. APPLE-STYLE SCROLLYTELLING INTERACTIVE STAGES ───────── */}
+        <div className="my-16 text-left">
+          <div className="text-center max-w-xl mx-auto mb-10">
+            <span className="text-xs font-mono uppercase tracking-widest text-red-400 font-bold">The Architecture of Speed</span>
+            <h2 className="text-3xl font-bold text-white mt-1">Engineered for Extreme Precision</h2>
+            <p className="text-sm text-slate-400 mt-2">Explore the four core technological pillars powering the Stirling-PDF engine.</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#070D18]/90 border border-red-900/30 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
+            {/* Left Nav List (Apple-style interactive selector) */}
+            <div className="lg:col-span-5 space-y-3">
+              {storyStages.map((st) => (
+                <div
+                  key={st.id}
+                  onClick={() => setStoryStage(st.id)}
+                  className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                    storyStage === st.id
+                      ? 'bg-[#131B2E] border-red-500/50 shadow-[0_0_25px_rgba(239,68,68,0.2)]'
+                      : 'bg-black/30 border-white/5 hover:border-white/15 opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-mono font-bold text-red-400 uppercase tracking-widest">
+                      Stage 0{st.id + 1}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 bg-black/50 px-2 py-0.5 rounded border border-white/5">
+                      {st.badge}
+                    </span>
+                  </div>
+                  <h4 className="text-base font-bold text-white mb-1">{st.title}</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">{st.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Dynamic Live Graphic Display */}
+            <div className="lg:col-span-7 bg-[#050B14] border border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center min-h-[380px] text-center relative overflow-hidden shadow-inner">
+              
+              {/* Dynamic SVG Visuals corresponding to active stage */}
+              {storyStage === 0 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-36 h-44 mx-auto bg-gradient-to-b from-cyan-950/60 to-slate-900 border border-cyan-500/40 rounded-2xl p-4 flex flex-col justify-between shadow-[0_0_30px_rgba(6,182,212,0.3)]">
+                    <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-300 to-transparent animate-scanline"></div>
+                    <div className="space-y-1.5 opacity-60">
+                      <div className="h-1.5 bg-cyan-400/50 rounded w-3/4"></div>
+                      <div className="h-1.5 bg-cyan-400/50 rounded w-full"></div>
+                      <div className="h-1.5 bg-cyan-400/50 rounded w-5/6"></div>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/80 py-1 rounded border border-cyan-800/60">
+                      AI OCR PARSED
+                    </span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white">Khmer & Dual Script OCR</h4>
+                  <p className="text-xs text-slate-400">99.4% accuracy with auto-deskewing and orientation correction.</p>
+                </div>
+              )}
+
+              {storyStage === 1 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-36 h-44 mx-auto bg-gradient-to-b from-red-950/60 to-slate-900 border border-red-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+                    <span className="text-3xl mb-2">🗜️</span>
+                    <span className="text-xs font-mono font-bold text-emerald-400">-90.4%</span>
+                    <span className="text-[10px] text-slate-400 mt-1">Lossless Vector Pass</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white">Lossless Optimization</h4>
+                  <p className="text-xs text-slate-400">Reduces storage costs and ensures instant email transmission.</p>
+                </div>
+              )}
+
+              {storyStage === 2 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-36 h-44 mx-auto bg-gradient-to-b from-purple-950/60 to-slate-900 border border-purple-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+                    <span className="text-3xl mb-2">🛡️</span>
+                    <span className="text-xs font-mono font-bold text-purple-300">METADATA STRIPPED</span>
+                    <span className="text-[10px] text-slate-400 mt-1">Zero Recovery Redaction</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white">Cryptographic Redaction</h4>
+                  <p className="text-xs text-slate-400">Permanently destroys redacted vectors from raw PDF bytecode.</p>
+                </div>
+              )}
+
+              {storyStage === 3 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-36 h-44 mx-auto bg-gradient-to-b from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                    <span className="text-3xl mb-2">⚡</span>
+                    <span className="text-xs font-mono font-bold text-emerald-300">DOCX · XLSX · PNG</span>
+                    <span className="text-[10px] text-slate-400 mt-1">Native Microsoft Office</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white">Native Office Transpiler</h4>
+                  <p className="text-xs text-slate-400">Preserves complex table spans, headers, and bullet hierarchies.</p>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+
         {/* ── AUTH / ACCESS STATUS CARD ────────────────────────────── */}
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-xl mx-auto mt-8">
           {authLoading ? (
             <div className="bg-[#0B1221]/90 border border-red-900/30 rounded-3xl p-8 flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
@@ -406,37 +542,7 @@ export default function PdfToolsPage() {
         </div>
       </section>
 
-      {/* ── 3. VISUAL WORKFLOW FLOWCHART ───────────────────────────── */}
-      <section className="w-full max-w-5xl mx-auto px-4 py-12">
-        <div className="bg-gradient-to-b from-[#0B1221]/90 via-[#070D18]/90 to-[#050B14]/90 border border-red-950/80 rounded-3xl p-8 sm:p-10 shadow-2xl backdrop-blur-md">
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <h3 className="text-2xl font-bold text-white mb-2">How Document Processing Works</h3>
-            <p className="text-sm text-slate-400">Streamlined 4-stage pipeline for maximum privacy, speed, and accuracy.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
-            {[
-              { step: '01', title: 'Upload Any File', desc: 'PDF, Word, Excel, Scanned images, or ZIP archives.', icon: '📁' },
-              { step: '02', title: 'AI OCR & Extract', desc: 'Deep learning recognizes Khmer & English text automatically.', icon: '🔍' },
-              { step: '03', title: 'Process & Optimize', desc: 'Merge, split, redact, compress, or add watermarks.', icon: '⚙️' },
-              { step: '04', title: 'Export & Encrypt', desc: 'Download instantly with optional AES-256 password protection.', icon: '🛡️' },
-            ].map((st, i) => (
-              <div key={i} className="bg-black/40 border border-white/5 rounded-2xl p-5 relative flex flex-col justify-between hover:border-red-500/30 transition-colors">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-2xl">{st.icon}</span>
-                    <span className="font-mono text-xs font-bold text-red-400 bg-red-950/60 px-2 py-0.5 rounded border border-red-900/40">{st.step}</span>
-                  </div>
-                  <h4 className="font-bold text-white text-base mb-1">{st.title}</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">{st.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 4. INTERACTIVE TOOLS SHOWCASE ──────────────────────────── */}
+      {/* ── 4. POPULAR TOOLS SHOWCASE ──────────────────────────────── */}
       <section className="w-full max-w-5xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
