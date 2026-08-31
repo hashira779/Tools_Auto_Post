@@ -275,7 +275,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: camtech
-      POSTGRES_PASSWORD: camtechpassword
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
       POSTGRES_DB: camtech
     ports:
       # Expose PostgreSQL to LAN so ORS workers can connect
@@ -397,12 +397,13 @@ services:
       - DB_POSTGRESDB_PORT=5432
       - DB_POSTGRESDB_DATABASE=camtech
       - DB_POSTGRESDB_USER=camtech
-      - DB_POSTGRESDB_PASSWORD=camtechpassword
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
       - DB_POSTGRESDB_SCHEMA=n8n_v2
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
       - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-camtech_n8n}
       - N8N_PATH=/n8n/
+      - N8N_GOOGLE_BYPASS_SECRET=${N8N_GOOGLE_BYPASS_SECRET:?N8N_GOOGLE_BYPASS_SECRET must be set in .env}
       - WEBHOOK_URL=https://camtech.cam/n8n/
       - N8N_HOST=camtech.cam
       - N8N_PROTOCOL=https
@@ -443,7 +444,7 @@ services:
       - --listening-port=3478
       - --min-port=50000
       - --max-port=50100
-      - --user=camtech:camtech_turn_secret
+      - --user=camtech:${TURN_SECRET:?TURN_SECRET must be set in .env}
       - --realm=camtech.cam
       - --no-tls
       - --no-dtls

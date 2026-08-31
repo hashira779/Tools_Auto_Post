@@ -17,7 +17,12 @@ if [ -f "$HOME/.camtech_env" ]; then
     source "$HOME/.camtech_env"
     set +a
 fi
-SUDO_PASS="${CAMTECH_SUDO_PASS:-pTT!CT01}"
+SUDO_PASS="${CAMTECH_SUDO_PASS:-}"
+if [ -z "$SUDO_PASS" ]; then
+    echo "❌ CAMTECH_SUDO_PASS is not set." >&2
+    echo "   Export it in your shell or put it in ~/.camtech_env — it must never be hardcoded." >&2
+    exit 1
+fi
 
 echo "===================================================="
 echo "  🚀 Starting Safe Production Deployment"

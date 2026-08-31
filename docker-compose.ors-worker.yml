@@ -36,7 +36,7 @@ services:
     container_name: ors-ai-orchestrator
     environment:
       # ── Points to MAIN server's PostgreSQL over the LAN ──
-      - DATABASE_URL=postgresql://camtech:camtechpassword@10.1.0.11:5432/camtech
+      - DATABASE_URL=postgresql://camtech:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@10.1.0.11:5432/camtech
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - OLLAMA_URL=http://ollama:11434

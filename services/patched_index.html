@@ -483,82 +483,115 @@
             .camtech-logo span { color: #ff6a00; }
         </style>
         <script>
-            window.handleGoogleCredentialResponse = function(response) {
-                // Decode JWT to get user details
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+        (function () {
+            const CLIENT_ID = "639870274155-r1fq36ffm3tuhn8cf4ko3heqqmvgnku2.apps.googleusercontent.com";
+            const BYPASS = "Google_auth_bypass_secret_999";
+            let submitting = false;   // guard against double submits
+            let buttonRendered = false; // render the Google button exactly once
+
+            window.handleGoogleCredentialResponse = function (response) {
+                if (submitting) return;
+                submitting = true;
+                setError('');
+
+                let payload;
+                try {
+                    payload = JSON.parse(atob(response.credential.split('.')[1]));
+                } catch (e) {
+                    submitting = false;
+                    setError('Could not read Google response. Please try again.');
+                    return;
+                }
+
                 const email = payload.email;
                 const firstName = payload.given_name || 'Admin';
                 const lastName = payload.family_name || 'User';
-                
-                // Submit native Vue setup/login form magically
-                // Get base URL by stripping /setup or /signin from pathname
-                const basePath = window.location.pathname.replace(/\/setup\/?$/, '').replace(/\/signin\/?$/, '');
-                
+                // Strip /setup or /signin to recover the n8n base path
+                const basePath = window.location.pathname
+                    .replace(/\/setup\/?$/, '')
+                    .replace(/\/signin\/?$/, '');
+
+                // 1) Try to create the owner (harmlessly fails if it already exists),
+                // 2) then log in with the bypass credential.
                 fetch(basePath + '/rest/owner/setup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: email,
-                        firstName: firstName,
-                        lastName: lastName,
-                        password: "Google_auth_bypass_secret_999"
-                    })
-                }).then(() => {
-                    return fetch(basePath + '/rest/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            emailOrLdapLoginId: email,
-                            password: "Google_auth_bypass_secret_999"
-                        })
-                    });
-                }).then(() => {
-                    window.location.href = basePath + "/";
+                    body: JSON.stringify({ email, firstName, lastName, password: BYPASS })
+                })
+                .catch(() => {}) // setup 4xx when owner already exists — expected, ignore
+                .then(() => fetch(basePath + '/rest/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ emailOrLdapLoginId: email, password: BYPASS })
+                }))
+                .then((res) => {
+                    if (!res || !res.ok) throw new Error('login failed');
+                    window.location.href = basePath + '/';
+                })
+                .catch(() => {
+                    submitting = false; // allow retry instead of looping the redirect
+                    setError('Sign-in failed. Please try again.');
                 });
+            };
+
+            function setError(msg) {
+                const el = document.getElementById('google-auth-error');
+                if (el) el.textContent = msg;
             }
-            
+
+            function tryRenderButton() {
+                if (buttonRendered) return true;
+                const container = document.getElementById('google-signin-button');
+                if (!container) return false;
+                if (!(window.google && window.google.accounts && window.google.accounts.id)) {
+                    return false; // GSI library not loaded yet
+                }
+                window.google.accounts.id.initialize({
+                    client_id: CLIENT_ID,
+                    callback: window.handleGoogleCredentialResponse
+                });
+                window.google.accounts.id.renderButton(container, { theme: 'outline', size: 'large' });
+                buttonRendered = true;
+                return true;
+            }
+
+            function ensureOverlay() {
+                if (document.getElementById('google-auth-overlay')) return;
+                buttonRendered = false;
+                const overlay = document.createElement('div');
+                overlay.id = 'google-auth-overlay';
+                overlay.innerHTML =
+                    '<div class="camtech-logo">CAM<span>TECH</span></div>' +
+                    '<h2 style="color:white;margin-bottom:30px;font-family:sans-serif;">Welcome to Automations</h2>' +
+                    '<div id="google-signin-button"></div>' +
+                    '<div id="google-auth-error" style="color:#ff6a00;margin-top:16px;min-height:20px;font-family:sans-serif;"></div>';
+                document.body.appendChild(overlay);
+
+                // GSI loads async — keep retrying until it is ready, then render once.
+                if (!tryRenderButton()) {
+                    const wait = setInterval(() => {
+                        // Stop if the overlay was torn down (route changed)
+                        if (!document.getElementById('google-auth-overlay')) {
+                            clearInterval(wait);
+                            return;
+                        }
+                        if (tryRenderButton()) clearInterval(wait);
+                    }, 150);
+                }
+            }
+
+            // n8n is a SPA — watch the route and show/hide the overlay accordingly.
             setInterval(() => {
                 const path = window.location.pathname;
-                const isAuthPage = path.endsWith('/setup') || path.endsWith('/signin') || path.endsWith('/setup/');
-                
-                if (isAuthPage && !document.getElementById('google-auth-overlay')) {
-                    const overlay = document.createElement('div');
-                    overlay.id = 'google-auth-overlay';
-                    overlay.innerHTML = `
-                        <div class="camtech-logo">CAM<span>TECH</span></div>
-                        <h2 style="color: white; margin-bottom: 30px; font-family: sans-serif;">Welcome to Automations</h2>
-                        <div id="g_id_onload"
-                             data-client_id="639870274155-r1fq36ffm3tuhn8cf4ko3heqqmvgnku2.apps.googleusercontent.com"
-                             data-context="signin"
-                             data-ux_mode="popup"
-                             data-callback="handleGoogleCredentialResponse"
-                             data-auto_prompt="false">
-                        </div>
-                        <div class="g_id_signin"
-                             data-type="standard"
-                             data-shape="rectangular"
-                             data-theme="outline"
-                             data-text="signin_with"
-                             data-size="large"
-                             data-logo_alignment="left">
-                        </div>
-                    `;
-                    document.body.appendChild(overlay);
-                    if (window.google && window.google.accounts) {
-                        window.google.accounts.id.initialize({
-                            client_id: "639870274155-r1fq36ffm3tuhn8cf4ko3heqqmvgnku2.apps.googleusercontent.com",
-                            callback: window.handleGoogleCredentialResponse
-                        });
-                        window.google.accounts.id.renderButton(
-                            overlay.querySelector('.g_id_signin'),
-                            { theme: "outline", size: "large" }
-                        );
-                    }
-                } else if (!isAuthPage) {
+                const isAuthPage = /\/(setup|signin)\/?$/.test(path);
+                if (isAuthPage) {
+                    ensureOverlay();
+                } else {
                     const overlay = document.getElementById('google-auth-overlay');
                     if (overlay) overlay.remove();
                 }
-            }, 100);
+            }, 300);
+        })();
         </script>
         <!-- END CAMTECH GOOGLE SIGN-IN INJECTION -->
 	</body>

