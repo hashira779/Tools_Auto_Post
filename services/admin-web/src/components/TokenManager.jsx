@@ -1,17 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { adminApi } from '../api/admin'
-import { Box } from './ui/box'
-import { HStack } from './ui/hstack'
-import { VStack } from './ui/vstack'
-import { Text } from './ui/text'
-import { Heading } from './ui/heading'
-import { Button, ButtonText, ButtonSpinner, ButtonIcon } from './ui/button'
-import { Input, InputField } from './ui/input'
-import { Checkbox, CheckboxIndicator, CheckboxIcon, CheckboxLabel } from './ui/checkbox'
-import { Card } from './ui/card'
-import { Badge, BadgeText } from './ui/badge'
-import { CheckIcon, KeyIcon, ClockIcon, TrashIcon, AlertCircleIcon, ShieldIcon, CalendarIcon } from 'lucide-react-native'
-import { Spinner } from './ui/spinner'
 
 const isExpired = (t) =>
   t.valid_until && new Date(t.valid_until) < new Date()
@@ -42,7 +30,8 @@ export default function TokenManager() {
 
   useEffect(() => { load() }, [load])
 
-  const handleCreate = async () => {
+  const handleCreate = async (e) => {
+    e.preventDefault()
     setCreating(true)
     setError('')
     try {
@@ -83,180 +72,198 @@ export default function TokenManager() {
   }
 
   return (
-    <Box className="flex-col lg:flex-row gap-8">
-      <Box className="lg:w-1/3">
-        <Card variant="outline" className="p-6 bg-background-900 border-border-800 shadow-hard-2">
-          <VStack space="xl">
-            <HStack space="md" alignItems="center">
-              <Box className="p-2 bg-primary-900/40 border border-primary-500/30 rounded-full">
-                <ShieldIcon size={24} className="text-primary-400" />
-              </Box>
-              <Heading size="xl" className="text-typography-100">Generate Token</Heading>
-            </HStack>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-fade-in">
+      {/* Create Token Sidebar */}
+      <div className="lg:col-span-1">
+        <div className="bg-gradient-to-b from-[#0B1221]/90 to-[#050B14]/90 border border-cyan-900/40 rounded-3xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.05)] backdrop-blur-xl sticky top-24">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-xl shadow-inner">
+              <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-200">
+              Generate Token
+            </h2>
+          </div>
 
-            <VStack space="md">
-              <VStack space="xs">
-                <Text size="sm" className="font-bold text-typography-400">DESCRIPTION</Text>
-                <Input variant="outline" size="md">
-                  <InputField 
-                    placeholder="e.g. VIP Partner access" 
-                    value={description}
-                    onChangeText={setDescription}
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold text-cyan-500/70 uppercase tracking-wider mb-2">
+                Description
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. VIP Partner access"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full bg-[#03060D] border border-cyan-900/50 rounded-xl px-4 py-3 text-cyan-50 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-400/50 transition-all duration-300 shadow-inner text-sm"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-1 pb-1">
+              <input
+                type="checkbox"
+                id="unlimited-checkbox"
+                checked={unlimited}
+                onChange={(e) => setUnlimited(e.target.checked)}
+                className="w-4 h-4 rounded border-cyan-900/50 bg-[#03060D] text-cyan-500 focus:ring-cyan-500/40 focus:ring-offset-0 transition-all cursor-pointer"
+              />
+              <label htmlFor="unlimited-checkbox" className="text-xs text-slate-400 cursor-pointer select-none">
+                Unlimited usage / never expires
+              </label>
+            </div>
+
+            {!unlimited && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-cyan-500/70 uppercase tracking-wider mb-2">
+                    Valid Days
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={validDays}
+                    onChange={(e) => setValidDays(e.target.value)}
+                    className="w-full bg-[#03060D] border border-cyan-900/50 rounded-xl px-4 py-3 text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-400/50 transition-all duration-300 shadow-inner text-sm"
                   />
-                </Input>
-              </VStack>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-cyan-500/70 uppercase tracking-wider mb-2">
+                    Max Uses
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={maxUses}
+                    onChange={(e) => setMaxUses(e.target.value)}
+                    className="w-full bg-[#03060D] border border-cyan-900/50 rounded-xl px-4 py-3 text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-400/50 transition-all duration-300 shadow-inner text-sm"
+                  />
+                </div>
+              </div>
+            )}
 
-              <Checkbox 
-                size="md" 
-                isInvalid={false} 
-                isDisabled={false} 
-                value="unlimited" 
-                isChecked={unlimited}
-                onChange={setUnlimited}
-              >
-                <CheckboxIndicator mr="$2">
-                  <CheckboxIcon as={CheckIcon} />
-                </CheckboxIndicator>
-                <CheckboxLabel>Unlimited usage / never expires</CheckboxLabel>
-              </Checkbox>
+            <button
+              type="submit"
+              disabled={creating}
+              className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 mt-4 cursor-pointer"
+            >
+              {creating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Generating…</span>
+                </>
+              ) : 'Generate Token'}
+            </button>
+          </form>
+        </div>
+      </div>
 
-              {!unlimited && (
-                <HStack space="md">
-                  <VStack space="xs" className="flex-1">
-                    <Text size="sm" className="font-bold text-typography-400">VALID DAYS</Text>
-                    <Input variant="outline" size="md">
-                      <InputField 
-                        keyboardType="numeric"
-                        value={validDays}
-                        onChangeText={setValidDays}
-                      />
-                    </Input>
-                  </VStack>
-                  <VStack space="xs" className="flex-1">
-                    <Text size="sm" className="font-bold text-typography-400">MAX USES</Text>
-                    <Input variant="outline" size="md">
-                      <InputField 
-                        keyboardType="numeric"
-                        value={maxUses}
-                        onChangeText={setMaxUses}
-                      />
-                    </Input>
-                  </VStack>
-                </HStack>
-              )}
+      {/* Token List */}
+      <div className="lg:col-span-2 space-y-5">
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-2xl px-5 py-4 animate-fade-in flex items-center gap-3">
+            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {error}
+          </div>
+        )}
 
-              <Button 
-                size="lg" 
-                variant="solid" 
-                action="primary" 
-                isDisabled={creating} 
-                onPress={handleCreate}
-                className="mt-4"
-              >
-                {creating && <ButtonSpinner mr="$2" />}
-                <ButtonText>{creating ? 'Generating...' : 'Generate Token'}</ButtonText>
-              </Button>
-            </VStack>
-          </VStack>
-        </Card>
-      </Box>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4 text-cyan-500/50">
+            <div className="w-8 h-8 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin"></div>
+            <p className="text-sm font-medium uppercase tracking-widest animate-pulse">Loading Tokens...</p>
+          </div>
+        ) : tokens.length === 0 ? (
+          <div className="bg-gradient-to-b from-[#0B1221]/50 to-[#050B14]/50 border border-cyan-900/20 rounded-3xl p-16 text-center text-slate-500 flex flex-col items-center gap-4">
+            <svg className="w-12 h-12 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <p className="text-sm font-medium">No tokens generated yet.</p>
+          </div>
+        ) : tokens.map((t, i) => {
+          const expired = isExpired(t)
+          const limitReached = t.max_uses > 0 && t.current_uses >= t.max_uses
+          return (
+            <div
+              key={t.id}
+              style={{ animationDelay: `${i * 50}ms` }}
+              className="bg-gradient-to-r from-[#0B1221]/90 to-[#050B14]/90 border border-cyan-900/30 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 animate-slide-up hover:border-cyan-500/40 hover:shadow-[0_0_25px_rgba(6,182,212,0.1)] transition-all duration-300 backdrop-blur-md"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                  <code className="text-base font-mono font-bold text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 px-3.5 py-1 rounded-lg tracking-wider shadow-inner">
+                    {t.token_key}
+                  </code>
+                  {!t.is_active ? (
+                    <span className="bg-slate-800/80 text-slate-400 border border-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      Disabled
+                    </span>
+                  ) : expired ? (
+                    <span className="bg-red-950/50 text-red-400 border border-red-500/30 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      Expired
+                    </span>
+                  ) : limitReached ? (
+                    <span className="bg-orange-950/50 text-orange-400 border border-orange-500/30 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      Limit Reached
+                    </span>
+                  ) : (
+                    <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-[0_0_10px_rgba(34,211,238,0.2)]">
+                      Active
+                    </span>
+                  )}
+                </div>
 
-      <Box className="lg:w-2/3">
-        <VStack space="md">
-          {error ? (
-            <Box className="bg-error-500/10 border border-error-500/30 p-4 rounded-xl flex-row items-center gap-3">
-              <AlertCircleIcon size={20} className="text-error-500" />
-              <Text className="text-error-500">{error}</Text>
-            </Box>
-          ) : null}
+                <p className="text-slate-200 text-sm font-medium mb-4">
+                  {t.description || <span className="text-slate-600 italic">No description provided</span>}
+                </p>
 
-          {loading ? (
-            <Box className="py-20 items-center justify-center">
-              <Spinner size="large" />
-              <Text className="mt-4 text-typography-400 tracking-widest uppercase text-sm">Loading Tokens...</Text>
-            </Box>
-          ) : tokens.length === 0 ? (
-            <Card variant="outline" className="p-16 items-center justify-center border-dashed border-border-700 bg-transparent">
-              <KeyIcon size={48} className="text-typography-500 mb-4" />
-              <Text className="text-typography-400">No tokens generated yet.</Text>
-            </Card>
-          ) : (
-            tokens.map((t, i) => {
-              const expired = isExpired(t)
-              const limitReached = t.max_uses > 0 && t.current_uses >= t.max_uses
-              
-              return (
-                <Card key={t.id} variant="outline" className="p-5 bg-background-900 border-border-800 flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <VStack space="sm" className="flex-1">
-                    <HStack space="md" alignItems="center" flexWrap="wrap">
-                      <Box className="px-3 py-1 bg-primary-900/30 border border-primary-500/20 rounded-lg">
-                        <Text className="font-mono font-bold text-primary-300">{t.token_key}</Text>
-                      </Box>
-                      
-                      {!t.is_active ? (
-                        <Badge size="md" variant="solid" action="muted"><BadgeText>Disabled</BadgeText></Badge>
-                      ) : expired ? (
-                        <Badge size="md" variant="solid" action="error"><BadgeText>Expired</BadgeText></Badge>
-                      ) : limitReached ? (
-                        <Badge size="md" variant="solid" action="warning"><BadgeText>Limit Reached</BadgeText></Badge>
-                      ) : (
-                        <Badge size="md" variant="solid" action="info"><BadgeText>Active</BadgeText></Badge>
-                      )}
-                    </HStack>
-                    
-                    <Text className="text-typography-300 font-medium">
-                      {t.description || <Text className="italic text-typography-500">No description provided</Text>}
-                    </Text>
-                    
-                    <HStack space="xl" flexWrap="wrap">
-                      <HStack space="xs" alignItems="center">
-                        <ShieldIcon size={14} className="text-typography-500" />
-                        <Text size="xs" className="text-typography-400 font-medium">
-                          <Text size="xs" className="text-typography-200">{t.current_uses}</Text> / {t.max_uses === 0 ? '∞' : t.max_uses} uses
-                        </Text>
-                      </HStack>
-                      <HStack space="xs" alignItems="center">
-                        <ClockIcon size={14} className="text-typography-500" />
-                        <Text size="xs" className="text-typography-400 font-medium">
-                          {t.valid_until ? new Date(t.valid_until).toLocaleDateString() : 'Never expires'}
-                        </Text>
-                      </HStack>
-                      <HStack space="xs" alignItems="center">
-                        <CalendarIcon size={14} className="text-typography-500" />
-                        <Text size="xs" className="text-typography-400 font-medium">
-                          {new Date(t.created_at).toLocaleDateString()}
-                        </Text>
-                      </HStack>
-                    </HStack>
-                  </VStack>
-                  
-                  <HStack space="sm" className="w-full sm:w-auto border-t sm:border-t-0 sm:border-l border-border-800 pt-4 sm:pt-0 sm:pl-4">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      action={t.is_active ? 'secondary' : 'primary'}
-                      onPress={() => toggleActive(t)}
-                      className="flex-1 sm:flex-none"
-                    >
-                      <ButtonText>{t.is_active ? 'Revoke' : 'Reactivate'}</ButtonText>
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      action="negative"
-                      onPress={() => remove(t)}
-                      className="flex-1 sm:flex-none"
-                    >
-                      <ButtonIcon as={TrashIcon} mr="$2" />
-                      <ButtonText>Delete</ButtonText>
-                    </Button>
-                  </HStack>
-                </Card>
-              )
-            })
-          )}
-        </VStack>
-      </Box>
-    </Box>
+                <div className="flex gap-5 text-xs text-slate-400 flex-wrap font-medium">
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-cyan-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span className="text-cyan-300 font-bold">{t.current_uses}</span> / {t.max_uses === 0 ? '∞' : t.max_uses} uses
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-cyan-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {t.valid_until ? new Date(t.valid_until).toLocaleDateString() : 'Never expires'}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-cyan-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Created: {new Date(t.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex sm:flex-col items-center gap-2 shrink-0 border-t sm:border-t-0 sm:border-l border-cyan-900/40 pt-4 sm:pt-0 sm:pl-5">
+                <button
+                  onClick={() => toggleActive(t)}
+                  className={`w-full text-xs font-bold px-4 py-2 rounded-xl transition-all duration-300 border cursor-pointer ${
+                    t.is_active
+                      ? 'text-slate-400 border-slate-700/80 hover:bg-slate-800 hover:text-white'
+                      : 'text-cyan-400 border-cyan-800 hover:bg-cyan-950/50 hover:border-cyan-500/60 shadow-[0_0_10px_rgba(34,211,238,0.15)]'
+                  }`}
+                >
+                  {t.is_active ? 'Revoke Access' : 'Reactivate'}
+                </button>
+                <button
+                  onClick={() => remove(t)}
+                  className="w-full text-xs font-bold px-4 py-2 rounded-xl text-red-400/70 border border-transparent hover:border-red-900/50 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 cursor-pointer"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
