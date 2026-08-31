@@ -81,6 +81,7 @@ echo "$SUDO_PASS" | sudo -S docker compose up -d --remove-orphans
 # Force Nginx to re-resolve upstream container IPs to fix 502 Bad Gateway
 echo "🔄 Reloading Nginx to clear DNS cache..."
 echo "$SUDO_PASS" | sudo -S docker compose exec -T savemedia-frontend nginx -s reload || true
+echo "$SUDO_PASS" | sudo -S docker compose exec -T admin-web nginx -s reload || true
 
 # 5. Smoke tests / Health verification
 echo "🔍 Verifying service health..."
