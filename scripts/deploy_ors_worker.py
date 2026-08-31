@@ -112,13 +112,7 @@ def main():
         f"cd {app_dir} && echo '{sudo_pass}' | sudo -S docker compose -f docker-compose.ors-worker.yml up -d --build",
         "Building and starting AI services (this takes a few minutes)")
 
-    # 6. Pull LLM models
-    print("\n  🧠 Waiting 15 seconds for Ollama to start...")
-    time.sleep(15)
-    print("  ⬇️  Downloading llama3.2 model (this may take a few minutes)...")
-    run_ssh(client,
-        f"echo '{sudo_pass}' | sudo -S docker exec ors-ollama ollama pull llama3.2",
-        "Pulling llama3.2 model")
+
 
     # 7. Verify
     run_ssh(client,
