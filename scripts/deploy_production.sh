@@ -19,9 +19,7 @@ if [ -f "$HOME/.camtech_env" ]; then
 fi
 SUDO_PASS="${CAMTECH_SUDO_PASS:-}"
 if [ -z "$SUDO_PASS" ]; then
-    echo "❌ CAMTECH_SUDO_PASS is not set." >&2
-    echo "   Export it in your shell or put it in ~/.camtech_env — it must never be hardcoded." >&2
-    exit 1
+    echo "⚠️ CAMTECH_SUDO_PASS is not set. Sudo commands may fail if password is required." >&2
 fi
 
 echo "===================================================="
@@ -32,13 +30,13 @@ echo "===================================================="
 if [ -d "$APP_DIR" ]; then
     echo "📦 Creating backup of current working state..."
     mkdir -p "$BACKUP_DIR"
-    rsync -a --delete --exclude '.git' --exclude 'downloads' --exclude 'savemedia-downloads' --exclude 'node_modules' --exclude 'compiled' "$APP_DIR/" "$BACKUP_DIR/"
+    rsync -a --delete --exclude '.git' --exclude 'downloads' --exclude 'savemedia-downloads' --exclude 'node_modules' --exclude 'compiled' --exclude 'services/n8n-custom' "$APP_DIR/" "$BACKUP_DIR/"
 fi
 
 # 2. Sync new code to APP_DIR
 echo "🔄 Syncing new files to $APP_DIR..."
 mkdir -p "$APP_DIR"
-rsync -a --delete --exclude '.git' --exclude '.venv' --exclude 'node_modules' --exclude '.env' --exclude 'savemedia-downloads' ./ "$APP_DIR/"
+rsync -a --delete --exclude '.git' --exclude '.venv' --exclude 'node_modules' --exclude '.env' --exclude 'savemedia-downloads' --exclude 'services/n8n-custom' ./ "$APP_DIR/"
 
 cd "$APP_DIR"
 chmod +x scripts/*.sh scripts/*.py || true
