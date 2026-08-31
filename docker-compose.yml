@@ -413,8 +413,8 @@ services:
       - "5678:5678"
     volumes:
       - n8n-data:/home/node/.n8n
-      - ./patched_auth.controller.js:/usr/local/lib/node_modules/n8n/dist/controllers/auth.controller.js:ro
-      - ./patched_index.html:/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-editor-ui@file+packages+frontend+editor-ui/node_modules/n8n-editor-ui/dist/index.html:ro
+      - ./services/n8n-patches/patched_auth.controller.js:/usr/local/lib/node_modules/n8n/dist/controllers/auth.controller.js:ro
+      - ./services/n8n-patches/patched_index.html:/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-editor-ui@file+packages+frontend+editor-ui/node_modules/n8n-editor-ui/dist/index.html:ro
     depends_on:
       postgres:
         condition: service_healthy

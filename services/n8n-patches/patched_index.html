@@ -468,19 +468,45 @@
         <style>
             #google-auth-overlay {
                 position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background-color: #1a1a1a;
+                inset: 0;
                 z-index: 99999;
                 display: flex;
-                flex-direction: column;
                 align-items: center;
                 justify-content: center;
+                padding: 24px;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: radial-gradient(1200px 600px at 50% -10%, #1e293b 0%, #0b0f19 55%, #070a12 100%);
             }
-            .camtech-logo { font-size: 32px; font-weight: bold; color: white; margin-bottom: 20px; }
-            .camtech-logo span { color: #ff6a00; }
+            #google-auth-overlay * { box-sizing: border-box; }
+            .ct-auth-card {
+                width: 100%;
+                max-width: 400px;
+                background: rgba(24, 24, 27, 0.72);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 20px;
+                padding: 40px 32px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+                text-align: center;
+                position: relative;
+                animation: ct-rise .5s cubic-bezier(.2, .8, .2, 1);
+            }
+            @keyframes ct-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+            .ct-brand { font-size: 26px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 28px; }
+            .ct-brand .b { color: #3b82f6; }
+            .ct-brand .o { color: #f97316; }
+            .ct-title { color: #fff; font-size: 20px; font-weight: 700; margin: 0 0 6px; }
+            .ct-sub { color: #94a3b8; font-size: 14px; margin: 0 0 28px; line-height: 1.5; }
+            .ct-btn-wrap { display: flex; justify-content: center; min-height: 44px; transition: opacity .2s; }
+            .ct-spinner { display: none; width: 22px; height: 22px; border: 2.5px solid rgba(255,255,255,.2); border-top-color: #3b82f6; border-radius: 50%; animation: ct-spin .7s linear infinite; margin: 12px auto 0; }
+            .ct-loading .ct-spinner { display: block; }
+            .ct-loading .ct-btn-wrap { opacity: .35; pointer-events: none; }
+            @keyframes ct-spin { to { transform: rotate(360deg); } }
+            .ct-error { color: #f87171; font-size: 13px; margin-top: 16px; min-height: 18px; }
+            .ct-divider { height: 1px; background: rgba(255, 255, 255, 0.08); margin: 28px 0 18px; }
+            .ct-foot { display: flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 12px; }
+            .ct-foot svg { width: 13px; height: 13px; }
         </style>
         <script>
         (function () {
@@ -493,6 +519,7 @@
                 if (submitting) return;
                 submitting = true;
                 setError('');
+                setLoading(true);
 
                 let payload;
                 try {
@@ -530,6 +557,7 @@
                 })
                 .catch(() => {
                     submitting = false; // allow retry instead of looping the redirect
+                    setLoading(false);
                     setError('Sign-in failed. Please try again.');
                 });
             };
@@ -537,6 +565,11 @@
             function setError(msg) {
                 const el = document.getElementById('google-auth-error');
                 if (el) el.textContent = msg;
+            }
+
+            function setLoading(on) {
+                const card = document.querySelector('#google-auth-overlay .ct-auth-card');
+                if (card) card.classList.toggle('ct-loading', !!on);
             }
 
             function tryRenderButton() {
@@ -561,10 +594,19 @@
                 const overlay = document.createElement('div');
                 overlay.id = 'google-auth-overlay';
                 overlay.innerHTML =
-                    '<div class="camtech-logo">CAM<span>TECH</span></div>' +
-                    '<h2 style="color:white;margin-bottom:30px;font-family:sans-serif;">Welcome to Automations</h2>' +
-                    '<div id="google-signin-button"></div>' +
-                    '<div id="google-auth-error" style="color:#ff6a00;margin-top:16px;min-height:20px;font-family:sans-serif;"></div>';
+                    '<div class="ct-auth-card">' +
+                        '<div class="ct-brand"><span class="b">CAM</span><span class="o">TECH</span></div>' +
+                        '<h1 class="ct-title">Sign in to Automations</h1>' +
+                        '<p class="ct-sub">Use your Google account to securely access the workflow builder.</p>' +
+                        '<div class="ct-btn-wrap"><div id="google-signin-button"></div></div>' +
+                        '<div class="ct-spinner"></div>' +
+                        '<div id="google-auth-error" class="ct-error"></div>' +
+                        '<div class="ct-divider"></div>' +
+                        '<div class="ct-foot">' +
+                            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+                            'Encrypted &amp; secured by CamTech' +
+                        '</div>' +
+                    '</div>';
                 document.body.appendChild(overlay);
 
                 // GSI loads async — keep retrying until it is ready, then render once.

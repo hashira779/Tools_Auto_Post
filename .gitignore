@@ -3,6 +3,13 @@
 *.env
 !.env.example
 
+# Vendored n8n source — not built here (we run the official image + patches).
+# Kept on disk for reference only; never tracked.
+services/n8n-custom/
+
+# Generated deploy artifacts
+.deployment-timestamp
+
 # Session cookies (NEVER commit - contains live session credentials)
 cookies.txt
 *.cookies

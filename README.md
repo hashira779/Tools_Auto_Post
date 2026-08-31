@@ -11,21 +11,32 @@ CamTech/
 ├── docker-compose.monitoring.yml   ← Optional Prometheus + Grafana stack
 ├── .env / .env.example             ← Environment config
 │
-├── services/
+├── services/                       ← One folder per deployable service (see services/README.md)
 │   ├── ai-orchestrator-api/        ← Central AI Agent & ReAct Logic
 │   ├── podcast-api/                ← Khmer → English Localization Engine
 │   ├── auto-post-bot/              ← Telegram bot (download → YouTube/TikTok/FB)
 │   ├── mms-tts/                    ← Offline Khmer TTS
-│   ├── savemedia-web/              ← Web downloader (MP4/MP3) + React SPA
+│   ├── savemedia-web/              ← Web downloader (MP4/MP3) + React SPA (main UI)
 │   ├── sticker-maker/              ← Sticker generation service
 │   ├── screen-share-api/           ← WebRTC signaling (Live Camera)
-│   └── admin-web/                  ← Admin dashboard
+│   ├── admin-web/                  ← Admin dashboard
+│   ├── n8n-patches/                ← Files bind-mounted over n8nio/n8n:latest
+│   │                                 (auth bypass controller + white-label index.html)
+│   └── n8n-custom/                 ← Vendored n8n source, REFERENCE ONLY (gitignored,
+│                                     not built — the official image + patches is what runs)
 │
+├── docs/                           ← DEPLOYMENT.md, SECURITY notes, dev guides
 ├── shared/                         ← Shared Python libraries
 ├── credentials/                    ← OAuth secrets (gitignored)
 ├── scripts/                        ← camtech CLI + deploy scripts
+├── config/                         ← Nginx / infra config
 └── tests/                          ← Test files
 ```
+
+> **n8n:** runs from the official `n8nio/n8n:latest` image. Customizations are the two
+> files in `services/n8n-patches/`, bind-mounted read-only in `docker-compose.yml`.
+> `services/n8n-custom/` is a full upstream clone kept on disk for reference and is
+> **not tracked or built** — don't wire anything to it.
 
 ## Frontend Routes
 
@@ -150,13 +161,15 @@ python main.py
 
 ## Adding a New Service
 
-1. Create `services/<service-name>/` with `Dockerfile` + code
-2. Add service block in root `docker-compose.yml`
-3. If it has a web frontend, add proxy rule in Nginx config
+See **[services/README.md](services/README.md)** for the service catalog, the standard
+service layout, and a copy-paste checklist/template for adding one. In short:
+
+1. Create `services/<service-name>/` following the standard layout (`Dockerfile`,
+   `.env.example`, `README.md`, code)
+2. Add a service block in root `docker-compose.yml`
+3. If it has a web frontend, add a proxy rule in the Nginx config
 4. Reuse `shared/` libraries via `PYTHONPATH`
 
 ## License
 
 See [LICENSE](LICENSE).
-> **Note:** GitHub App tokens cannot push workflow files. To enable CI, run:
-> `git mv ci.yml.github-workflow .github/workflows/ci.yml && git commit -m "ci: enable workflow" && git push`
