@@ -30,13 +30,13 @@ echo "===================================================="
 if [ -d "$APP_DIR" ]; then
     echo "📦 Creating backup of current working state..."
     mkdir -p "$BACKUP_DIR"
-    rsync -a --delete --exclude '.git' --exclude 'downloads' --exclude 'savemedia-downloads' --exclude 'node_modules' --exclude 'compiled' --exclude 'services/n8n-custom' "$APP_DIR/" "$BACKUP_DIR/"
+    echo "$SUDO_PASS" | sudo -S rsync -aq --delete --exclude '.git' --exclude 'downloads' --exclude 'savemedia-downloads' --exclude 'node_modules' --exclude 'compiled' --exclude 'services/n8n-custom' "$APP_DIR/" "$BACKUP_DIR/"
 fi
 
 # 2. Sync new code to APP_DIR
 echo "🔄 Syncing new files to $APP_DIR..."
-mkdir -p "$APP_DIR"
-rsync -a --delete --exclude '.git' --exclude '.venv' --exclude 'node_modules' --exclude '.env' --exclude 'savemedia-downloads' --exclude 'services/n8n-custom' ./ "$APP_DIR/"
+echo "$SUDO_PASS" | sudo -S mkdir -p "$APP_DIR"
+echo "$SUDO_PASS" | sudo -S rsync -aq --delete --exclude '.git' --exclude '.venv' --exclude 'node_modules' --exclude '.env' --exclude 'savemedia-downloads' --exclude 'services/n8n-custom' ./ "$APP_DIR/"
 
 cd "$APP_DIR"
 chmod +x scripts/*.sh scripts/*.py || true
@@ -69,7 +69,7 @@ if ! echo "$SUDO_PASS" | sudo -S docker compose build; then
     
     if [ -d "$BACKUP_DIR" ]; then
         echo "🔄 Restoring previous working code..."
-        rsync -a --delete "$BACKUP_DIR/" "$APP_DIR/"
+        echo "$SUDO_PASS" | sudo -S rsync -aq --delete "$BACKUP_DIR/" "$APP_DIR/"
     fi
     exit 1
 fi
@@ -140,7 +140,7 @@ if [ "$DEPLOY_FAILED" -eq 1 ]; then
     
     if [ -d "$BACKUP_DIR" ]; then
         echo "🔄 Restoring working backup..."
-        rsync -a --delete "$BACKUP_DIR/" "$APP_DIR/"
+        echo "$SUDO_PASS" | sudo -S rsync -aq --delete "$BACKUP_DIR/" "$APP_DIR/"
         cd "$APP_DIR"
         echo "$SUDO_PASS" | sudo -S docker compose up -d --build
         echo "✅ Rollback complete. Previous stable version is running."
