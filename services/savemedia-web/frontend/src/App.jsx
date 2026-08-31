@@ -6,7 +6,6 @@ import { TOOL_PATHS, toolFromPath } from './routes'
 import AppNavbar from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Footer from './components/Footer'
-import VerificationOverlay from './components/VerificationOverlay'
 import DownloaderPage from './pages/DownloaderPage'
 import PdfToolsPage from './pages/PdfToolsPage'
 import AutomationsPage from './pages/AutomationsPage'
@@ -64,8 +63,6 @@ function App() {
         activeTool={activeTool}
         onSelectTool={handleSelectTool}
       />
-
-      <VerificationOverlay />
 
       {/* Main Layout */}
       <div className="relative min-h-screen flex flex-col">
