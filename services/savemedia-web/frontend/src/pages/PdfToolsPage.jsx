@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import VerificationOverlay from '../components/VerificationOverlay'
 
@@ -12,8 +12,29 @@ export default function PdfToolsPage() {
   const [demoProgress, setDemoProgress] = useState(100)
   const [rotatedPages, setRotatedPages] = useState({ 1: 0, 2: 0, 3: 0, 4: 0 })
 
-  // Apple-Style Scrollytelling Active Stage State
+  // Apple-Style Real Scroll Track State
   const [storyStage, setStoryStage] = useState(0)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const scrollyContainerRef = useRef(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollyContainerRef.current) return
+      const rect = scrollyContainerRef.current.getBoundingClientRect()
+      const totalScrollable = scrollyContainerRef.current.offsetHeight - window.innerHeight
+      if (totalScrollable <= 0) return
+
+      const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1)
+      setScrollProgress(progress)
+
+      const stageIndex = Math.min(Math.floor(progress * 4), 3)
+      setStoryStage(stageIndex)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const runSimulation = () => {
     setIsProcessing(true)
@@ -159,7 +180,7 @@ export default function PdfToolsPage() {
   return (
     <div className="w-full flex flex-col items-center pb-24 text-slate-200 overflow-x-hidden">
       
-      {/* ── 1. HERO BANNER SECTION (RESPONSIVE) ─────────────────────── */}
+      {/* ── 1. HERO BANNER SECTION (APPLE-STYLE TYPOGRAPHY) ─────────── */}
       <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-8 text-center relative">
         {/* Ambient Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[600px] h-[350px] bg-red-600/15 rounded-full blur-[120px] pointer-events-none -z-10 animate-pulse-glow" />
@@ -379,97 +400,8 @@ export default function PdfToolsPage() {
 
         </div>
 
-        {/* ── 3. APPLE-STYLE SCROLLYTELLING INTERACTIVE STAGES ───────── */}
-        <div className="my-12 sm:my-16 text-left">
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <span className="text-xs font-mono uppercase tracking-widest text-red-400 font-bold">The Architecture of Speed</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mt-1">Engineered for Extreme Precision</h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2 px-2">Explore the four core technological pillars powering the Stirling-PDF engine.</p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center bg-[#070D18]/90 border border-red-900/30 rounded-3xl p-5 sm:p-10 shadow-2xl backdrop-blur-xl">
-            {/* Left Nav List */}
-            <div className="lg:col-span-5 space-y-3">
-              {storyStages.map((st) => (
-                <div
-                  key={st.id}
-                  onClick={() => setStoryStage(st.id)}
-                  className={`p-4 sm:p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${
-                    storyStage === st.id
-                      ? 'bg-[#131B2E] border-red-500/50 shadow-[0_0_25px_rgba(239,68,68,0.2)]'
-                      : 'bg-black/30 border-white/5 hover:border-white/15 opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-mono font-bold text-red-400 uppercase tracking-widest">
-                      Stage 0{st.id + 1}
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 bg-black/50 px-2 py-0.5 rounded border border-white/5">
-                      {st.badge}
-                    </span>
-                  </div>
-                  <h4 className="text-sm sm:text-base font-bold text-white mb-1">{st.title}</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">{st.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Right Dynamic Live Graphic Display with Rich Images */}
-            <div className="lg:col-span-7 bg-[#050B14] border border-white/10 rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center min-h-[340px] sm:min-h-[380px] text-center relative overflow-hidden shadow-inner">
-              
-              {storyStage === 0 && (
-                <div className="space-y-4 animate-fade-in w-full max-w-md">
-                  <div className="relative rounded-2xl overflow-hidden border border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.25)]">
-                    <img src="/images/pdf-ocr-card.jpg" alt="Deep OCR Scanning" className="w-full h-44 object-cover" />
-                    <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-300 to-transparent animate-scanline"></div>
-                  </div>
-                  <h4 className="text-base sm:text-lg font-bold text-white">Khmer & Dual Script OCR Engine</h4>
-                  <p className="text-xs text-slate-400">99.4% accuracy with automated deskewing and orientation correction.</p>
-                </div>
-              )}
-
-              {storyStage === 1 && (
-                <div className="space-y-4 animate-fade-in w-full max-w-sm">
-                  <div className="relative w-32 h-40 sm:w-36 sm:h-44 mx-auto bg-gradient-to-b from-red-950/60 to-slate-900 border border-red-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.3)]">
-                    <span className="text-3xl mb-2">🗜️</span>
-                    <span className="text-xs font-mono font-bold text-emerald-400">-90.4%</span>
-                    <span className="text-[10px] text-slate-400 mt-1">Lossless Vector Pass</span>
-                  </div>
-                  <h4 className="text-base sm:text-lg font-bold text-white">Lossless Vector Optimization</h4>
-                  <p className="text-xs text-slate-400">Reduces storage costs and ensures instant email transmission.</p>
-                </div>
-              )}
-
-              {storyStage === 2 && (
-                <div className="space-y-4 animate-fade-in w-full max-w-sm">
-                  <div className="relative w-32 h-40 sm:w-36 sm:h-44 mx-auto bg-gradient-to-b from-purple-950/60 to-slate-900 border border-purple-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.3)]">
-                    <span className="text-3xl mb-2">🛡️</span>
-                    <span className="text-xs font-mono font-bold text-purple-300">METADATA STRIPPED</span>
-                    <span className="text-[10px] text-slate-400 mt-1">Zero Recovery Redaction</span>
-                  </div>
-                  <h4 className="text-base sm:text-lg font-bold text-white">Cryptographic Redaction</h4>
-                  <p className="text-xs text-slate-400">Permanently destroys redacted vectors from raw PDF bytecode.</p>
-                </div>
-              )}
-
-              {storyStage === 3 && (
-                <div className="space-y-4 animate-fade-in w-full max-w-sm">
-                  <div className="relative w-32 h-40 sm:w-36 sm:h-44 mx-auto bg-gradient-to-b from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-                    <span className="text-3xl mb-2">⚡</span>
-                    <span className="text-xs font-mono font-bold text-emerald-300">DOCX · XLSX · PNG</span>
-                    <span className="text-[10px] text-slate-400 mt-1">Native Microsoft Office</span>
-                  </div>
-                  <h4 className="text-base sm:text-lg font-bold text-white">Native Office Transpiler</h4>
-                  <p className="text-xs text-slate-400">Preserves complex table spans, headers, and bullet hierarchies.</p>
-                </div>
-              )}
-
-            </div>
-          </div>
-        </div>
-
         {/* ── AUTH / ACCESS STATUS CARD ────────────────────────────── */}
-        <div className="w-full max-w-xl mx-auto mt-8">
+        <div className="w-full max-w-xl mx-auto my-8">
           {authLoading ? (
             <div className="bg-[#0B1221]/90 border border-red-900/30 rounded-3xl p-8 flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
@@ -535,8 +467,114 @@ export default function PdfToolsPage() {
         </div>
       </section>
 
+      {/* ── 3. APPLE-STYLE SCROLL-PINNED STORYTELLING SECTION ───────── */}
+      <section ref={scrollyContainerRef} className="w-full max-w-5xl mx-auto px-4 sm:px-6 relative h-[250vh] sm:h-[300vh]">
+        {/* Sticky Pinned Container */}
+        <div className="sticky top-20 sm:top-24 w-full bg-[#070D18]/95 border border-red-900/30 rounded-3xl p-5 sm:p-10 shadow-2xl backdrop-blur-2xl text-left overflow-hidden">
+          
+          {/* Section Header & Apple Scroll Indicator */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 border-b border-red-950/80 mb-6">
+            <div>
+              <span className="text-xs font-mono uppercase tracking-widest text-red-400 font-bold">The Architecture of Speed</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mt-0.5">Engineered for Extreme Precision</h2>
+            </div>
+            {/* Real Scroll Progress Tracker */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-mono text-slate-400">Scroll Story</span>
+              <div className="w-24 h-1.5 bg-black/60 rounded-full overflow-hidden border border-white/10">
+                <div 
+                  className="h-full bg-gradient-to-r from-red-500 to-rose-400 rounded-full transition-all duration-150"
+                  style={{ width: `${Math.round(scrollProgress * 100)}%` }}
+                ></div>
+              </div>
+              <span className="text-xs font-mono font-bold text-red-400">0{storyStage + 1}/04</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+            {/* Left Stage Selector List */}
+            <div className="lg:col-span-5 space-y-3">
+              {storyStages.map((st) => (
+                <div
+                  key={st.id}
+                  onClick={() => setStoryStage(st.id)}
+                  className={`p-4 sm:p-5 rounded-2xl border transition-all duration-500 cursor-pointer ${
+                    storyStage === st.id
+                      ? 'bg-[#131B2E] border-red-500/60 shadow-[0_0_30px_rgba(239,68,68,0.25)] scale-[1.02]'
+                      : 'bg-black/30 border-white/5 opacity-50 hover:opacity-80'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-mono font-bold text-red-400 uppercase tracking-widest">
+                      Stage 0{st.id + 1}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 bg-black/50 px-2 py-0.5 rounded border border-white/5">
+                      {st.badge}
+                    </span>
+                  </div>
+                  <h4 className="text-sm sm:text-base font-bold text-white mb-1">{st.title}</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">{st.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Dynamic Morphing Display */}
+            <div className="lg:col-span-7 bg-[#050B14] border border-white/10 rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[360px] text-center relative overflow-hidden shadow-inner">
+              
+              {storyStage === 0 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-md">
+                  <div className="relative rounded-2xl overflow-hidden border border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.25)]">
+                    <img src="/images/pdf-ocr-card.jpg" alt="Deep OCR Scanning" className="w-full h-44 object-cover" />
+                    <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-300 to-transparent animate-scanline"></div>
+                  </div>
+                  <h4 className="text-base sm:text-lg font-bold text-white">Khmer & Dual Script OCR Engine</h4>
+                  <p className="text-xs text-slate-400">99.4% accuracy with automated deskewing and orientation correction.</p>
+                </div>
+              )}
+
+              {storyStage === 1 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-32 h-40 sm:w-36 sm:h-44 mx-auto bg-gradient-to-b from-red-950/60 to-slate-900 border border-red-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+                    <span className="text-4xl mb-2">🗜️</span>
+                    <span className="text-sm font-mono font-bold text-emerald-400">-90.4%</span>
+                    <span className="text-[10px] text-slate-400 mt-1">Lossless Vector Pass</span>
+                  </div>
+                  <h4 className="text-base sm:text-lg font-bold text-white">Lossless Vector Optimization</h4>
+                  <p className="text-xs text-slate-400">Reduces storage costs and ensures instant email transmission.</p>
+                </div>
+              )}
+
+              {storyStage === 2 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-32 h-40 sm:w-36 sm:h-44 mx-auto bg-gradient-to-b from-purple-950/60 to-slate-900 border border-purple-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+                    <span className="text-4xl mb-2">🛡️</span>
+                    <span className="text-xs font-mono font-bold text-purple-300">METADATA STRIPPED</span>
+                    <span className="text-[10px] text-slate-400 mt-1">Zero Recovery Redaction</span>
+                  </div>
+                  <h4 className="text-base sm:text-lg font-bold text-white">Cryptographic Redaction</h4>
+                  <p className="text-xs text-slate-400">Permanently destroys redacted vectors from raw PDF bytecode.</p>
+                </div>
+              )}
+
+              {storyStage === 3 && (
+                <div className="space-y-4 animate-fade-in w-full max-w-sm">
+                  <div className="relative w-32 h-40 sm:w-36 sm:h-44 mx-auto bg-gradient-to-b from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                    <span className="text-4xl mb-2">⚡</span>
+                    <span className="text-xs font-mono font-bold text-emerald-300">DOCX · XLSX · PNG</span>
+                    <span className="text-[10px] text-slate-400 mt-1">Native Microsoft Office</span>
+                  </div>
+                  <h4 className="text-base sm:text-lg font-bold text-white">Native Office Transpiler</h4>
+                  <p className="text-xs text-slate-400">Preserves complex table spans, headers, and bullet hierarchies.</p>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── 4. POPULAR TOOLS SHOWCASE (WITH EMBEDDED IMAGES) ────────── */}
-      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Popular PDF Utilities</h2>
