@@ -131,7 +131,7 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
             <button
               onClick={() => {
                 localStorage.removeItem('camtech_pwa_dismissed')
-                window.dispatchEvent(new Event('beforeinstallprompt'))
+                window.dispatchEvent(new CustomEvent('open-pwa-install'))
               }}
               className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-3)] hover:text-blue-400 hover:bg-[var(--color-surface-2)] transition-all duration-200 cursor-pointer focus-ring hidden sm:flex border border-transparent hover:border-[var(--color-glass-border)] group"
               aria-label="Add to Home Screen"

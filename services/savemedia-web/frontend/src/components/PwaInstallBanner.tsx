@@ -37,9 +37,22 @@ export default function PwaInstallBanner() {
       setShowBanner(true)
     }
 
+    const handleOpenInstall = () => {
+      setShowBanner(true)
+      if (iosDevice || !deferredPrompt || typeof (deferredPrompt as any)?.prompt !== 'function') {
+        setShowIosGuide(true)
+      } else {
+        handleInstallClick()
+      }
+    }
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-  }, [])
+    window.addEventListener('open-pwa-install', handleOpenInstall)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('open-pwa-install', handleOpenInstall)
+    }
+  }, [deferredPrompt])
 
   const handleInstallClick = async () => {
     if (isIos) {
@@ -47,14 +60,21 @@ export default function PwaInstallBanner() {
       return
     }
 
-    if (!deferredPrompt) return
-
-    deferredPrompt.prompt()
-    const { outcome } = await deferredPrompt.userChoice
-    if (outcome === 'accepted') {
-      setShowBanner(false)
+    if (deferredPrompt && typeof deferredPrompt.prompt === 'function') {
+      try {
+        await deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
+        if (outcome === 'accepted') {
+          setShowBanner(false)
+        }
+        setDeferredPrompt(null)
+      } catch (err) {
+        console.warn('PWA install prompt error:', err)
+        setShowIosGuide(true)
+      }
+    } else {
+      setShowIosGuide(true)
     }
-    setDeferredPrompt(null)
   }
 
   const handleDismiss = () => {
