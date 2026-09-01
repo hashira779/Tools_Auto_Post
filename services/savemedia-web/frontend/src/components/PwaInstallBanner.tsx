@@ -4,7 +4,7 @@ export default function PwaInstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showBanner, setShowBanner] = useState(false)
   const [isIos, setIsIos] = useState(false)
-  const [showIosGuide, setShowIosGuide] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
 
   useEffect(() => {
     // Check if already running in standalone mode (already installed)
@@ -19,16 +19,10 @@ export default function PwaInstallBanner() {
       return
     }
 
-    // Detect iOS
+    // Detect iOS device
     const userAgent = window.navigator.userAgent.toLowerCase()
     const iosDevice = /iphone|ipad|ipod/.test(userAgent)
     setIsIos(iosDevice)
-
-    if (iosDevice) {
-      // Show banner after 3 seconds on iOS
-      const timer = setTimeout(() => setShowBanner(true), 3000)
-      return () => clearTimeout(timer)
-    }
 
     // Android / Chrome / Edge prompt event listener
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -38,9 +32,8 @@ export default function PwaInstallBanner() {
     }
 
     const handleOpenInstall = () => {
-      setShowBanner(true)
       if (iosDevice || !deferredPrompt || typeof (deferredPrompt as any)?.prompt !== 'function') {
-        setShowIosGuide(true)
+        setShowGuide(true)
       } else {
         handleInstallClick()
       }
@@ -56,7 +49,7 @@ export default function PwaInstallBanner() {
 
   const handleInstallClick = async () => {
     if (isIos) {
-      setShowIosGuide(true)
+      setShowGuide(true)
       return
     }
 
@@ -66,111 +59,140 @@ export default function PwaInstallBanner() {
         const { outcome } = await deferredPrompt.userChoice
         if (outcome === 'accepted') {
           setShowBanner(false)
+          setShowGuide(false)
         }
         setDeferredPrompt(null)
       } catch (err) {
         console.warn('PWA install prompt error:', err)
-        setShowIosGuide(true)
+        setShowGuide(true)
       }
     } else {
-      setShowIosGuide(true)
+      setShowGuide(true)
     }
   }
 
   const handleDismiss = () => {
     setShowBanner(false)
-    setShowIosGuide(false)
+    setShowGuide(false)
     localStorage.setItem('camtech_pwa_dismissed', Date.now().toString())
   }
 
-  if (!showBanner) return null
-
   return (
     <>
-      {/* ── Android & General PWA Install Toast Banner ────────────────── */}
-      <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 animate-bounce-in">
-        <div className="bg-slate-900/95 border border-blue-500/40 rounded-2xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl text-white flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shrink-0 shadow-md p-2 border border-white/20">
-              <img src="/camtech-icon.svg" alt="CamTech Icon" className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                <span>Add CamTech to Home Screen</span>
-                <span className="text-[10px] bg-blue-500/30 text-blue-300 px-1.5 py-0.2 rounded font-mono">App</span>
-              </h4>
-              <p className="text-[11px] text-slate-300 leading-tight mt-0.5">
-                {isIos ? 'Install on iOS for 1-tap full screen access' : 'Fast 1-tap installation for iOS & Android'}
-              </p>
-            </div>
-          </div>
+      {/* ── 1. FLOATING TOAST BANNER (BOTTOM-RIGHT) ────────────────────── */}
+      {showBanner && !showGuide && (
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[380px] z-50 animate-fade-in">
+          <div className="bg-[#0B1221]/95 border border-blue-500/30 rounded-3xl p-4 sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-2xl text-white flex items-center justify-between gap-3 relative overflow-hidden">
+            {/* Ambient Background Glow */}
+            <div className="absolute -top-10 -left-10 w-28 h-28 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={handleInstallClick}
-              className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer transition-transform hover:scale-105 active:scale-95"
-            >
-              {isIos ? 'How to Add' : 'Install'}
-            </button>
-            <button
-              onClick={handleDismiss}
-              className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-bold flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Close"
-            >
-              ✕
-            </button>
+            <div className="flex items-center gap-3.5 relative z-10">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 p-2.5 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(37,99,235,0.4)] border border-white/20">
+                <img src="/camtech-icon.svg" alt="CamTech Icon" className="w-full h-full object-contain filter drop-shadow" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h4 className="text-sm font-bold text-white tracking-tight">CamTech App</h4>
+                  <span className="text-[10px] font-mono font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.2 rounded-full">
+                    PWA
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 leading-tight mt-0.5">
+                  {isIos ? 'Add to Home Screen for 1-tap full screen' : 'Install for offline & instant full screen access'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 relative z-10 shrink-0">
+              <button
+                onClick={handleInstallClick}
+                className="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl text-xs font-bold shadow-[0_0_15px_rgba(37,99,235,0.4)] cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap"
+              >
+                {isIos ? 'Install' : 'Install'}
+              </button>
+              <button
+                onClick={handleDismiss}
+                className="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-bold flex items-center justify-center transition-colors cursor-pointer border border-slate-700/60"
+                aria-label="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* ── iOS Step-by-Step Interactive Modal Guide ────────────────── */}
-      {showIosGuide && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-end sm:items-center justify-center p-4 animate-fade-in">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-sm w-full text-left space-y-4 shadow-2xl text-white">
+      {/* ── 2. APPLE-GRADE BOTTOM SHEET / MODAL INSTALL GUIDE ─────────── */}
+      {showGuide && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-3 sm:p-4 animate-fade-in">
+          <div className="bg-[#0B1221] border border-slate-800 rounded-3xl p-6 sm:p-7 max-w-md w-full text-left shadow-[0_25px_70px_rgba(0,0,0,0.8)] text-white relative overflow-hidden space-y-5">
+            {/* Top Ambient Light */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-purple-500"></div>
+
+            {/* Header with App Identity */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🍏</span>
-                <h3 className="text-base font-bold text-white">Add CamTech on iOS</h3>
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-400 p-2 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.35)] border border-white/20">
+                  <img src="/camtech-icon.svg" alt="CamTech Icon" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-1.5">
+                    <span>Install CamTech</span>
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded-full font-mono">
+                      ✓ Ready
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">Add to Home Screen for fast native experience</p>
+                </div>
               </div>
+
               <button
-                onClick={() => setShowIosGuide(false)}
-                className="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs cursor-pointer"
+                onClick={() => setShowGuide(false)}
+                className="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer border border-slate-700"
               >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Follow these 2 quick steps in Safari or Chrome to add CamTech to your iPhone / iPad Home Screen:
-            </p>
-
-            <div className="space-y-3 bg-slate-800/60 p-4 rounded-2xl border border-slate-700 text-xs">
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">1</span>
+            {/* Visual Step-by-Step Cards */}
+            <div className="space-y-2.5">
+              {/* Step 1 */}
+              <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 flex items-center gap-3.5 transition-all">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                </div>
                 <div>
-                  <span className="font-bold text-white">Tap the Share button</span>
-                  <p className="text-slate-400 text-[11px] mt-0.5 flex items-center gap-1">
-                    Tap <span className="px-1.5 py-0.5 bg-slate-700 rounded font-mono text-blue-300">⎋ (Share)</span> icon at the bottom of Safari browser.
+                  <span className="text-xs font-bold text-white block">1. Tap the Share button</span>
+                  <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                    Tap the <span className="text-blue-300 font-semibold">Share</span> icon in Safari bottom bar or Chrome menu.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 pt-2 border-t border-slate-700/60">
-                <span className="w-6 h-6 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">2</span>
+              {/* Step 2 */}
+              <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 flex items-center gap-3.5 transition-all">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
                 <div>
-                  <span className="font-bold text-white">Select "Add to Home Screen"</span>
-                  <p className="text-slate-400 text-[11px] mt-0.5 flex items-center gap-1">
-                    Scroll down and tap <span className="px-1.5 py-0.5 bg-slate-700 rounded font-mono text-emerald-300">➕ Add to Home Screen</span>.
+                  <span className="text-xs font-bold text-white block">2. Tap "Add to Home Screen"</span>
+                  <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                    Scroll down and select <span className="text-cyan-300 font-semibold">Add to Home Screen</span>.
                   </p>
                 </div>
               </div>
             </div>
 
+            {/* Bottom Action Button */}
             <button
-              onClick={() => setShowIosGuide(false)}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+              onClick={() => setShowGuide(false)}
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-2xl text-xs font-bold shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all cursor-pointer text-center"
             >
-              Got it!
+              Got it, Close
             </button>
           </div>
         </div>
