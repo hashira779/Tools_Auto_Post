@@ -1,9 +1,19 @@
 import { useState, useEffect, createContext, useContext } from 'react'
 import { supabase } from '../lib/supabase'
 
-const AuthContext = createContext({})
+export interface AuthContextType {
+  session: any
+  user: any
+  dbUser: any
+  loading: boolean
+  loginWithGoogle: () => Promise<void>
+  logout: () => Promise<void>
+  refreshDbUser: () => Promise<boolean>
+}
 
-export function AuthProvider({ children }) {
+const AuthContext = createContext<AuthContextType>({} as AuthContextType)
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState(null)
   const [user, setUser] = useState(null)
   const [dbUser, setDbUser] = useState(null)

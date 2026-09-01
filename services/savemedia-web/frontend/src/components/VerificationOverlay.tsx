@@ -1,7 +1,13 @@
 import React, { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 
-export default function VerificationOverlay({ onVerified, title = "Activate Access", subtitle = "Enter your secure token key to unlock this workspace." }) {
+interface VerificationOverlayProps {
+  onVerified?: (data?: any) => void
+  title?: string
+  subtitle?: string
+}
+
+export default function VerificationOverlay({ onVerified, title = "Activate Access", subtitle = "Enter your secure token key to unlock this workspace." }: VerificationOverlayProps) {
   const { session, dbUser, refreshDbUser, logout } = useAuth()
   const [token, setToken] = useState('')
   const [error, setError] = useState('')
