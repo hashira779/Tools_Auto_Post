@@ -84,8 +84,8 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
             <CamtechLogo variant="full" theme="color" width={130} />
           </button>
 
-          {/* ── Center: Nav Tabs (Desktop) ────────────── */}
-          <nav className="hidden md:flex items-center gap-1" role="tablist" aria-label="Tools">
+          {/* ── Center: Nav Tabs (Desktop / Scrollable) ────────────── */}
+          <nav className="hidden md:flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-[680px] py-1" role="tablist" aria-label="Tools">
             {NAV_TOOLS.map((tool) => {
               const isActive = activeTool === tool.id
               return (
@@ -94,9 +94,9 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => onSelectTool(tool.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-[13px] font-semibold transition-all duration-200 cursor-pointer focus-ring relative ${
+                  className={`px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all duration-200 cursor-pointer focus-ring whitespace-nowrap shrink-0 relative ${
                     isActive
-                      ? 'text-white bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_12px_rgba(37,99,235,0.4)] scale-[1.03]'
+                      ? 'text-white bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_12px_rgba(37,99,235,0.4)]'
                       : 'text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] border border-transparent'
                   }`}
                 >

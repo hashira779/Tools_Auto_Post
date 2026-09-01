@@ -369,24 +369,24 @@ export default function AutomationsPage() {
       {/* ── 3. APPLE-STYLE SCROLL-PINNED STORYTELLING SECTION ───────── */}
       <section ref={scrollyContainerRef} className="w-full max-w-5xl mx-auto px-4 sm:px-6 relative h-[250vh] sm:h-[300vh]">
         {/* Sticky Pinned Container */}
-        <div className="sticky top-20 sm:top-24 w-full bg-white/95 border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-2xl backdrop-blur-2xl text-left overflow-hidden">
+        <div className="sticky top-24 sm:top-28 w-full bg-[var(--color-surface-1)] border border-[var(--color-border)] rounded-3xl p-5 sm:p-10 shadow-2xl backdrop-blur-2xl text-left overflow-hidden">
           
           {/* Section Header & Apple Scroll Indicator */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 border-b border-slate-200 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 border-b border-[var(--color-border)] mb-6">
             <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-orange-600 font-bold">Autonomous Engine</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-0.5">Autonomous Intelligence in Motion</h2>
+              <span className="text-xs font-mono uppercase tracking-widest text-orange-500 font-bold">Autonomous Engine</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)] mt-0.5">Autonomous Intelligence in Motion</h2>
             </div>
             {/* Real Scroll Progress Tracker */}
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono text-slate-600">Scroll Story</span>
-              <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden border border-slate-200">
+              <span className="text-xs font-mono text-[var(--color-text-3)]">Scroll Story</span>
+              <div className="w-24 h-1.5 bg-[var(--color-surface-3)] rounded-full overflow-hidden border border-[var(--color-border)]">
                 <div 
                   className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-150"
                   style={{ width: `${Math.round(scrollProgress * 100)}%` }}
                 ></div>
               </div>
-              <span className="text-xs font-mono font-bold text-orange-600">0{storyStage + 1}/04</span>
+              <span className="text-xs font-mono font-bold text-orange-500">0{storyStage + 1}/04</span>
             </div>
           </div>
 
@@ -399,26 +399,26 @@ export default function AutomationsPage() {
                   onClick={() => setStoryStage(st.id)}
                   className={`p-4 sm:p-5 rounded-2xl border transition-all duration-500 cursor-pointer ${
                     storyStage === st.id
-                      ? 'bg-white shadow-md border-orange-500/60 shadow-[0_0_30px_rgba(249,115,22,0.25)] scale-[1.02]'
-                      : 'bg-slate-50 border-slate-200 opacity-50 hover:opacity-80'
+                      ? 'bg-[var(--color-surface-2)] shadow-md border-orange-500/60 shadow-[0_0_30px_rgba(249,115,22,0.25)] scale-[1.02]'
+                      : 'bg-[var(--color-surface-1)] border-[var(--color-border)] opacity-60 hover:opacity-100'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-mono font-bold text-orange-600 uppercase tracking-widest">
+                    <span className="text-xs font-mono font-bold text-orange-500 uppercase tracking-widest">
                       Stage 0{st.id + 1}
                     </span>
-                    <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 bg-white shadow-sm px-2 py-0.5 rounded border border-slate-200">
+                    <span className="text-[10px] sm:text-[11px] font-semibold text-[var(--color-text-3)] bg-[var(--color-surface-3)] px-2 py-0.5 rounded border border-[var(--color-border)]">
                       {st.badge}
                     </span>
                   </div>
-                  <h4 className="text-sm sm:text-base font-bold text-slate-900 mb-1">{st.title}</h4>
-                  <p className="text-xs text-slate-600 leading-relaxed">{st.desc}</p>
+                  <h4 className="text-sm sm:text-base font-bold text-[var(--color-text)] mb-1">{st.title}</h4>
+                  <p className="text-xs text-[var(--color-text-3)] leading-relaxed">{st.desc}</p>
                 </div>
               ))}
             </div>
 
             {/* Right Dynamic Morphing Display */}
-            <div className="lg:col-span-7 bg-slate-50 border border-slate-200 rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[360px] text-center relative overflow-hidden shadow-inner">
+            <div className="lg:col-span-7 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[360px] text-center relative overflow-hidden shadow-inner">
               
               {storyStage === 0 && (
                 <div className="space-y-4 animate-fade-in w-full max-w-sm">
