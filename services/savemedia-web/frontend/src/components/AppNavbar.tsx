@@ -94,10 +94,10 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => onSelectTool(tool.id)}
-                  className={`px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all duration-200 cursor-pointer focus-ring ${
+                  className={`px-3.5 py-1.5 rounded-xl text-[13px] font-semibold transition-all duration-200 cursor-pointer focus-ring relative ${
                     isActive
-                      ? 'text-[var(--color-text)] bg-[var(--color-surface-2)] shadow-sm border border-[var(--color-glass-border)]'
-                      : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-1)] border border-transparent'
+                      ? 'text-white bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_12px_rgba(37,99,235,0.4)] scale-[1.03]'
+                      : 'text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] border border-transparent'
                   }`}
                 >
                   {tool.label}
