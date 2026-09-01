@@ -70,8 +70,18 @@ export function AuthProvider({ children }) {
     if (error) console.error("Logout error:", error.message)
   }
 
+  // Updated refreshDbUser to be async and await the fetch
+  const refreshDbUser = async () => {
+    if (session?.access_token) {
+      setLoading(true)
+      await fetchDbUser(session.access_token)
+      return true
+    }
+    return false
+  }
+
   return (
-    <AuthContext.Provider value={{ session, user, dbUser, loading, loginWithGoogle, logout, refreshDbUser: () => session && fetchDbUser(session.access_token) }}>
+    <AuthContext.Provider value={{ session, user, dbUser, loading, loginWithGoogle, logout, refreshDbUser }}>
       {children}
     </AuthContext.Provider>
   )
