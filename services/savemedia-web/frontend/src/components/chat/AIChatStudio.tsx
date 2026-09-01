@@ -95,19 +95,19 @@ export default function AIChatStudio() {
 
   if (!user) {
     return (
-      <div className="w-full h-[calc(100vh-64px)] bg-gray-50 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 sm:p-12 flex flex-col items-center text-center animate-slide-up border border-gray-100">
-          <div className="w-16 h-16 rounded-full bg-black flex items-center justify-center shadow-lg mb-6">
+      <div className="w-full h-[calc(100vh-64px)] bg-[var(--color-surface)] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-[var(--color-surface-1)] rounded-3xl shadow-xl p-8 sm:p-12 flex flex-col items-center text-center animate-slide-up border border-[var(--color-border)]">
+          <div className="w-16 h-16 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center shadow-lg mb-6">
             <span className="text-3xl font-bold text-white">C</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">CAMTECH AI</h1>
-          <p className="text-gray-500 mb-10 text-lg leading-relaxed">
+          <h1 className="text-3xl font-bold text-[var(--color-text)] mb-4">CAMTECH AI</h1>
+          <p className="text-[var(--color-text-3)] mb-10 text-lg leading-relaxed">
             Sign in to start chatting.<br/>
             <span className="text-sm">Your account lets CAMTECH securely save your conversations and AI history.</span>
           </p>
           <button 
             onClick={loginWithGoogle}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold py-4 rounded-xl transition-all shadow-sm active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-3 bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:opacity-90 text-[var(--color-text)] font-semibold py-4 rounded-xl transition-all shadow-sm active:scale-[0.98]"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -337,8 +337,8 @@ export default function AIChatStudio() {
               disabled={!input.trim() || loading || isUploading}
               className={`p-2 rounded-full flex items-center justify-center transition-all duration-200 z-10 mr-1
                 ${!input.trim() || loading || isUploading
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                  : 'bg-black text-white hover:bg-gray-800 shadow-sm active:scale-95'
+                  ? 'bg-[var(--color-surface-3)] text-[var(--color-text-4)] cursor-not-allowed' 
+                  : 'bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] shadow-sm active:scale-95'
                 }`}
             >
               {loading && input.trim() === '' ? (

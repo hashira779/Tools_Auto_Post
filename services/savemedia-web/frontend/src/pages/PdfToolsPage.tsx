@@ -580,7 +580,7 @@ export default function PdfToolsPage() {
           </div>
 
           {/* Category Tabs */}
-          <div className="flex items-center gap-1 bg-[#0B1221] p-1 rounded-2xl border border-slate-200 overflow-x-auto max-w-full">
+          <div className="flex items-center gap-1 bg-[var(--color-surface-2)] p-1 rounded-2xl border border-[var(--color-border)] overflow-x-auto max-w-full">
             {categories.map((c) => (
               <button
                 key={c.id}

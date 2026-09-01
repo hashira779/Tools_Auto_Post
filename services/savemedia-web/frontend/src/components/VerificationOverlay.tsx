@@ -94,7 +94,7 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
                 placeholder="CAM-XXXX-XXXX"
                 value={token}
                 onChange={(e) => setToken(e.target.value.toUpperCase())}
-                className="w-full bg-[#03060D] border-2 border-cyan-500/40 focus:border-cyan-400 rounded-2xl px-4 py-3.5 text-cyan-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 transition-all duration-200"
+                className="w-full bg-[var(--color-surface-2)] border-2 border-cyan-500/40 focus:border-cyan-400 rounded-2xl px-4 py-3.5 text-[var(--color-text)] placeholder-[var(--color-text-4)] focus:outline-none focus:ring-2 focus:ring-cyan-400/30 transition-all duration-200"
                 disabled={loading}
                 autoFocus
               />
