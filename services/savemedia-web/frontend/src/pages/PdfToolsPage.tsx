@@ -5,6 +5,7 @@ import VerificationOverlay from '../components/VerificationOverlay'
 export default function PdfToolsPage() {
   const { dbUser, session, loading: authLoading, loginWithGoogle } = useAuth()
   const [activeCategory, setActiveCategory] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Interactive Live Simulator State
   const [activeDemo, setActiveDemo] = useState('compress')
@@ -244,9 +245,13 @@ export default function PdfToolsPage() {
     }
   ]
 
-  const filteredTools = activeCategory === 'all' 
-    ? toolCards 
-    : toolCards.filter(t => t.category === activeCategory)
+  const filteredTools = toolCards.filter(t => {
+    const matchesCategory = activeCategory === 'all' || t.category === activeCategory
+    const matchesSearch = searchQuery === '' || 
+      t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      t.desc.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesCategory && matchesSearch
+  })
 
   return (
     <main className="w-full flex flex-col items-center animate-fade-in text-[var(--color-text)] relative z-10">
@@ -759,75 +764,124 @@ export default function PdfToolsPage() {
         </div>
       </section>
 
-      {/* ── 4. POPULAR TOOLS SHOWCASE (WITH EMBEDDED IMAGES) ────────── */}
+      {/* ── 4. STIRLING-PDF TOOLS SHOWCASE WITH SEARCH & CATEGORIES ── */}
       <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Popular PDF Utilities</h2>
-            <p className="text-slate-600 text-xs sm:text-sm mt-1">Explore some of the 50+ built-in modules included in the suite.</p>
+        <div className="space-y-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <span className="text-xs font-mono font-bold uppercase tracking-widest text-red-600">Stirling PDF Core Suite</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Popular PDF Utilities</h2>
+              <p className="text-slate-600 text-xs sm:text-sm mt-0.5">Explore 50+ built-in modules for editing, OCR, conversion, and cloud image integration.</p>
+            </div>
+
+            {/* Instant Search Bar */}
+            <div className="relative min-w-[280px] sm:min-w-[320px]">
+              <input
+                type="text"
+                placeholder="🔍 Search tools (e.g. OCR, Merge, Google, Compress)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-300 focus:border-red-500 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none shadow-sm transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Category Tabs */}
-          <div className="flex items-center gap-1 bg-[var(--color-surface-2)] p-1 rounded-2xl border border-[var(--color-border)] overflow-x-auto max-w-full">
-            {categories.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setActiveCategory(c.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  activeCategory === c.id
-                    ? 'bg-red-500/20 text-red-700 border border-red-500/40 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/5 border border-transparent'
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
+          {/* Category Tabs with Counts */}
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 overflow-x-auto max-w-full">
+            {categories.map((c) => {
+              const count = c.id === 'all'
+                ? toolCards.length
+                : toolCards.filter(t => t.category === c.id).length
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setActiveCategory(c.id)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                    activeCategory === c.id
+                      ? 'bg-red-600 text-white shadow-md'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/80 border border-transparent'
+                  }`}
+                >
+                  <span>{c.label}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                    activeCategory === c.id ? 'bg-red-800 text-white' : 'bg-slate-200 text-slate-600'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTools.map((t, idx) => (
-            <div
-              key={idx}
-              className="bg-white border border-slate-200 hover:border-slate-600 rounded-2xl p-6 transition-all duration-200 flex flex-col justify-between group"
+        {filteredTools.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center shadow-sm my-6 space-y-3">
+            <div className="text-3xl">🔍</div>
+            <h3 className="text-lg font-bold text-slate-800">No PDF Tools Found</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">No tools match your search "{searchQuery}". Try searching for terms like "OCR", "Merge", or "Google".</p>
+            <button
+              onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}
+              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-bold border border-red-200 cursor-pointer transition-colors"
             >
-              <div className="flex flex-col h-full justify-between">
-                {t.image && (
-                  <div className="mb-4 rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
-                    <img src={t.image} alt={t.title} className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                )}
+              Reset Search Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTools.map((t, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-slate-200 hover:border-red-500/40 rounded-3xl p-6 transition-all duration-300 flex flex-col justify-between group shadow-sm hover:shadow-[0_0_30px_rgba(239,68,68,0.12)] hover:-translate-y-1"
+              >
+                <div className="flex flex-col h-full justify-between">
+                  {t.image && (
+                    <div className="mb-4 rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+                      <img src={t.image} alt={t.title} className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  )}
 
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-red-50 border border-slate-200 flex items-center justify-center group-hover:border-red-500/40 group-hover:bg-red-50 transition-colors shadow-inner">
-                    {t.icon}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-11 h-11 rounded-2xl bg-red-50 border border-red-200/60 flex items-center justify-center group-hover:border-red-500/40 group-hover:bg-red-100/50 transition-colors shadow-inner">
+                      {t.icon}
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2.5 py-1 rounded-full border border-red-200">
+                      {t.badge}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2.5 py-1 rounded-full border border-red-200">
-                    {t.badge}
-                  </span>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-1.5 group-hover:text-red-600 transition-colors">
+                    {t.title}
+                  </h3>
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
+                    {t.desc}
+                  </p>
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2 group-hover:text-red-700 transition-colors">
-                  {t.title}
-                </h3>
-                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
-                  {t.desc}
-                </p>
-              </div>
 
-                <div className="pt-6 mt-auto">
+                <div className="pt-4 mt-auto border-t border-slate-100">
                   <a
                     href="/pdf/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold px-4 py-2.5 rounded-lg text-sm transition-colors border border-slate-300"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-red-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all duration-300 shadow-sm cursor-pointer"
                   >
                     <span>Launch Tool</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                   </a>
                 </div>
-            </div>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ── 5. WHY CAMTECH PDF TOOLS ───────────────────────────────── */}
