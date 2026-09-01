@@ -107,8 +107,12 @@ function App() {
           {/* PDF Tools (Stirling-PDF iframe) */}
           <Route path="/pdf-tools" element={<PdfToolsPage />} />
 
-          {/* Workflow Automations */}
-          <Route path="/automations" element={<AutomationsPage />} />
+          {/* Workflow Automations — Now properly wrapped */}
+          <Route path="/automations" element={
+            <div className="flex-1 w-full flex flex-col items-center pt-12 pb-24">
+              <AutomationsPage />
+            </div>
+          } />
 
           {/* Live Camera — host studio */}
           <Route path="/live" element={
