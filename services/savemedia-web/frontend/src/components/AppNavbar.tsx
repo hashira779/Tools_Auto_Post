@@ -78,7 +78,7 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
           {/* ── Left: Logo ────────────────────────────── */}
           <button
             onClick={() => onSelectTool(TOOL_DOWNLOADER)}
-            className="flex items-center select-none cursor-pointer group focus-ring rounded-lg py-1.5 px-2 -ml-2 transition-transform hover:scale-105 text-slate-900 dark:text-white"
+            className="flex items-center select-none cursor-pointer group focus-ring rounded-lg py-1.5 px-2 -ml-2 transition-transform hover:scale-105 text-[var(--color-text)]"
             aria-label="CamTech home"
           >
             <CamtechLogo variant="full" theme="color" width={130} />

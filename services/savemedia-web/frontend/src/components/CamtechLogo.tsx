@@ -37,8 +37,8 @@ export default function CamtechLogo({
       break
     case 'color':
     default:
-      // Brand colors based exactly on the logo
-      fillDark = 'currentColor'
+      // Brand colors based exactly on the logo: dark parts use dynamic text color (navy in light, white in dark)
+      fillDark = 'var(--color-text, currentColor)'
       fillBlue = '#1473E6'
       fillCyan = '#19B5FE'
       gradTop = 'url(#camtech-top-grad)'
