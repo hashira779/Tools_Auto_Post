@@ -157,29 +157,27 @@ export default function AutomationsPage() {
     : templates.filter(t => t.category === activeTab)
 
   return (
-    <div className="w-full flex flex-col items-center pb-24 text-slate-200 overflow-x-hidden">
+    <div className="w-full min-h-screen bg-slate-950 flex flex-col items-center pb-24 text-slate-200 overflow-x-hidden relative z-10">
       
-      {/* ── 1. HERO BANNER SECTION (APPLE-STYLE TYPOGRAPHY) ─────────── */}
-      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-8 text-center relative">
-        {/* Ambient Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[600px] h-[350px] bg-orange-600/15 rounded-full blur-[120px] pointer-events-none -z-10 animate-pulse-glow" />
-
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs font-bold uppercase tracking-wider mb-6 shadow-[0_0_20px_rgba(249,115,22,0.2)] animate-fade-in">
-          <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping"></span>
-          AI-Powered n8n Workflow Automation · 400+ Connectors
+      {/* ── 1. HERO BANNER SECTION (CLEAN PROFESSIONAL SAAS) ─────────── */}
+      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-12 text-center relative">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-300 text-xs sm:text-sm font-medium mb-6">
+          <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+          Enterprise n8n Automations
         </div>
 
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-orange-100 to-amber-300 tracking-tight leading-tight mb-6 break-words">
-          Automate Any Task. <br className="hidden sm:inline" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">Connect 400+ Apps With AI</span>
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight mb-6">
+          Automate Any Task.
+          <br className="hidden sm:inline" />
+          <span className="text-slate-400"> Connect 400+ Apps.</span>
         </h1>
 
-        <p className="text-sm sm:text-base lg:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-8 px-2">
-          Visual drag-and-drop workflow builder connected natively to CamTech AI models (Ollama, Kokoro-82M, Telegram Bot, Celery). Build self-running bots and pipelines with <span className="text-slate-200 font-semibold">zero coding required</span>.
+        <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-12">
+          Visual drag-and-drop workflow builder natively connected to local AI models. Build self-running bots and pipelines with zero coding required.
         </p>
 
         {/* ── 2. REAL INTERACTIVE CODE-DRIVEN WORKFLOW SIMULATOR ──────── */}
-        <div className="w-full relative mx-auto mb-10 rounded-3xl overflow-hidden border border-orange-500/30 bg-[#0B1221]/95 shadow-[0_0_50px_rgba(249,115,22,0.2)] backdrop-blur-2xl text-left p-4 sm:p-8">
+        <div className="w-full relative mx-auto mb-16 rounded-2xl overflow-hidden border border-slate-800 bg-[#0B1120] shadow-2xl text-left p-6 sm:p-8">
           
           {/* Header Controls */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-orange-950/80">
@@ -506,9 +504,9 @@ export default function AutomationsPage() {
           {filteredTemplates.map((t, idx) => (
             <div
               key={idx}
-              className="bg-gradient-to-b from-[#0B1221]/80 to-[#050B14]/80 border border-orange-950/60 rounded-3xl p-5 sm:p-7 hover:border-orange-500/40 hover:shadow-[0_0_25px_rgba(249,115,22,0.12)] transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+              className="bg-slate-900/50 border border-slate-800 hover:border-slate-600 rounded-2xl p-6 transition-all duration-200 flex flex-col justify-between group"
             >
-              <div>
+              <div className="flex flex-col h-full justify-between">
                 {t.image && (
                   <div className="mb-4 rounded-2xl overflow-hidden border border-white/10 shadow-inner">
                     <img src={t.image} alt={t.title} className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -541,15 +539,18 @@ export default function AutomationsPage() {
                 </div>
               </div>
 
-              <a
-                href="/n8n/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 bg-slate-900/90 hover:bg-orange-600/20 text-slate-300 hover:text-orange-300 font-bold px-4 py-3 rounded-xl text-xs transition-all duration-300 border border-slate-800 hover:border-orange-500/40 cursor-pointer"
-              >
-                <span>Open in Workflow Builder</span>
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-              </a>
+                <div className="pt-6 mt-auto">
+                  <a
+                    href="/n8n/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition-colors border border-slate-700 hover:border-slate-600"
+                  >
+                    <span>Open Template</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  </a>
+                </div>
+              </div>
             </div>
           ))}
         </div>
