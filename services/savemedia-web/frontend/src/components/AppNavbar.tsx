@@ -127,6 +127,21 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
           {/* ── Right: Fullscreen + Theme + Mobile Menu ─────────────── */}
           <div className="flex items-center gap-2">
 
+            {/* Install App Quick Button */}
+            <button
+              onClick={() => {
+                localStorage.removeItem('camtech_pwa_dismissed')
+                window.dispatchEvent(new Event('beforeinstallprompt'))
+              }}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl text-[11px] font-bold shadow-sm transition-all duration-200 cursor-pointer hover:scale-105"
+              title="Add to Home Screen (iOS & Android)"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+              </svg>
+              <span>Add App</span>
+            </button>
+
             {/* Fullscreen Toggle Button */}
             <button
               onClick={toggleFullscreen}

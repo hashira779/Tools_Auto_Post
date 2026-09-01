@@ -1,0 +1,23 @@
+{
+  "name": "CamTech — Free Media & PDF Tools",
+  "short_name": "CamTech",
+  "description": "Free all-in-one media studio & PDF suite. Video downloader, text-to-speech, PDF tools, AI studio.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/camtech-icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/camtech-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

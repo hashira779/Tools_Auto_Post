@@ -6,6 +6,7 @@ import { TOOL_PATHS, toolFromPath } from './routes'
 import AppNavbar from './components/AppNavbar'
 import AppSidebar from './components/AppSidebar'
 import Footer from './components/Footer'
+import PwaInstallBanner from './components/PwaInstallBanner'
 import DownloaderPage from './pages/DownloaderPage'
 import PdfToolsPage from './pages/PdfToolsPage'
 import AutomationsPage from './pages/AutomationsPage'
@@ -149,6 +150,7 @@ function App() {
 
         {activeTool !== 'pdf' && activeTool !== 'screen-share' && activeTool !== 'automation' && <Footer />}
       </div>
+      <PwaInstallBanner />
     </>
   )
 }
