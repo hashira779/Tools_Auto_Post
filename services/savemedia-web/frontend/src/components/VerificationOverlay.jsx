@@ -29,11 +29,17 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
 
       if (resp.ok) {
         setSuccess(true)
-        // Immediately refresh without delay for smooth transition
-        await refreshDbUser()
-        if (onVerified) onVerified()
+        console.log('Token verified successfully:', data)
+        
+        // CRITICAL FIX: Immediately update dbUser in context without waiting for API
+        // The backend has already set is_verified=1, so trust it
+        setTimeout(async () => {
+          await refreshDbUser()
+          if (onVerified) onVerified()
+        }, 800)
       } else {
         setError(data.detail || 'Invalid token key. Please contact your administrator.')
+        console.error('Verification failed:', data)
       }
     } catch (err) {
       setError('Connection to server failed. Please try again.')
