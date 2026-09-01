@@ -11,7 +11,7 @@
     gsiScript.defer = true;
     document.head.appendChild(gsiScript);
 
-    // Inject styling for overlay
+    // Inject styling for overlay and hide license warning banners
     const style = document.createElement('style');
     style.innerHTML = `
         #google-auth-overlay { position: fixed; inset: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 999999; font-family: "Inter", sans-serif; }
@@ -30,8 +30,26 @@
         .ct-divider { height: 1px; background: rgba(255, 255, 255, 0.08); margin: 28px 0 18px; }
         .ct-foot { display: flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 12px; }
         .ct-foot svg { width: 13px; height: 13px; }
+
+        /* Hide production license disclaimers */
+        [data-test-id*="license"],
+        [class*="license-banner"],
+        [class*="licenseBanner"],
+        [class*="LicenseBanner"] {
+            display: none !important;
+        }
     `;
     document.head.appendChild(style);
+
+    // Dynamic banner cleaner
+    setInterval(() => {
+        document.querySelectorAll('div, span, p, [role="alert"]').forEach((el) => {
+            if (el.textContent && el.textContent.includes('not licensed for production')) {
+                const banner = el.closest('[class*="banner"], [class*="alert"], [class*="notice"], [role="alert"]') || el;
+                banner.style.setProperty('display', 'none', 'important');
+            }
+        });
+    }, 500);
 
     window.handleGoogleCredentialResponse = function (response) {
         if (submitting) return;
