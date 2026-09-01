@@ -38,9 +38,9 @@
 
 @layer base {
   :root {
-    --bg-surface:     #f8fafc;
-    --bg-surface-1:   #ffffffB3; /* 70% opacity */
-    --bg-surface-2:   #f1f5f9CC; /* 80% opacity */
+    --bg-surface:     #f8fafc; /* light grey app background */
+    --bg-surface-1:   #ffffff; /* crisp white cards */
+    --bg-surface-2:   #f1f5f9; /* subtle active states */
     --bg-surface-3:   #e2e8f0;
     --bg-surface-4:   #cbd5e1;
     
@@ -49,14 +49,14 @@
     --text-3:         #475569;
     --text-4:         #64748b;
     
-    --border-main:    rgba(0, 0, 0, 0.08);
-    --border-2:       rgba(0, 0, 0, 0.12);
-    --border-3:       rgba(0, 0, 0, 0.16);
-    --glass-border:   rgba(255, 255, 255, 0.8);
+    --border-main:    #e2e8f0;
+    --border-2:       #cbd5e1;
+    --border-3:       #94a3b8;
+    --glass-border:   #e2e8f0;
 
-    --navbar-bg:      rgba(255, 255, 255, 0.65);
+    --navbar-bg:      rgba(255, 255, 255, 0.95);
     
-    --shadow-color:   rgba(0, 0, 0, 0.05);
+    --shadow-color:   rgba(0, 0, 0, 0.04);
   }
 
   .dark {
@@ -125,19 +125,7 @@ body {
   inset: 0;
   z-index: -10;
   background-color: var(--color-surface);
-  background-image: 
-    radial-gradient(at 10% 20%, rgba(37, 99, 235, 0.12) 0px, transparent 50%),
-    radial-gradient(at 90% 10%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
-    radial-gradient(at 80% 90%, rgba(139, 92, 246, 0.10) 0px, transparent 50%),
-    radial-gradient(at 20% 80%, rgba(236, 72, 153, 0.08) 0px, transparent 50%);
-  filter: blur(80px);
-  animation: mesh-breathe 25s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-@keyframes mesh-breathe {
-  0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
-  100% { transform: scale(1.2) rotate(3deg); opacity: 1; }
+  /* Removed messy radial gradients and animations for a crisp enterprise look */
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -146,26 +134,23 @@ body {
 
 .card {
   background: var(--color-surface-1);
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
-  border: 1px solid var(--color-glass-border);
-  border-radius: 20px;
-  box-shadow: 0 10px 40px -10px var(--shadow-color);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  border: 1px solid var(--color-border);
+  border-radius: 12px; /* standard saas radius */
+  box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 44px -10px var(--shadow-color);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -4px var(--shadow-color);
+  border-color: var(--color-border-3);
 }
 
 .card-elevated {
-  background: var(--color-surface-2);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid var(--color-glass-border);
-  border-radius: 24px;
-  box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.3);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
 }
 
 /* ══════════════════════════════════════════════════════════════

@@ -111,7 +111,7 @@ export default function PdfToolsPage() {
       desc: 'Extract text from scanned documents & photos with high accuracy Khmer and English OCR recognition.',
       image: '/images/pdf-ocr-card.jpg',
       icon: (
-        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       )
@@ -122,7 +122,7 @@ export default function PdfToolsPage() {
       badge: 'Popular',
       desc: 'Combine unlimited PDF files into one clean, organized document with custom page sorting.',
       icon: (
-        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
         </svg>
       )
@@ -133,7 +133,7 @@ export default function PdfToolsPage() {
       badge: 'High Precision',
       desc: 'Convert complex PDF layouts, tables, and images into fully editable Microsoft Word documents.',
       icon: (
-        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       )
@@ -144,7 +144,7 @@ export default function PdfToolsPage() {
       badge: 'Up to 90% Less',
       desc: 'Shrink massive PDF files for email attachment without losing visual crispness or vector text sharpness.',
       icon: (
-        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       )
@@ -155,7 +155,7 @@ export default function PdfToolsPage() {
       badge: 'Privacy 100%',
       desc: 'Permanently remove hidden author metadata, GPS location tags, and black-out confidential text.',
       icon: (
-        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       )
@@ -166,7 +166,7 @@ export default function PdfToolsPage() {
       badge: 'Interactive',
       desc: 'Interactive grid interface to drag, reorder, rotate individual pages, extract chapters, or delete pages.',
       icon: (
-        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
         </svg>
       )
@@ -178,43 +178,43 @@ export default function PdfToolsPage() {
     : toolCards.filter(t => t.category === activeCategory)
 
   return (
-    <div className="w-full min-h-screen bg-slate-950 flex flex-col items-center pb-24 text-slate-200 overflow-x-hidden relative z-10">
+    <div className="w-full min-h-screen bg-slate-50 flex flex-col items-center pb-24 text-slate-900 overflow-x-hidden relative z-10">
       
       {/* ── 1. HERO BANNER SECTION (CLEAN PROFESSIONAL SAAS) ─────────── */}
       <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-12 text-center relative">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-300 text-xs sm:text-sm font-medium mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white shadow-sm border border-slate-200 text-slate-700 text-xs sm:text-sm font-medium mb-6">
           <span className="w-2 h-2 rounded-full bg-red-500"></span>
           Enterprise PDF Suite
         </div>
 
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight mb-6">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight mb-6">
           Professional Document Processing.
           <br className="hidden sm:inline" />
-          <span className="text-slate-400"> Secured On-Premises.</span>
+          <span className="text-slate-600"> Secured On-Premises.</span>
         </h1>
 
-        <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-12">
+        <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mb-12">
           50+ offline-ready tools to edit, convert, merge, and sanitize documents with zero file size limits. Built for privacy-first enterprises.
         </p>
 
         {/* ── 2. REAL INTERACTIVE CODE-DRIVEN PLAYGROUND ──────────────── */}
-        <div className="w-full relative mx-auto mb-16 rounded-2xl overflow-hidden border border-slate-800 bg-[#0B1120] shadow-2xl text-left p-6 sm:p-8">
+        <div className="w-full relative mx-auto mb-16 rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-2xl text-left p-6 sm:p-8">
           
           {/* Header Controls */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-red-950/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-red-500/80"></span>
                 <span className="w-3 h-3 rounded-full bg-yellow-500/80"></span>
                 <span className="w-3 h-3 rounded-full bg-emerald-500/80"></span>
               </div>
-              <span className="text-xs font-mono font-bold text-slate-400">
+              <span className="text-xs font-mono font-bold text-slate-600">
                 Stirling-PDF Studio · Live Simulator
               </span>
             </div>
 
             {/* Interactive Module Selector */}
-            <div className="flex items-center gap-1 bg-[#050B14] p-1 rounded-xl border border-red-950 overflow-x-auto max-w-full">
+            <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 overflow-x-auto max-w-full">
               {[
                 { id: 'compress', label: '🗜️ Compress' },
                 { id: 'ocr', label: '🔍 AI OCR' },
@@ -226,8 +226,8 @@ export default function PdfToolsPage() {
                   onClick={() => { setActiveDemo(m.id); runSimulation(); }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                     activeDemo === m.id
-                      ? 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-sm'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                      ? 'bg-red-500/20 text-red-700 border border-red-500/40 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/5 border border-transparent'
                   }`}
                 >
                   {m.label}
@@ -241,22 +241,22 @@ export default function PdfToolsPage() {
             {activeDemo === 'compress' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center animate-fade-in">
                 <div className="space-y-4">
-                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-red-400 bg-red-950/60 px-3 py-1 rounded-full border border-red-900/40">
+                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-red-600 bg-red-50 px-3 py-1 rounded-full border border-slate-200">
                     Smart Vector Compression
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white">
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
                     Shrink Heavy PDFs up to 90%
                   </h3>
-                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
                     Preserve crystal-clear vector fonts, table formatting, and hi-res image resolutions while purging redundant internal metadata streams.
                   </p>
 
                   <div className="space-y-2 pt-2">
                     <div className="flex justify-between text-xs font-mono">
-                      <span className="text-slate-400">Original: 48.2 MB</span>
+                      <span className="text-slate-600">Original: 48.2 MB</span>
                       <span className="text-emerald-400 font-bold">Optimized: 4.6 MB (-90.4%)</span>
                     </div>
-                    <div className="w-full h-3 bg-black/60 rounded-full overflow-hidden border border-white/5 p-0.5">
+                    <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden border border-slate-200 p-0.5">
                       <div 
                         className="h-full bg-gradient-to-r from-red-500 to-emerald-500 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
                         style={{ width: `${demoProgress}%` }}
@@ -267,19 +267,19 @@ export default function PdfToolsPage() {
                   <button
                     onClick={runSimulation}
                     disabled={isProcessing}
-                    className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-xs font-bold transition-all cursor-pointer"
+                    className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-700 border border-red-500/40 text-xs font-bold transition-all cursor-pointer"
                   >
                     <span>{isProcessing ? '⚡ Optimizing…' : '🔄 Run Test Compression'}</span>
                   </button>
                 </div>
 
                 {/* Animated File Visualizer */}
-                <div className="bg-[#050B14] border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-inner relative overflow-hidden">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-inner relative overflow-hidden">
                   <div className="w-20 h-24 bg-gradient-to-b from-red-950/80 to-slate-900 border border-red-500/40 rounded-xl flex flex-col items-center justify-center p-2 mb-3 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
                     <span className="text-2xl mb-1">📄</span>
-                    <span className="text-[10px] font-mono font-bold text-red-300">ANNUAL.PDF</span>
+                    <span className="text-[10px] font-mono font-bold text-red-700">ANNUAL.PDF</span>
                   </div>
-                  <span className="text-xs font-bold text-white mb-1">Corporate_Annual_Report_2026.pdf</span>
+                  <span className="text-xs font-bold text-slate-900 mb-1">Corporate_Annual_Report_2026.pdf</span>
                   <span className="text-[11px] text-emerald-400 font-mono">⚡ 124 Pages Processed in 0.48s</span>
                 </div>
               </div>
@@ -288,33 +288,33 @@ export default function PdfToolsPage() {
             {activeDemo === 'ocr' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center animate-fade-in">
                 <div className="space-y-4">
-                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-400 bg-cyan-950/60 px-3 py-1 rounded-full border border-cyan-900/40">
+                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-700 bg-cyan-50 px-3 py-1 rounded-full border border-cyan-200">
                     Neural Deep OCR (Khmer + English)
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white">
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
                     Convert Scanned Photos to Selectable Text
                   </h3>
-                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
                     Trained on specialized Khmer language fonts and complex table structures. Turn unselectable image scans into searchable, copyable documents.
                   </p>
                   <button
                     onClick={runSimulation}
                     disabled={isProcessing}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-700 border border-cyan-300 text-xs font-bold transition-all cursor-pointer"
                   >
                     <span>{isProcessing ? '🔍 Scanning Document…' : '⚡ Simulate OCR Extraction'}</span>
                   </button>
                 </div>
 
                 {/* Scanned Image to Text Live Comparison with Laser Scan Effect */}
-                <div className="bg-[#050B14] border border-cyan-500/30 rounded-2xl p-5 font-mono text-xs text-slate-300 space-y-2 shadow-inner relative overflow-hidden">
+                <div className="bg-slate-50 border border-cyan-200 rounded-2xl p-5 font-mono text-xs text-slate-700 space-y-2 shadow-inner relative overflow-hidden">
                   <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-scanline shadow-[0_0_12px_rgba(34,211,238,0.8)] pointer-events-none"></div>
-                  <div className="flex items-center justify-between text-[11px] text-cyan-400 pb-2 border-b border-white/5">
+                  <div className="flex items-center justify-between text-[11px] text-cyan-700 pb-2 border-b border-slate-200">
                     <span>STATUS: OCR_RECOGNITION_ACTIVE</span>
                     <span>CONFIDENCE: 99.4%</span>
                   </div>
-                  <p className="text-slate-400">=== EXTRACTED TEXT STREAM ===</p>
-                  <p className="text-cyan-200 bg-cyan-950/30 p-2 rounded border border-cyan-900/40 select-all">
+                  <p className="text-slate-600">=== EXTRACTED TEXT STREAM ===</p>
+                  <p className="text-cyan-800 bg-cyan-50 p-2 rounded border border-cyan-200 select-all">
                     កិច្ចសន្យាផ្តល់សេវាកម្ម / Service Level Agreement (SLA)<br />
                     Agreement Date: 2026-08-31 | Status: Verified Active
                   </p>
@@ -327,10 +327,10 @@ export default function PdfToolsPage() {
               <div className="space-y-4 animate-fade-in">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
-                    <h3 className="text-lg font-bold text-white">Visual Page Organizer</h3>
-                    <p className="text-xs text-slate-400">Click any page thumbnail below to rotate it 90° live!</p>
+                    <h3 className="text-lg font-bold text-slate-900">Visual Page Organizer</h3>
+                    <p className="text-xs text-slate-600">Click any page thumbnail below to rotate it 90° live!</p>
                   </div>
-                  <span className="text-xs font-mono text-slate-400 bg-black/40 px-3 py-1 rounded-lg border border-white/10">
+                  <span className="text-xs font-mono text-slate-600 bg-white shadow-sm px-3 py-1 rounded-lg border border-slate-200">
                     4 Pages in Workspace
                   </span>
                 </div>
@@ -341,17 +341,17 @@ export default function PdfToolsPage() {
                     <div
                       key={pNum}
                       onClick={() => rotatePage(pNum)}
-                      className="bg-[#050B14] border border-white/10 hover:border-red-500/50 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 group"
+                      className="bg-slate-50 border border-slate-200 hover:border-red-500/50 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 group"
                     >
                       <div
-                        className="w-14 h-18 sm:w-16 sm:h-20 bg-slate-900 border border-white/20 rounded-lg flex flex-col items-center justify-center p-2 mb-2 transition-transform duration-300 shadow-md"
+                        className="w-14 h-18 sm:w-16 sm:h-20 bg-slate-100 border border-white/20 rounded-lg flex flex-col items-center justify-center p-2 mb-2 transition-transform duration-300 shadow-md"
                         style={{ transform: `rotate(${rotatedPages[pNum]}deg)` }}
                       >
-                        <span className="text-xs font-bold text-slate-400">P.{pNum}</span>
+                        <span className="text-xs font-bold text-slate-600">P.{pNum}</span>
                         <div className="w-8 h-0.5 bg-white/20 mt-1 rounded"></div>
                         <div className="w-6 h-0.5 bg-white/20 mt-0.5 rounded"></div>
                       </div>
-                      <span className="text-[11px] font-bold text-slate-300 group-hover:text-red-400 flex items-center gap-1">
+                      <span className="text-[11px] font-bold text-slate-700 group-hover:text-red-600 flex items-center gap-1">
                         <span>Rotate</span>
                         <span className="font-mono text-slate-500">({rotatedPages[pNum]}°)</span>
                       </span>
@@ -367,20 +367,20 @@ export default function PdfToolsPage() {
                   <span className="text-xs font-mono font-bold uppercase tracking-widest text-blue-400 bg-blue-950/60 px-3 py-1 rounded-full border border-blue-900/40">
                     High-Fidelity Document Conversion
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white">
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
                     Convert to DOCX, Excel & Images
                   </h3>
-                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
                     Convert complex multi-column PDFs into fully editable Word DOCX files while preserving exact paragraph spacing, margins, and embedded charts.
                   </p>
                 </div>
 
-                <div className="bg-[#050B14] border border-blue-500/30 rounded-2xl p-6 flex items-center justify-around shadow-inner">
+                <div className="bg-slate-50 border border-blue-500/30 rounded-2xl p-6 flex items-center justify-around shadow-inner">
                   <div className="flex flex-col items-center">
                     <div className="w-14 h-18 sm:w-16 sm:h-20 bg-red-950/80 border border-red-500/40 rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-lg mb-2">
                       PDF
                     </div>
-                    <span className="text-xs text-slate-400 font-medium">Input File</span>
+                    <span className="text-xs text-slate-600 font-medium">Input File</span>
                   </div>
 
                   <span className="text-xl sm:text-2xl text-blue-400 animate-pulse">➔</span>
@@ -389,7 +389,7 @@ export default function PdfToolsPage() {
                     <div className="w-14 h-18 sm:w-16 sm:h-20 bg-blue-950/80 border border-blue-500/40 rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-lg mb-2">
                       DOCX
                     </div>
-                    <span className="text-xs text-slate-400 font-medium">Editable Word</span>
+                    <span className="text-xs text-slate-600 font-medium">Editable Word</span>
                   </div>
                 </div>
               </div>
@@ -401,27 +401,27 @@ export default function PdfToolsPage() {
         {/* ── AUTH / ACCESS STATUS CARD ────────────────────────────── */}
         <div className="w-full max-w-xl mx-auto my-8">
           {authLoading ? (
-            <div className="bg-[#0B1221]/90 border border-red-900/30 rounded-3xl p-8 flex flex-col items-center gap-3">
+            <div className="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
-              <p className="text-xs uppercase tracking-widest text-slate-400 font-bold">Checking Workspace Authorization…</p>
+              <p className="text-xs uppercase tracking-widest text-slate-600 font-bold">Checking Workspace Authorization…</p>
             </div>
           ) : !session ? (
             /* STEP 1: Not signed in */
-            <div className="bg-gradient-to-b from-[#0B1221]/95 to-[#050B14]/95 border border-red-900/40 rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(239,68,68,0.15)] backdrop-blur-xl animate-fade-in">
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(239,68,68,0.15)] backdrop-blur-xl animate-fade-in">
               <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center border border-red-500/30 text-red-400">
+                <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center border border-red-500/30 text-red-600">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-white">Sign In to Launch Full Studio</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900">Sign In to Launch Full Studio</h3>
               </div>
-              <p className="text-slate-400 text-xs sm:text-sm mb-6">
+              <p className="text-slate-600 text-xs sm:text-sm mb-6">
                 Sign in with your Google account to unlock complete document editing, batch exports, and 50+ modules.
               </p>
               <button
                 onClick={loginWithGoogle}
-                className="w-full bg-white/10 hover:bg-white/15 text-white font-bold py-3.5 sm:py-4 px-6 rounded-2xl border border-white/15 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:border-red-500/40 cursor-pointer text-sm sm:text-base hover:-translate-y-0.5"
+                className="w-full bg-white/10 hover:bg-white/15 text-slate-900 font-bold py-3.5 sm:py-4 px-6 rounded-2xl border border-white/15 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:border-red-500/40 cursor-pointer text-sm sm:text-base hover:-translate-y-0.5"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="#EA4335" d="M12 5c1.6 0 3 .5 4.1 1.5l3.1-3.1C17.3 1.6 14.8.7 12 .7 7.5.7 3.7 3.3 1.9 7.1l3.7 2.8C6.5 6.9 9 5 12 5z"/>
@@ -440,20 +440,20 @@ export default function PdfToolsPage() {
             />
           ) : (
             /* STEP 3: Verified & Ready to Launch */
-            <div className="bg-gradient-to-b from-[#0B1221]/95 to-[#050B14]/95 border border-red-500/40 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(239,68,68,0.25)] backdrop-blur-xl animate-fade-in text-center">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-bold mb-4">
+            <div className="bg-white border border-red-500/40 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(239,68,68,0.25)] backdrop-blur-xl animate-fade-in text-center">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-500/20 text-red-700 border border-red-500/30 text-xs font-bold mb-4">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
                 Workspace Verified & Ready
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Stirling-PDF Studio is Active</h3>
-              <p className="text-slate-400 text-xs sm:text-sm mb-6 max-w-md mx-auto">
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Stirling-PDF Studio is Active</h3>
+              <p className="text-slate-600 text-xs sm:text-sm mb-6 max-w-md mx-auto">
                 Launch the dedicated full-screen PDF workspace to process batch files, OCR scans, and run all 50+ tools.
               </p>
               <a
                 href="/pdf/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold py-3.5 sm:py-4 px-6 sm:px-8 rounded-2xl transition-all duration-300 shadow-[0_0_25px_rgba(239,68,68,0.4)] hover:shadow-[0_0_35px_rgba(239,68,68,0.6)] cursor-pointer text-sm sm:text-base hover:-translate-y-0.5 active:translate-y-0"
+                className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-slate-900 font-bold py-3.5 sm:py-4 px-6 sm:px-8 rounded-2xl transition-all duration-300 shadow-[0_0_25px_rgba(239,68,68,0.4)] hover:shadow-[0_0_35px_rgba(239,68,68,0.6)] cursor-pointer text-sm sm:text-base hover:-translate-y-0.5 active:translate-y-0"
               >
                 <span>Launch Standalone PDF Studio</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -468,24 +468,24 @@ export default function PdfToolsPage() {
       {/* ── 3. APPLE-STYLE SCROLL-PINNED STORYTELLING SECTION ───────── */}
       <section ref={scrollyContainerRef} className="w-full max-w-5xl mx-auto px-4 sm:px-6 relative h-[250vh] sm:h-[300vh]">
         {/* Sticky Pinned Container */}
-        <div className="sticky top-20 sm:top-24 w-full bg-[#070D18]/95 border border-red-900/30 rounded-3xl p-5 sm:p-10 shadow-2xl backdrop-blur-2xl text-left overflow-hidden">
+        <div className="sticky top-20 sm:top-24 w-full bg-white/95 border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-2xl backdrop-blur-2xl text-left overflow-hidden">
           
           {/* Section Header & Apple Scroll Indicator */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 border-b border-red-950/80 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 border-b border-slate-200 mb-6">
             <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-red-400 font-bold">The Architecture of Speed</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mt-0.5">Engineered for Extreme Precision</h2>
+              <span className="text-xs font-mono uppercase tracking-widest text-red-600 font-bold">The Architecture of Speed</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-0.5">Engineered for Extreme Precision</h2>
             </div>
             {/* Real Scroll Progress Tracker */}
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono text-slate-400">Scroll Story</span>
-              <div className="w-24 h-1.5 bg-black/60 rounded-full overflow-hidden border border-white/10">
+              <span className="text-xs font-mono text-slate-600">Scroll Story</span>
+              <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden border border-slate-200">
                 <div 
                   className="h-full bg-gradient-to-r from-red-500 to-rose-400 rounded-full transition-all duration-150"
                   style={{ width: `${Math.round(scrollProgress * 100)}%` }}
                 ></div>
               </div>
-              <span className="text-xs font-mono font-bold text-red-400">0{storyStage + 1}/04</span>
+              <span className="text-xs font-mono font-bold text-red-600">0{storyStage + 1}/04</span>
             </div>
           </div>
 
@@ -498,35 +498,35 @@ export default function PdfToolsPage() {
                   onClick={() => setStoryStage(st.id)}
                   className={`p-4 sm:p-5 rounded-2xl border transition-all duration-500 cursor-pointer ${
                     storyStage === st.id
-                      ? 'bg-[#131B2E] border-red-500/60 shadow-[0_0_30px_rgba(239,68,68,0.25)] scale-[1.02]'
-                      : 'bg-black/30 border-white/5 opacity-50 hover:opacity-80'
+                      ? 'bg-white shadow-md border-red-500/60 shadow-[0_0_30px_rgba(239,68,68,0.25)] scale-[1.02]'
+                      : 'bg-slate-50 border-slate-200 opacity-50 hover:opacity-80'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-mono font-bold text-red-400 uppercase tracking-widest">
+                    <span className="text-xs font-mono font-bold text-red-600 uppercase tracking-widest">
                       Stage 0{st.id + 1}
                     </span>
-                    <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 bg-black/50 px-2 py-0.5 rounded border border-white/5">
+                    <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 bg-white shadow-sm px-2 py-0.5 rounded border border-slate-200">
                       {st.badge}
                     </span>
                   </div>
-                  <h4 className="text-sm sm:text-base font-bold text-white mb-1">{st.title}</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">{st.desc}</p>
+                  <h4 className="text-sm sm:text-base font-bold text-slate-900 mb-1">{st.title}</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">{st.desc}</p>
                 </div>
               ))}
             </div>
 
             {/* Right Dynamic Morphing Display */}
-            <div className="lg:col-span-7 bg-[#050B14] border border-white/10 rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[360px] text-center relative overflow-hidden shadow-inner">
+            <div className="lg:col-span-7 bg-slate-50 border border-slate-200 rounded-3xl p-5 sm:p-8 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[360px] text-center relative overflow-hidden shadow-inner">
               
               {storyStage === 0 && (
                 <div className="space-y-4 animate-fade-in w-full max-w-md">
-                  <div className="relative rounded-2xl overflow-hidden border border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.25)]">
+                  <div className="relative rounded-2xl overflow-hidden border border-cyan-300 shadow-[0_0_30px_rgba(6,182,212,0.25)]">
                     <img src="/images/pdf-ocr-card.jpg" alt="Deep OCR Scanning" className="w-full h-44 object-cover" />
                     <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-300 to-transparent animate-scanline"></div>
                   </div>
-                  <h4 className="text-base sm:text-lg font-bold text-white">Khmer & Dual Script OCR Engine</h4>
-                  <p className="text-xs text-slate-400">99.4% accuracy with automated deskewing and orientation correction.</p>
+                  <h4 className="text-base sm:text-lg font-bold text-slate-900">Khmer & Dual Script OCR Engine</h4>
+                  <p className="text-xs text-slate-600">99.4% accuracy with automated deskewing and orientation correction.</p>
                 </div>
               )}
 
@@ -535,10 +535,10 @@ export default function PdfToolsPage() {
                   <div className="relative w-32 h-40 sm:w-36 sm:h-44 mx-auto bg-gradient-to-b from-red-950/60 to-slate-900 border border-red-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.3)]">
                     <span className="text-4xl mb-2">🗜️</span>
                     <span className="text-sm font-mono font-bold text-emerald-400">-90.4%</span>
-                    <span className="text-[10px] text-slate-400 mt-1">Lossless Vector Pass</span>
+                    <span className="text-[10px] text-slate-600 mt-1">Lossless Vector Pass</span>
                   </div>
-                  <h4 className="text-base sm:text-lg font-bold text-white">Lossless Vector Optimization</h4>
-                  <p className="text-xs text-slate-400">Reduces storage costs and ensures instant email transmission.</p>
+                  <h4 className="text-base sm:text-lg font-bold text-slate-900">Lossless Vector Optimization</h4>
+                  <p className="text-xs text-slate-600">Reduces storage costs and ensures instant email transmission.</p>
                 </div>
               )}
 
@@ -547,10 +547,10 @@ export default function PdfToolsPage() {
                   <div className="relative w-32 h-40 sm:w-36 sm:h-44 mx-auto bg-gradient-to-b from-purple-950/60 to-slate-900 border border-purple-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.3)]">
                     <span className="text-4xl mb-2">🛡️</span>
                     <span className="text-xs font-mono font-bold text-purple-300">METADATA STRIPPED</span>
-                    <span className="text-[10px] text-slate-400 mt-1">Zero Recovery Redaction</span>
+                    <span className="text-[10px] text-slate-600 mt-1">Zero Recovery Redaction</span>
                   </div>
-                  <h4 className="text-base sm:text-lg font-bold text-white">Cryptographic Redaction</h4>
-                  <p className="text-xs text-slate-400">Permanently destroys redacted vectors from raw PDF bytecode.</p>
+                  <h4 className="text-base sm:text-lg font-bold text-slate-900">Cryptographic Redaction</h4>
+                  <p className="text-xs text-slate-600">Permanently destroys redacted vectors from raw PDF bytecode.</p>
                 </div>
               )}
 
@@ -559,10 +559,10 @@ export default function PdfToolsPage() {
                   <div className="relative w-32 h-40 sm:w-36 sm:h-44 mx-auto bg-gradient-to-b from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
                     <span className="text-4xl mb-2">⚡</span>
                     <span className="text-xs font-mono font-bold text-emerald-300">DOCX · XLSX · PNG</span>
-                    <span className="text-[10px] text-slate-400 mt-1">Native Microsoft Office</span>
+                    <span className="text-[10px] text-slate-600 mt-1">Native Microsoft Office</span>
                   </div>
-                  <h4 className="text-base sm:text-lg font-bold text-white">Native Office Transpiler</h4>
-                  <p className="text-xs text-slate-400">Preserves complex table spans, headers, and bullet hierarchies.</p>
+                  <h4 className="text-base sm:text-lg font-bold text-slate-900">Native Office Transpiler</h4>
+                  <p className="text-xs text-slate-600">Preserves complex table spans, headers, and bullet hierarchies.</p>
                 </div>
               )}
 
@@ -575,20 +575,20 @@ export default function PdfToolsPage() {
       <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Popular PDF Utilities</h2>
-            <p className="text-slate-400 text-xs sm:text-sm mt-1">Explore some of the 50+ built-in modules included in the suite.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Popular PDF Utilities</h2>
+            <p className="text-slate-600 text-xs sm:text-sm mt-1">Explore some of the 50+ built-in modules included in the suite.</p>
           </div>
 
           {/* Category Tabs */}
-          <div className="flex items-center gap-1 bg-[#0B1221] p-1 rounded-2xl border border-red-950 overflow-x-auto max-w-full">
+          <div className="flex items-center gap-1 bg-[#0B1221] p-1 rounded-2xl border border-slate-200 overflow-x-auto max-w-full">
             {categories.map((c) => (
               <button
                 key={c.id}
                 onClick={() => setActiveCategory(c.id)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   activeCategory === c.id
-                    ? 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                    ? 'bg-red-500/20 text-red-700 border border-red-500/40 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/5 border border-transparent'
                 }`}
               >
                 {c.label}
@@ -601,27 +601,27 @@ export default function PdfToolsPage() {
           {filteredTools.map((t, idx) => (
             <div
               key={idx}
-              className="bg-slate-900/50 border border-slate-800 hover:border-slate-600 rounded-2xl p-6 transition-all duration-200 flex flex-col justify-between group"
+              className="bg-white border border-slate-200 hover:border-slate-600 rounded-2xl p-6 transition-all duration-200 flex flex-col justify-between group"
             >
               <div className="flex flex-col h-full justify-between">
                 {t.image && (
-                  <div className="mb-4 rounded-2xl overflow-hidden border border-white/10 shadow-inner">
+                  <div className="mb-4 rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
                     <img src={t.image} alt={t.title} className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                 )}
 
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-red-950/40 border border-red-900/40 flex items-center justify-center group-hover:border-red-500/40 group-hover:bg-red-950/60 transition-colors shadow-inner">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-red-50 border border-slate-200 flex items-center justify-center group-hover:border-red-500/40 group-hover:bg-red-50 transition-colors shadow-inner">
                     {t.icon}
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-300 bg-red-950/60 px-2.5 py-1 rounded-full border border-red-800/40">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2.5 py-1 rounded-full border border-red-200">
                     {t.badge}
                   </span>
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-white mb-2 group-hover:text-red-300 transition-colors">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2 group-hover:text-red-700 transition-colors">
                   {t.title}
                 </h3>
-                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
                   {t.desc}
                 </p>
               </div>
@@ -631,13 +631,12 @@ export default function PdfToolsPage() {
                     href="/pdf/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition-colors border border-slate-700 hover:border-slate-600"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold px-4 py-2.5 rounded-lg text-sm transition-colors border border-slate-300"
                   >
                     <span>Launch Tool</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                   </a>
                 </div>
-              </div>
             </div>
           ))}
         </div>
@@ -646,31 +645,31 @@ export default function PdfToolsPage() {
       {/* ── 5. WHY CAMTECH PDF TOOLS ───────────────────────────────── */}
       <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12">
         <div className="text-center max-w-xl mx-auto mb-10">
-          <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">Why Use CamTech PDF Suite?</h3>
-          <p className="text-xs sm:text-sm text-slate-400">Engineered for professionals who handle sensitive corporate and personal files.</p>
+          <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">Why Use CamTech PDF Suite?</h3>
+          <p className="text-xs sm:text-sm text-slate-600">Engineered for professionals who handle sensitive corporate and personal files.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-          <div className="bg-[#0B1221]/60 border border-white/5 rounded-3xl p-6 sm:p-7 hover:border-red-500/30 transition-all">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 hover:border-red-500/30 transition-all">
             <div className="text-3xl mb-4">🔒</div>
-            <h4 className="text-base sm:text-lg font-bold text-white mb-2">100% Private & Local</h4>
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+            <h4 className="text-base sm:text-lg font-bold text-slate-900 mb-2">100% Private & Local</h4>
+            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
               Your files are processed directly on your dedicated server and never transmitted to 3rd-party commercial cloud providers.
             </p>
           </div>
 
-          <div className="bg-[#0B1221]/60 border border-white/5 rounded-3xl p-6 sm:p-7 hover:border-red-500/30 transition-all">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 hover:border-red-500/30 transition-all">
             <div className="text-3xl mb-4">⚡</div>
-            <h4 className="text-base sm:text-lg font-bold text-white mb-2">No File Limits & Fast</h4>
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+            <h4 className="text-base sm:text-lg font-bold text-slate-900 mb-2">No File Limits & Fast</h4>
+            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
               Process huge 500MB+ documents, multi-thousand page books, or bulk archives without paying extra subscriptions.
             </p>
           </div>
 
-          <div className="bg-[#0B1221]/60 border border-white/5 rounded-3xl p-6 sm:p-7 hover:border-red-500/30 transition-all">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 hover:border-red-500/30 transition-all">
             <div className="text-3xl mb-4">🇰🇭</div>
-            <h4 className="text-base sm:text-lg font-bold text-white mb-2">Khmer OCR Supported</h4>
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+            <h4 className="text-base sm:text-lg font-bold text-slate-900 mb-2">Khmer OCR Supported</h4>
+            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
               Specialized Tessdata optical character recognition trained to digitize Khmer script and dual Khmer-English documents.
             </p>
           </div>
