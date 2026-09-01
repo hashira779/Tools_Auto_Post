@@ -59,6 +59,42 @@ export default function PdfToolsPage() {
     }))
   }
 
+  // Google Drive & Web Image Fetcher State
+  const [driveUrlInput, setDriveUrlInput] = useState('')
+  const [fetchedImage, setFetchedImage] = useState<string | null>(null)
+  const [isFetchingImage, setIsFetchingImage] = useState(false)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  const parseGoogleDriveUrl = (inputUrl: string) => {
+    if (!inputUrl) return ''
+    const fileIdMatch = inputUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
+    if (fileIdMatch && fileIdMatch[1]) {
+      return `https://lh3.googleusercontent.com/d/${fileIdMatch[1]}`
+    }
+    const idMatch = inputUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+    if (idMatch && idMatch[1]) {
+      return `https://lh3.googleusercontent.com/d/${idMatch[1]}`
+    }
+    return inputUrl.trim()
+  }
+
+  const handleFetchImage = (urlToFetch?: string) => {
+    const targetUrl = urlToFetch || driveUrlInput
+    if (!targetUrl) {
+      setFetchError('Please enter a valid Google Drive share link or Web Image URL.')
+      return
+    }
+    setFetchError(null)
+    setIsFetchingImage(true)
+    
+    const resolvedUrl = parseGoogleDriveUrl(targetUrl)
+    
+    setTimeout(() => {
+      setFetchedImage(resolvedUrl)
+      setIsFetchingImage(false)
+    }, 500)
+  }
+
   const storyStages = [
     {
       id: 0,
@@ -96,6 +132,7 @@ export default function PdfToolsPage() {
 
   const categories = [
     { id: 'all', label: 'All 50+ Tools' },
+    { id: 'gdrive', label: '☁️ Google Drive & Image Tools' },
     { id: 'organize', label: 'Organize & Merge' },
     { id: 'convert', label: 'Convert & Export' },
     { id: 'ai', label: 'AI & OCR' },
@@ -104,6 +141,40 @@ export default function PdfToolsPage() {
   ]
 
   const toolCards = [
+    {
+      category: 'gdrive',
+      title: 'Google Drive Image to PDF',
+      badge: 'Google Integration',
+      desc: 'Fetch images directly from Google Drive share links or Google Photos and convert them into clean PDF documents.',
+      image: '/images/pdf-ocr-card.jpg',
+      icon: (
+        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      )
+    },
+    {
+      category: 'gdrive',
+      title: 'PDF to High-Res Images',
+      badge: 'Export JPG/PNG',
+      desc: 'Convert PDF document pages into high-resolution PNG or JPG image files ready for sharing.',
+      icon: (
+        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+      )
+    },
+    {
+      category: 'gdrive',
+      title: 'Add Google Drive Image to PDF',
+      badge: 'Watermark & Stamp',
+      desc: 'Overlay logos, signatures, or image pages from Google Drive directly into any PDF file.',
+      icon: (
+        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+        </svg>
+      )
+    },
     {
       category: 'ai',
       title: 'AI OCR & Text Extraction',
@@ -216,6 +287,7 @@ export default function PdfToolsPage() {
             {/* Interactive Module Selector */}
             <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 overflow-x-auto max-w-full">
               {[
+                { id: 'gdrive', label: '☁️ Google Drive & Image' },
                 { id: 'compress', label: '🗜️ Compress' },
                 { id: 'ocr', label: '🔍 AI OCR' },
                 { id: 'reorder', label: '📑 Organizer' },
@@ -223,7 +295,7 @@ export default function PdfToolsPage() {
               ].map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => { setActiveDemo(m.id); runSimulation(); }}
+                  onClick={() => { setActiveDemo(m.id); if (m.id !== 'gdrive') runSimulation(); }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                     activeDemo === m.id
                       ? 'bg-red-500/20 text-red-700 border border-red-500/40 shadow-sm'
@@ -238,6 +310,122 @@ export default function PdfToolsPage() {
 
           {/* Interactive Workspace Body */}
           <div className="py-6">
+            {activeDemo === 'gdrive' && (
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center animate-fade-in">
+                <div className="md:col-span-7 space-y-4">
+                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    Cloud & Web Image Integration
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
+                    Fetch Google Drive & Web Images to PDF
+                  </h3>
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    Paste any public Google Drive sharing link, Google Photos URL, or web image address to preview and process directly into Stirling PDF.
+                  </p>
+
+                  <div className="space-y-3 pt-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Paste Google Drive link or Image URL..."
+                        value={driveUrlInput}
+                        onChange={(e) => setDriveUrlInput(e.target.value)}
+                        className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:border-red-500"
+                      />
+                      <button
+                        onClick={() => handleFetchImage()}
+                        disabled={isFetchingImage}
+                        className="px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md shrink-0 flex items-center gap-1.5"
+                      >
+                        {isFetchingImage ? (
+                          <span className="animate-pulse">Fetching...</span>
+                        ) : (
+                          <>
+                            <span>Fetch Image</span>
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Quick Preset Buttons */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[11px] font-mono text-slate-500">Quick Samples:</span>
+                      <button
+                        onClick={() => {
+                          const url = '/images/pdf-ocr-card.jpg'
+                          setDriveUrlInput(url)
+                          handleFetchImage(url)
+                        }}
+                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg text-[11px] font-bold text-slate-700 cursor-pointer"
+                      >
+                        📄 Google Scan Sample
+                      </button>
+                      <button
+                        onClick={() => {
+                          const url = 'https://drive.google.com/file/d/1A2B3C4D5E6F7G8H9I0J/view'
+                          setDriveUrlInput(url)
+                          handleFetchImage(url)
+                        }}
+                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg text-[11px] font-bold text-slate-700 cursor-pointer"
+                      >
+                        📁 Drive Link Demo
+                      </button>
+                    </div>
+
+                    {fetchError && (
+                      <p className="text-xs text-red-600 font-medium">{fetchError}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Preview Visualizer Card */}
+                <div className="md:col-span-5 bg-slate-50 border border-emerald-200 rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-inner relative min-h-[220px]">
+                  {fetchedImage ? (
+                    <div className="w-full space-y-3 animate-fade-in">
+                      <div className="relative rounded-xl overflow-hidden border border-slate-300 max-h-40 bg-white flex items-center justify-center shadow-sm">
+                        <img
+                          src={fetchedImage}
+                          alt="Fetched Google Drive Preview"
+                          className="max-h-36 object-contain"
+                          onError={() => {
+                            setFetchedImage('/images/pdf-ocr-card.jpg')
+                          }}
+                        />
+                        <span className="absolute top-2 right-2 text-[10px] font-mono font-bold bg-emerald-600 text-white px-2 py-0.5 rounded-full shadow">
+                          ✓ Image Fetched
+                        </span>
+                      </div>
+                      <div className="flex gap-2 justify-center">
+                        <a
+                          href="/pdf/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-[11px] font-bold shadow hover:bg-red-500 transition-colors"
+                        >
+                          Convert to PDF
+                        </a>
+                        <a
+                          href="/pdf/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-[11px] font-bold shadow hover:bg-slate-700 transition-colors"
+                        >
+                          Add to PDF Page
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-slate-400 space-y-2">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                      </div>
+                      <span className="text-xs font-medium text-slate-600">Enter a Google Drive link or Web URL to preview image</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             {activeDemo === 'compress' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center animate-fade-in">
                 <div className="space-y-4">

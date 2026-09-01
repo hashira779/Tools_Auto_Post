@@ -3,6 +3,36 @@ import React from 'react'
 export default function PdfTools() {
   const tools = [
     {
+      title: 'Google Drive Image to PDF',
+      desc: 'Fetch images from Google Drive links or Photos and convert them to PDF.',
+      path: '/pdf/img-to-pdf',
+      icon: (
+        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      )
+    },
+    {
+      title: 'PDF to High-Res Images',
+      desc: 'Convert PDF document pages into PNG or JPG image files.',
+      path: '/pdf/pdf-to-img',
+      icon: (
+        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+      )
+    },
+    {
+      title: 'Add Google Drive Image to PDF',
+      desc: 'Overlay Google Drive image logos or signatures onto PDF pages.',
+      path: '/pdf/add-image',
+      icon: (
+        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+        </svg>
+      )
+    },
+    {
       title: 'Merge PDFs',
       desc: 'Combine multiple PDF documents into a single organized file.',
       path: '/pdf/merge-pdfs',
