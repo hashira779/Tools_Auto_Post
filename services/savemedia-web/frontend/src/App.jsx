@@ -104,11 +104,11 @@ function App() {
             </div>
           } />
 
-          {/* PDF Tools (Stirling-PDF iframe) */}
-          <Route path="/pdf-tools" element={<PdfToolsPage />} />
+          {/* PDF Tools (Stirling-PDF iframe & studio) */}
+          <Route path="/pdf-tools" element={<ToolShell><PdfToolsPage /></ToolShell>} />
 
-          {/* Workflow Automations — Full screen with no wrapper interference */}
-          <Route path="/automations" element={<AutomationsPage />} />
+          {/* Workflow Automations — Full screen with standard tool shell */}
+          <Route path="/automations" element={<ToolShell><AutomationsPage /></ToolShell>} />
 
           {/* Live Camera — host studio */}
           <Route path="/live" element={

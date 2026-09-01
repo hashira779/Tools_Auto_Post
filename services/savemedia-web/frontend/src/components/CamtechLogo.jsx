@@ -38,7 +38,7 @@ export default function CamtechLogo({
     case 'color':
     default:
       // Brand colors based exactly on the logo
-      fillDark = '#0B1220'
+      fillDark = 'currentColor'
       fillBlue = '#1473E6'
       fillCyan = '#19B5FE'
       gradTop = 'url(#camtech-top-grad)'
@@ -87,7 +87,7 @@ export default function CamtechLogo({
   )
 
   const drawWordmark = () => {
-    const wordDark = isColor ? '#0B1220' : fillDark
+    const wordDark = fillDark
     const wordBlue = isColor ? '#1473E6' : fillDark
 
     return (

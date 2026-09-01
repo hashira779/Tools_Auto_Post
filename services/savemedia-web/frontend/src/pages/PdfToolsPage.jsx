@@ -178,11 +178,11 @@ export default function PdfToolsPage() {
     : toolCards.filter(t => t.category === activeCategory)
 
   return (
-    <div className="w-full min-h-screen bg-slate-50 flex flex-col items-center pb-24 text-slate-900 overflow-x-hidden relative z-10">
+    <main className="w-full flex flex-col items-center animate-fade-in text-[var(--color-text)] relative z-10">
       
-      {/* ── 1. HERO BANNER SECTION (CLEAN PROFESSIONAL SAAS) ─────────── */}
-      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-12 text-center relative">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white shadow-sm border border-slate-200 text-slate-700 text-xs sm:text-sm font-medium mb-6">
+      {/* ── 1. HERO BANNER SECTION ───────────────────────────────────── */}
+      <section className="w-full pt-4 pb-12 text-center relative">
+        <div className="badge badge-primary mb-6 text-xs sm:text-sm font-medium">
           <span className="w-2 h-2 rounded-full bg-red-500"></span>
           Enterprise PDF Suite
         </div>
@@ -676,6 +676,6 @@ export default function PdfToolsPage() {
         </div>
       </section>
 
-    </div>
+    </main>
   )
 }
