@@ -156,35 +156,71 @@ export default function PwaInstallBanner() {
 
             {/* Visual Step-by-Step Cards */}
             <div className="space-y-2.5">
-              {/* Step 1 */}
-              <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 flex items-center gap-3.5 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-white block">1. Tap the Share button</span>
-                  <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
-                    Tap the <span className="text-blue-300 font-semibold">Share</span> icon in Safari bottom bar or Chrome menu.
-                  </p>
-                </div>
-              </div>
+              {isIos ? (
+                <>
+                  {/* iOS Step 1 */}
+                  <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 flex items-center gap-3.5 transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">1. Tap the Share button</span>
+                      <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                        Tap the <span className="text-blue-300 font-semibold">Share</span> icon in Safari's bottom toolbar.
+                      </p>
+                    </div>
+                  </div>
 
-              {/* Step 2 */}
-              <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 flex items-center gap-3.5 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-white block">2. Tap "Add to Home Screen"</span>
-                  <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
-                    Scroll down and select <span className="text-cyan-300 font-semibold">Add to Home Screen</span>.
-                  </p>
-                </div>
-              </div>
+                  {/* iOS Step 2 */}
+                  <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 flex items-center gap-3.5 transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">2. Tap "Add to Home Screen"</span>
+                      <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                        Scroll down and select <span className="text-cyan-300 font-semibold">Add to Home Screen</span>.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Desktop PC Step 1 */}
+                  <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 flex items-center gap-3.5 transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">1. Look for the Install Icon</span>
+                      <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                        Click the <span className="text-blue-300 font-semibold">Install App (⊕)</span> button in your browser's address bar.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Desktop PC Step 2 */}
+                  <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-3.5 flex items-center gap-3.5 transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">2. Confirm Desktop Install</span>
+                      <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                        Click <span className="text-cyan-300 font-semibold">Install</span> to pin CamTech to your Taskbar or Desktop.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Bottom Action Button */}
