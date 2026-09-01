@@ -29,15 +29,15 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
 
       if (resp.ok) {
         setSuccess(true)
-        setTimeout(() => {
-          refreshDbUser()
-          if (onVerified) onVerified()
-        }, 1200)
+        // Immediately refresh without delay for smooth transition
+        await refreshDbUser()
+        if (onVerified) onVerified()
       } else {
         setError(data.detail || 'Invalid token key. Please contact your administrator.')
       }
     } catch (err) {
       setError('Connection to server failed. Please try again.')
+      console.error('Verification error:', err)
     } finally {
       setLoading(false)
     }
@@ -65,10 +65,11 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
 
         {success ? (
           <div className="bg-cyan-500/15 border border-cyan-400/50 text-cyan-300 p-5 rounded-2xl flex items-center justify-center gap-3 animate-slide-up shadow-[0_0_20px_rgba(6,182,212,0.2)]">
-            <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+            <svg className="w-6 h-6 text-cyan-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span className="font-bold tracking-wide">Access Granted! Unlocking…</span>
+            <span className="font-bold tracking-wide">Access Granted! Loading…</span>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
@@ -81,7 +82,7 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
                 placeholder="CAM-XXXX-XXXX"
                 value={token}
                 onChange={(e) => setToken(e.target.value.toUpperCase())}
-                className="w-full bg-[#03060D] border-2 border-cyan-500/40 focus:border-cyan-400 rounded-2xl px-4 py-3.5 text-cyan-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all font-mono tracking-[0.15em] text-center text-base font-bold shadow-inner"
+                className="w-full bg-[#03060D] border-2 border-cyan-500/40 focus:border-cyan-400 rounded-2xl px-4 py-3.5 text-cyan-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 transition-all duration-200"
                 disabled={loading}
                 autoFocus
               />
@@ -96,7 +97,7 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
             <button
               type="submit"
               disabled={loading || !token.trim()}
-              className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.25)] hover:shadow-[0_0_30px_rgba(6,182,212,0.45)] hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer text-sm"
+              className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer"
             >
               {loading ? (
                 <>
