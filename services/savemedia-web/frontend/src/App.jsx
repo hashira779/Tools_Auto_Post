@@ -65,7 +65,7 @@ function App() {
       />
 
       {/* Main Layout */}
-      <div className="relative min-h-screen flex flex-col">
+      <div className="relative min-h-screen flex flex-col w-full">
         {/* The Animated Mesh Gradient Background */}
         <div className="mesh-bg"></div>
 
@@ -107,12 +107,8 @@ function App() {
           {/* PDF Tools (Stirling-PDF iframe) */}
           <Route path="/pdf-tools" element={<PdfToolsPage />} />
 
-          {/* Workflow Automations — Now properly wrapped */}
-          <Route path="/automations" element={
-            <div className="flex-1 w-full flex flex-col items-center pt-12 pb-24">
-              <AutomationsPage />
-            </div>
-          } />
+          {/* Workflow Automations — Full screen with no wrapper interference */}
+          <Route path="/automations" element={<AutomationsPage />} />
 
           {/* Live Camera — host studio */}
           <Route path="/live" element={
