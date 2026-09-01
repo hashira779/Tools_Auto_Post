@@ -45,7 +45,7 @@ chmod +x scripts/*.sh scripts/*.py || true
 # This replaces the {{BASE_PATH}} placeholders with the production base path (/n8n)
 # so the white-labelled n8n frontend can find its JS/CSS assets when mounted under /n8n.
 echo "🔧 Fixing n8n base paths in patched HTML files..."
-if python3 services/fix-base-path.py --base-path /n8n --dir services/n8n-patches; then
+if python3 services/fix-base-path.py --base-path n8n --dir services/n8n-patches; then
     echo "✓ n8n base path placeholders replaced"
 else
     echo "⚠️ n8n base path fixer failed — continuing deployment (check logs)" >&2
