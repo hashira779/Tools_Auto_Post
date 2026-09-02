@@ -8,9 +8,9 @@ import { useAuth } from '../../hooks/useAuth';
 const card =
   'bg-[var(--color-surface-1)] border border-[var(--color-glass-border)] rounded-2xl backdrop-blur-xl';
 const inputCls =
-  'w-full bg-[var(--color-surface-2)] border border-[var(--color-glass-border)] rounded-xl px-4 py-2.5 text-[var(--color-text)] placeholder:text-[var(--color-text-4)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/40 focus:border-[var(--color-primary-500)] transition-all';
+  'w-full bg-[var(--color-surface-2)] border border-[var(--color-glass-border)] rounded-xl px-4 py-2.5 text-[var(--color-text)] placeholder:text-[var(--color-text-4)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/40 focus:border-[var(--color-primary-500)] transition-colors';
 const labelCls =
-  'block text-[11px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5 ml-0.5';
+  'block text-[11px] font-semibold text-[var(--color-text-4)]  mb-1.5 ml-0.5';
 
 function StatCard({ label, value, sub, accent, icon }) {
   return (
@@ -22,7 +22,7 @@ function StatCard({ label, value, sub, accent, icon }) {
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider">{label}</p>
+        <p className="text-[11px] font-semibold text-[var(--color-text-4)] ">{label}</p>
         <p className="text-2xl font-bold text-[var(--color-text)] leading-tight">{value}</p>
         {sub && <p className="text-xs text-[var(--color-text-3)] truncate">{sub}</p>}
       </div>
@@ -48,12 +48,12 @@ function Toggle({ on, onClick, accent = 'var(--color-primary-500)' }) {
   return (
     <button
       onClick={onClick}
-      className="w-11 h-6 rounded-full relative transition-all shrink-0"
+      className="w-11 h-6 rounded-full relative transition-colors shrink-0"
       style={{ background: on ? accent : 'var(--color-surface-4)' }}
       aria-pressed={on}
     >
       <span
-        className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${on ? 'right-1' : 'left-1'}`}
+        className={`absolute top-1 w-4 h-4 bg-[var(--color-surface-1)] rounded-full shadow transition-colors ${on ? 'right-1' : 'left-1'}`}
       />
     </button>
   );
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
         <button
           onClick={fetchData}
           disabled={refreshing}
-          className="self-start inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-[var(--color-text-2)] bg-[var(--color-surface-2)] border border-[var(--color-glass-border)] hover:text-[var(--color-text)] hover:border-[var(--color-primary-400)] transition-all"
+          className="self-start inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-[var(--color-text-2)] bg-[var(--color-surface-2)] border border-[var(--color-glass-border)] hover:text-[var(--color-text)] hover:border-[var(--color-primary-400)] transition-colors"
         >
           <svg className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -318,7 +318,7 @@ export default function AdminDashboard() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
+            className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors ${
               tab === t.id
                 ? 'bg-[var(--color-primary-500)] text-white shadow-lg shadow-[var(--color-primary-500)]/20'
                 : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'
@@ -403,7 +403,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 )}
-                <button type="submit" disabled={creating} className="w-full bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold py-3 rounded-xl transition-all disabled:opacity-60">
+                <button type="submit" disabled={creating} className="w-full bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-60">
                   {creating ? 'Generating…' : 'Generate Token'}
                 </button>
               </form>
@@ -421,7 +421,7 @@ export default function AdminDashboard() {
                       <button
                         onClick={() => copyToken(t.token_key)}
                         title="Copy token"
-                        className="text-base font-mono font-bold text-[var(--color-primary-400)] tracking-wider bg-[var(--color-primary-500)]/10 px-2 py-0.5 rounded hover:bg-[var(--color-primary-500)]/20 transition-all inline-flex items-center gap-1.5"
+                        className="text-base font-mono font-bold text-[var(--color-primary-400)] tracking-wider bg-[var(--color-primary-500)]/10 px-2 py-0.5 rounded hover:bg-[var(--color-primary-500)]/20 transition-colors inline-flex items-center gap-1.5"
                       >
                         {t.token_key}
                         <span className="text-[10px] text-[var(--color-text-4)]">{copied === t.token_key ? '✓ copied' : '⧉'}</span>
@@ -435,7 +435,7 @@ export default function AdminDashboard() {
                       <span>Created: <b className="text-[var(--color-text-3)]">{new Date(t.created_at).toLocaleDateString()}</b></span>
                     </div>
                   </div>
-                  <button onClick={() => handleDeleteToken(t.id)} className="p-2.5 rounded-lg text-[var(--color-text-4)] hover:text-[var(--color-error)] hover:bg-[var(--color-error-dim)] transition-all opacity-0 group-hover:opacity-100">
+                  <button onClick={() => handleDeleteToken(t.id)} className="p-2.5 rounded-lg text-[var(--color-text-4)] hover:text-[var(--color-error)] hover:bg-[var(--color-error-dim)] transition-colors opacity-0 group-hover:opacity-100">
                     <TrashIcon />
                   </button>
                 </div>
@@ -459,7 +459,7 @@ export default function AdminDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[640px]">
                 <thead>
-                  <tr className="bg-[var(--color-surface-2)] text-[11px] font-bold text-[var(--color-text-4)] uppercase tracking-widest border-b border-[var(--color-glass-border)]">
+                  <tr className="bg-[var(--color-surface-2)] text-[11px] font-bold text-[var(--color-text-4)] border-b border-[var(--color-glass-border)]">
                     <th className="px-6 py-4">User Email</th>
                     <th className="px-6 py-4">Status</th>
                     <th className="px-6 py-4">Verified</th>
@@ -472,7 +472,7 @@ export default function AdminDashboard() {
                   {filteredUsers.length === 0 ? (
                     <tr><td colSpan={6} className="px-6 py-10 text-center text-[var(--color-text-4)]">No users found.</td></tr>
                   ) : filteredUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-[var(--color-surface-2)]/50 transition-all">
+                    <tr key={u.id} className="hover:bg-[var(--color-surface-2)]/50 transition-colors">
                       <td className="px-6 py-4 text-sm font-medium text-[var(--color-text)]">{u.email}</td>
                       <td className="px-6 py-4"><Badge tone={u.status === 'active' ? 'success' : 'error'}>{u.status}</Badge></td>
                       <td className="px-6 py-4"><Toggle on={u.is_verified} onClick={() => handleUpdateUser(u.id, { is_verified: !u.is_verified })} /></td>
@@ -481,7 +481,7 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => handleUpdateUser(u.id, { status: u.status === 'active' ? 'blocked' : 'active' })}
-                          className="text-xs font-bold text-[var(--color-text-4)] hover:text-[var(--color-text)] transition-all underline underline-offset-4 decoration-[var(--color-border-3)]"
+                          className="text-xs font-bold text-[var(--color-text-4)] hover:text-[var(--color-text)] transition-colors underline underline-offset-4 decoration-[var(--color-border-3)]"
                         >
                           {u.status === 'active' ? 'Block' : 'Unblock'}
                         </button>
@@ -522,7 +522,7 @@ export default function AdminDashboard() {
                   <label className={labelCls}>Category</label>
                   <input type="text" required value={wfCategory} onChange={(e) => setWfCategory(e.target.value)} className={inputCls} />
                 </div>
-                <button type="submit" disabled={wfCreating} className="w-full bg-[#f97316] hover:bg-[#ea580c] text-white font-bold py-3 rounded-xl transition-all disabled:opacity-60">
+                <button type="submit" disabled={wfCreating} className="w-full bg-[#f97316] hover:bg-[#ea580c] text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-60">
                   {wfCreating ? 'Registering…' : 'Register Workflow'}
                 </button>
               </form>
@@ -549,7 +549,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
                     <Toggle on={wf.is_active} onClick={() => handleToggleWorkflow(wf.id, wf.is_active)} accent="#f97316" />
-                    <button onClick={() => handleDeleteWorkflow(wf.id)} className="p-2.5 rounded-lg text-[var(--color-text-4)] hover:text-[var(--color-error)] hover:bg-[var(--color-error-dim)] transition-all opacity-0 group-hover:opacity-100">
+                    <button onClick={() => handleDeleteWorkflow(wf.id)} className="p-2.5 rounded-lg text-[var(--color-text-4)] hover:text-[var(--color-error)] hover:bg-[var(--color-error-dim)] transition-colors opacity-0 group-hover:opacity-100">
                       <TrashIcon />
                     </button>
                   </div>

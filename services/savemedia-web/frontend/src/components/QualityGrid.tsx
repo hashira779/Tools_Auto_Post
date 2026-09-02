@@ -17,7 +17,7 @@ export default function QualityGrid({ formats, selectedQuality, onSelect }) {
           >
             {/* Best badge */}
             {i === 0 && (
-              <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[var(--color-surface-3)] rounded text-[9px] font-semibold uppercase tracking-wider text-[var(--color-text-2)] border border-[var(--color-border)]">
+              <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[var(--color-surface-3)] rounded text-[9px] font-semibold text-[var(--color-text-2)] border border-[var(--color-border)]">
                 Best
               </span>
             )}
@@ -41,7 +41,7 @@ export default function QualityGrid({ formats, selectedQuality, onSelect }) {
                 ~{fmt.filesize_approx} MB
               </div>
             )}
-            <div className={`text-[9px] mt-2 uppercase tracking-widest font-semibold ${
+            <div className={`text-[9px] mt-2  font-semibold ${
               selected ? 'text-[var(--color-primary-400)]' : 'text-[var(--color-text-4)]'
             }`}>
               {fmt.ext}

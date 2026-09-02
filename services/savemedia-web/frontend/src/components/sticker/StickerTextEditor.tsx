@@ -64,7 +64,7 @@ export default function StickerTextEditor({ textConfig, onTextConfigChange }) {
 
       {/* Khmer Presets */}
       <div className="mb-5">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-4)] mb-2 px-1">
+        <div className="text-[10px] font-semibold text-[var(--color-text-4)] mb-2 px-1">
           Khmer Memes
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -86,7 +86,7 @@ export default function StickerTextEditor({ textConfig, onTextConfigChange }) {
 
       {/* English Presets */}
       <div className="mb-6">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-4)] mb-2 px-1">
+        <div className="text-[10px] font-semibold text-[var(--color-text-4)] mb-2 px-1">
           English Memes
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -108,7 +108,7 @@ export default function StickerTextEditor({ textConfig, onTextConfigChange }) {
 
       {/* Custom Text */}
       <div className="mb-6">
-        <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-2 px-1">
+        <label className="block text-[10px] font-semibold text-[var(--color-text-4)] mb-2 px-1">
           Custom Text (Khmer, English, Emojis)
         </label>
         <input
@@ -124,7 +124,7 @@ export default function StickerTextEditor({ textConfig, onTextConfigChange }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-[var(--color-border)]">
         {/* Style */}
         <div>
-          <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5 px-1">Style</label>
+          <label className="block text-[10px] font-semibold text-[var(--color-text-4)] mb-1.5 px-1">Style</label>
           <select
             value={style}
             onChange={(e) => handleChange('style', e.target.value)}
@@ -138,7 +138,7 @@ export default function StickerTextEditor({ textConfig, onTextConfigChange }) {
 
         {/* Font */}
         <div>
-          <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5 px-1">Font</label>
+          <label className="block text-[10px] font-semibold text-[var(--color-text-4)] mb-1.5 px-1">Font</label>
           <select
             value={font}
             onChange={(e) => handleChange('font', e.target.value)}
@@ -152,7 +152,7 @@ export default function StickerTextEditor({ textConfig, onTextConfigChange }) {
 
         {/* Position */}
         <div>
-          <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5 px-1">Position</label>
+          <label className="block text-[10px] font-semibold text-[var(--color-text-4)] mb-1.5 px-1">Position</label>
           <div className="flex gap-1 h-[34px]">
             {POSITIONS.map((p) => (
               <button
@@ -174,7 +174,7 @@ export default function StickerTextEditor({ textConfig, onTextConfigChange }) {
       {/* Font Size */}
       <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
          <div className="flex justify-between text-[11px] font-medium mb-2 px-1">
-            <span className="text-[var(--color-text-4)] uppercase tracking-wider">Font Size</span>
+            <span className="text-[var(--color-text-4)] ">Font Size</span>
             <span className="text-[var(--color-text)]">{fontSize}px</span>
           </div>
           <input

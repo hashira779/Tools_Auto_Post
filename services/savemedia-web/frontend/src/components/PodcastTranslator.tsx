@@ -259,13 +259,13 @@ const PodcastTranslator = () => {
           <div>
             <div className="flex rounded-lg bg-[var(--color-surface-2)] p-1 mb-4 w-max border border-[var(--color-border-2)]">
               <button
-                className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${uploadType === 'file' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-primary-600)]' : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'}`}
+                className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${uploadType === 'file' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-primary-600)]' : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'}`}
                 onClick={() => setUploadType('file')}
               >
                 Upload File
               </button>
               <button
-                className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${uploadType === 'url' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-primary-600)]' : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'}`}
+                className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${uploadType === 'url' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-primary-600)]' : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'}`}
                 onClick={() => setUploadType('url')}
               >
                 Paste URL
@@ -280,7 +280,7 @@ const PodcastTranslator = () => {
                   onChange={handleFileChange}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
-                <div className={`w-full border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-200 ${file ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)]/5' : 'border-[var(--color-border-2)] bg-[var(--color-surface-1)] group-hover:border-[var(--color-primary-300)]'}`}>
+                <div className={`w-full border-2 border-dashed rounded-2xl p-10 text-center transition-colors duration-200 ${file ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)]/5' : 'border-[var(--color-border-2)] bg-[var(--color-surface-1)] group-hover:border-[var(--color-primary-300)]'}`}>
                   {file ? (
                     <div className="flex flex-col items-center gap-3">
                       <div className="p-3 bg-[var(--color-primary-500)]/10 rounded-full">
@@ -348,7 +348,7 @@ const PodcastTranslator = () => {
           
           <div className="w-full h-3 bg-[var(--color-surface-3)] rounded-full overflow-hidden border border-[var(--color-border)] relative">
             <div 
-              className="h-full bg-[var(--color-primary-500)] relative z-10 transition-all duration-500 ease-out"
+              className="h-full bg-[var(--color-primary-500)] relative z-10 transition-colors duration-500 ease-out"
               style={{ width: `${progress}%` }}
             >
               <div className="absolute top-0 right-0 bottom-0 w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 animate-[shimmer_2s_infinite]"></div>
@@ -362,7 +362,7 @@ const PodcastTranslator = () => {
               const isCompleted = progress >= (idx + 1) * 25;
               return (
                 <div key={step} className="flex flex-col items-center text-center gap-2.5">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors duration-300
                     ${isCompleted ? 'bg-[var(--color-primary-500)] border-[var(--color-primary-500)] text-white' : 
                       isActive ? 'bg-[var(--color-surface-1)] border-[var(--color-primary-500)] animate-pulse text-[var(--color-text)]' : 'bg-[var(--color-surface-2)] border-[var(--color-border-3)] text-[var(--color-text-4)]'}`}
                   >
@@ -459,7 +459,7 @@ const PodcastTranslator = () => {
           
           <button 
             onClick={resetForm}
-            className="text-[var(--color-text-3)] hover:text-[var(--color-text)] font-semibold text-sm underline-offset-4 hover:underline transition-all mt-8"
+            className="text-[var(--color-text-3)] hover:text-[var(--color-text)] font-semibold text-sm underline-offset-4 hover:underline transition-colors mt-8"
           >
             Translate Another Podcast
           </button>

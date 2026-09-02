@@ -14,22 +14,80 @@
     // Inject styling for overlay and hide license warning banners
     const style = document.createElement('style');
     style.innerHTML = `
-        #google-auth-overlay { position: fixed; inset: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 999999; font-family: "Inter", sans-serif; }
-        .ct-auth-card { background: #1e293b; padding: 40px; border-radius: 16px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .ct-brand { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 24px; display: flex; justify-content: center; }
-        .ct-brand .b { color: #3b82f6; }
+        #google-auth-overlay {
+            position: fixed; inset: 0; z-index: 999999;
+            display: flex; align-items: center; justify-content: center;
+            padding: 24px;
+            background: #09090b;
+            background-image: radial-gradient(60rem 30rem at 50% -20%, rgba(37,99,235,0.10), transparent 70%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            animation: ct-overlay-in 260ms cubic-bezier(0.2, 0, 0, 1) both;
+        }
+        .ct-auth-card {
+            width: 100%; max-width: 400px;
+            padding: 36px 32px 28px;
+            background: #121216;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.35), 0 16px 40px rgba(0,0,0,0.55);
+            text-align: center;
+            animation: ct-card-in 320ms cubic-bezier(0.32, 0.72, 0, 1) both;
+        }
+        .ct-brand {
+            display: flex; justify-content: center;
+            font-size: 19px; font-weight: 700; letter-spacing: -0.02em;
+            margin-bottom: 28px;
+        }
+        .ct-brand .b { color: #3b76f6; }
         .ct-brand .o { color: #f97316; }
-        .ct-title { color: #fff; font-size: 20px; font-weight: 700; margin: 0 0 6px; }
-        .ct-sub { color: #94a3b8; font-size: 14px; margin: 0 0 28px; line-height: 1.5; }
-        .ct-btn-wrap { display: flex; justify-content: center; min-height: 44px; transition: opacity .2s; }
-        .ct-spinner { display: none; width: 22px; height: 22px; border: 2.5px solid rgba(255,255,255,.2); border-top-color: #3b82f6; border-radius: 50%; animation: ct-spin .7s linear infinite; margin: 12px auto 0; }
+        .ct-title {
+            margin: 0 0 6px;
+            color: #fafafa; font-size: 19px; font-weight: 600;
+            letter-spacing: -0.022em; line-height: 1.25;
+        }
+        .ct-sub {
+            margin: 0 0 26px;
+            color: #8b8b96; font-size: 14px; line-height: 1.55;
+        }
+        .ct-btn-wrap {
+            display: flex; justify-content: center; min-height: 44px;
+            transition: opacity 170ms cubic-bezier(0.2, 0, 0, 1);
+        }
+        .ct-spinner {
+            display: none;
+            width: 18px; height: 18px; margin: 14px auto 0;
+            border: 2px solid rgba(255,255,255,0.14);
+            border-top-color: #3b76f6;
+            border-radius: 50%;
+            animation: ct-spin 0.7s linear infinite;
+        }
         .ct-loading .ct-spinner { display: block; }
-        .ct-loading .ct-btn-wrap { opacity: .35; pointer-events: none; }
+        .ct-loading .ct-btn-wrap { opacity: 0.4; pointer-events: none; }
+        .ct-error {
+            min-height: 18px; margin-top: 14px;
+            color: #ef4444; font-size: 13px; line-height: 1.4;
+        }
+        .ct-divider {
+            height: 1px; margin: 26px 0 16px;
+            background: rgba(255,255,255,0.08);
+        }
+        .ct-foot {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            color: #6a6a75; font-size: 12px;
+        }
+        .ct-foot svg { width: 12px; height: 12px; }
+
         @keyframes ct-spin { to { transform: rotate(360deg); } }
-        .ct-error { color: #f87171; font-size: 13px; margin-top: 16px; min-height: 18px; }
-        .ct-divider { height: 1px; background: rgba(255, 255, 255, 0.08); margin: 28px 0 18px; }
-        .ct-foot { display: flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 12px; }
-        .ct-foot svg { width: 13px; height: 13px; }
+        @keyframes ct-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes ct-card-in {
+            from { opacity: 0; transform: translate3d(0, 8px, 0); }
+            to   { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #google-auth-overlay, .ct-auth-card { animation: none; }
+        }
 
         /* Hide production license disclaimers */
         [data-test-id*="license"],
@@ -41,15 +99,29 @@
     `;
     document.head.appendChild(style);
 
-    // Dynamic banner cleaner
-    setInterval(() => {
+    // Dynamic banner cleaner — reacts to DOM mutations (debounced) instead of
+    // polling a full-page scan every 500ms. n8n's canvas mutates the DOM
+    // continuously while editing, so the old blind interval caused visible
+    // jank; this only does the (unchanged) scan when content actually changes.
+    function hideLicenseBanners() {
         document.querySelectorAll('div, span, p, [role="alert"]').forEach((el) => {
             if (el.textContent && el.textContent.includes('not licensed for production')) {
                 const banner = el.closest('[class*="banner"], [class*="alert"], [class*="notice"], [role="alert"]') || el;
                 banner.style.setProperty('display', 'none', 'important');
             }
         });
-    }, 500);
+    }
+    let bannerScanScheduled = false;
+    function scheduleBannerScan() {
+        if (bannerScanScheduled) return;
+        bannerScanScheduled = true;
+        (window.requestIdleCallback || ((fn) => setTimeout(fn, 200)))(() => {
+            bannerScanScheduled = false;
+            hideLicenseBanners();
+        });
+    }
+    new MutationObserver(scheduleBannerScan).observe(document.body, { childList: true, subtree: true });
+    scheduleBannerScan();
 
     window.handleGoogleCredentialResponse = function (response) {
         if (submitting) return;

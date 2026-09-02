@@ -45,9 +45,9 @@ export default function StickerUploader({ onUpload }) {
       </div>
 
       <div
-        className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 select-none ${
+        className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors duration-200 select-none ${
           dragOver
-            ? 'border-[var(--color-primary-500)] bg-[rgba(134,59,255,0.06)] scale-[1.01]'
+            ? 'border-[var(--color-primary-500)] bg-[rgba(134,59,255,0.06)]'
             : 'border-[var(--color-border-2)] hover:border-[var(--color-border-3)] bg-[var(--color-surface-1)] hover:bg-[var(--color-surface-2)]'
         }`}
         onDrop={handleDrop}

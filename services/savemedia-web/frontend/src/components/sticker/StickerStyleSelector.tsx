@@ -27,7 +27,7 @@ export default function StickerStyleSelector({ selectedStyle, onSelectStyle, pro
               key={style.id}
               onClick={() => onSelectStyle(style.id)}
               disabled={processing}
-              className={`p-2.5 rounded-xl text-left transition-all duration-150 relative cursor-pointer select-none border focus-ring outline-none ${
+              className={`p-2.5 rounded-xl text-left transition-colors duration-150 relative cursor-pointer select-none border focus-ring outline-none ${
                 isSelected
                   ? 'border-[var(--color-primary-500)] bg-[rgba(134,59,255,0.06)]'
                   : 'border-[var(--color-border)] hover:border-[var(--color-border-2)] hover:bg-[var(--color-surface-1)]'

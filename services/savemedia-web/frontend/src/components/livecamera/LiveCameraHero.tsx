@@ -292,7 +292,7 @@ export default function LiveCameraHero() {
               
               {/* Local Host Video Tile */}
               {localStream && (
-                <div className={`relative aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10 flex items-center justify-center group transition-all duration-300 ${totalParticipants === 1 ? 'w-full max-w-5xl' : 'w-full max-w-[calc(50%-1rem)] min-w-[300px]'}`}>
+                <div className={`relative aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10 flex items-center justify-center group transition-colors duration-300 ${totalParticipants === 1 ? 'w-full max-w-5xl' : 'w-full max-w-[calc(50%-1rem)] min-w-[300px]'}`}>
                   <video
                     ref={localVideoRef}
                     autoPlay
@@ -301,7 +301,7 @@ export default function LiveCameraHero() {
                     className="w-full h-full object-cover transform -scale-x-100"
                   />
                   {isVideoOff && (
-                    <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center gap-3 text-slate-400 z-10">
+                    <div className="absolute inset-0 bg-[var(--color-surface-2)] flex flex-col items-center justify-center gap-3 text-[var(--color-text-4)] z-10">
                       <div className="w-16 h-16 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-white text-xl font-bold">
                         Host
                       </div>
@@ -319,7 +319,7 @@ export default function LiveCameraHero() {
 
               {/* Remote Participant Tiles */}
               {Array.from(streams.entries()).map(([id, stream]) => (
-                <div key={id} className={`relative aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10 flex items-center justify-center group transition-all duration-300 ${totalParticipants === 1 ? 'w-full max-w-5xl' : 'w-full max-w-[calc(50%-1rem)] min-w-[300px]'}`}>
+                <div key={id} className={`relative aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10 flex items-center justify-center group transition-colors duration-300 ${totalParticipants === 1 ? 'w-full max-w-5xl' : 'w-full max-w-[calc(50%-1rem)] min-w-[300px]'}`}>
                   <VideoPreview stream={stream} connectionState="connected" />
                   
                   <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-medium">
@@ -339,7 +339,7 @@ export default function LiveCameraHero() {
               </div>
 
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-primary-50)] dark:bg-[var(--color-primary-900)] border border-[var(--color-primary-200)] dark:border-[var(--color-primary-800)] text-[var(--color-primary-600)] dark:text-[var(--color-primary-400)] text-xs font-bold uppercase tracking-widest">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-primary-50)] dark:bg-[var(--color-primary-900)] border border-[var(--color-primary-200)] dark:border-[var(--color-primary-800)] text-[var(--color-primary-600)] dark:text-[var(--color-primary-400)] text-xs font-bold ">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Studio Ready</span>
                 </div>
@@ -381,7 +381,7 @@ export default function LiveCameraHero() {
             <div className="p-4 border-b border-[var(--color-border-2)] flex items-center justify-between bg-[var(--color-surface-2)]">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-[var(--color-primary-500)]" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">Live Chat</h4>
+                <h4 className="text-xs font-bold text-[var(--color-text)]">Live Chat</h4>
               </div>
               <span className="text-[10px] text-[var(--color-text-3)] font-mono">{messages.length} messages</span>
             </div>
@@ -422,7 +422,7 @@ export default function LiveCameraHero() {
                   <button
                     key={emoji}
                     onClick={() => sendReaction(emoji)}
-                    className="w-8 h-8 flex items-center justify-center text-lg hover:scale-125 active:scale-95 transition-transform"
+                    className="w-8 h-8 flex items-center justify-center text-lg active:scale-95 transition-transform"
                   >
                     {emoji}
                   </button>
@@ -461,7 +461,7 @@ export default function LiveCameraHero() {
               {/* Mic Toggle */}
               <button
                 onClick={toggleAudio}
-                className={`p-3 rounded-lg border transition-all ${
+                className={`p-3 rounded-lg border transition-colors ${
                   isAudioMuted 
                     ? 'bg-[var(--color-error)] text-white border-[var(--color-error)] shadow-md shadow-[var(--color-error-dim)]' 
                     : 'btn-secondary'
@@ -474,7 +474,7 @@ export default function LiveCameraHero() {
               {/* Video Toggle */}
               <button
                 onClick={toggleVideo}
-                className={`p-3 rounded-lg border transition-all ${
+                className={`p-3 rounded-lg border transition-colors ${
                   isVideoOff 
                     ? 'bg-[var(--color-error)] text-white border-[var(--color-error)] shadow-md shadow-[var(--color-error-dim)]' 
                     : 'btn-secondary'
@@ -506,7 +506,7 @@ export default function LiveCameraHero() {
           {/* Chat Toggle */}
           <button
             onClick={() => setShowChat(prev => !prev)}
-            className={`p-3 rounded-lg border transition-all ${
+            className={`p-3 rounded-lg border transition-colors ${
               showChat 
                 ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-500)] shadow-md shadow-[var(--color-primary-200)]' 
                 : 'btn-secondary'
@@ -519,7 +519,7 @@ export default function LiveCameraHero() {
           {/* End Session Button */}
           <button
             onClick={handleRecreate}
-            className="p-3 rounded-lg bg-[var(--color-error-dim)] hover:bg-[var(--color-error)] text-[var(--color-error)] hover:text-white border border-[var(--color-error)]/30 transition-all flex items-center gap-2"
+            className="p-3 rounded-lg bg-[var(--color-error-dim)] hover:bg-[var(--color-error)] text-[var(--color-error)] hover:text-white border border-[var(--color-error)]/30 transition-colors flex items-center gap-2"
             title="End Call & Reset Room"
           >
             <PhoneOff className="w-5 h-5" />
@@ -544,7 +544,7 @@ export default function LiveCameraHero() {
               <p className="text-xs text-[var(--color-text-3)]">Scan or share this link to join Room: <strong className="text-[var(--color-text)]">{roomId}</strong></p>
             </div>
 
-            <div className="p-4 bg-white rounded-xl shadow-sm ring-1 ring-black/5">
+            <div className="p-4 bg-[var(--color-surface-1)] rounded-xl shadow-sm ring-1 ring-black/5">
               <QRCode 
                 value={`${window.location.origin}/share/${roomId}`}
                 size={180}

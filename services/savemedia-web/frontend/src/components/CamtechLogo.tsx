@@ -120,7 +120,7 @@ export default function CamtechLogo({
     )
   }
 
-  const baseClasses = `camtech-logo transition-[transform,opacity] duration-200 ease-out hover:scale-[1.02] inline-block select-none ${className}`
+  const baseClasses = `camtech-logo transition-[transform,opacity] duration-200 ease-out hover: inline-block select-none ${className}`
 
   if (variant === 'icon') {
     return (

@@ -11,7 +11,7 @@ export default function StickerHero() {
         <span className="font-medium text-[11px]">Telegram Stickers</span>
       </div>
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3 text-[var(--color-text)]">
-        Create <span className="bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-300)] bg-clip-text text-transparent">Custom Stickers</span>
+        Create <span className="text-[var(--color-primary-600)]">Custom Stickers</span>
       </h1>
       <p className="text-[14px] text-[var(--color-text-3)] max-w-sm mx-auto">
         Convert any image into a Telegram sticker with custom text, memes, and styles.

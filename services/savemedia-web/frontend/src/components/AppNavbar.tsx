@@ -78,7 +78,7 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
           {/* ── Left: Logo ────────────────────────────── */}
           <button
             onClick={() => onSelectTool(TOOL_DOWNLOADER)}
-            className="flex items-center select-none cursor-pointer group focus-ring rounded-lg py-1.5 px-2 -ml-2 transition-transform hover:scale-105 text-[var(--color-text)]"
+            className="flex items-center select-none cursor-pointer group focus-ring rounded-lg py-1.5 px-2 -ml-2 transition-transform text-[var(--color-text)]"
             aria-label="CamTech home"
           >
             <CamtechLogo variant="full" theme="color" width={130} />
@@ -94,9 +94,9 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => onSelectTool(tool.id)}
-                  className={`px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all duration-200 cursor-pointer focus-ring whitespace-nowrap shrink-0 relative ${
+                  className={`px-3 py-1.5 rounded-xl text-[13px] font-medium transition-colors duration-150 cursor-pointer focus-ring whitespace-nowrap shrink-0 relative ${
                     isActive
-                      ? 'text-white bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_12px_rgba(37,99,235,0.4)]'
+                      ? 'text-white bg-[var(--color-primary-600)]'
                       : 'text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] border border-transparent'
                   }`}
                 >
@@ -110,7 +110,7 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                 role="tab"
                 aria-selected={activeTool === TOOL_ADMIN}
                 onClick={() => onSelectTool(TOOL_ADMIN)}
-                className={`ml-1 px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all duration-200 cursor-pointer focus-ring flex items-center gap-1.5 ${
+                className={`ml-1 px-3 py-1.5 rounded-xl text-[13px] font-medium transition-colors duration-150 cursor-pointer focus-ring flex items-center gap-1.5 ${
                   activeTool === TOOL_ADMIN
                     ? 'text-red-400 bg-red-400/10 border border-red-400/20'
                     : 'text-red-500/70 hover:text-red-400 hover:bg-red-400/5 border border-transparent'
@@ -133,11 +133,11 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                 localStorage.removeItem('camtech_pwa_dismissed')
                 window.dispatchEvent(new CustomEvent('open-pwa-install'))
               }}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-3)] hover:text-blue-400 hover:bg-[var(--color-surface-2)] transition-all duration-200 cursor-pointer focus-ring hidden sm:flex border border-transparent hover:border-[var(--color-glass-border)] group"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors duration-150 cursor-pointer focus-ring hidden sm:flex border border-transparent hover:border-[var(--color-glass-border)] group"
               aria-label="Add to Home Screen"
               title="Add to Home Screen (iOS & Android App)"
             >
-              <svg className="w-[17px] h-[17px] group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-[17px] h-[17px] group- transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
             </button>
@@ -145,7 +145,7 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
             {/* Fullscreen Toggle Button */}
             <button
               onClick={toggleFullscreen}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-all duration-200 cursor-pointer focus-ring hidden sm:flex border border-transparent hover:border-[var(--color-glass-border)]"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors duration-150 cursor-pointer focus-ring hidden sm:flex border border-transparent hover:border-[var(--color-glass-border)]"
               aria-label="Toggle Fullscreen"
               title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
             >
@@ -163,7 +163,7 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-all duration-200 cursor-pointer focus-ring border border-transparent hover:border-[var(--color-glass-border)]"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors duration-150 cursor-pointer focus-ring border border-transparent hover:border-[var(--color-glass-border)]"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? (
@@ -182,7 +182,7 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
             {/* Mobile Menu Button */}
             <button
               onClick={onOpenMobileMenu}
-              className="md:hidden w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-all duration-200 cursor-pointer focus-ring border border-transparent hover:border-[var(--color-glass-border)]"
+              className="md:hidden w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors duration-150 cursor-pointer focus-ring border border-transparent hover:border-[var(--color-glass-border)]"
               aria-label="Open menu"
             >
               <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -212,7 +212,7 @@ export default function AppNavbar({ activeTool, onSelectTool, onOpenMobileMenu }
                   >
                     {tool.mobileLabel}
                     {isActive && (
-                      <span className="absolute bottom-0 left-1/4 right-1/4 h-[3px] rounded-t-full bg-gradient-to-r from-[var(--color-primary-400)] to-[var(--color-primary-600)]" />
+                      <span className="absolute bottom-0 left-1/4 right-1/4 h-[3px] rounded-t-full bg-[var(--color-primary-500)]" />
                     )}
                   </button>
                 )

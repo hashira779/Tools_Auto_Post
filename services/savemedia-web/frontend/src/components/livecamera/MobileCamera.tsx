@@ -258,7 +258,7 @@ export default function MobileCamera({ roomId }) {
   // Pre-join Lobby View
   if (supportState !== STATE.LIVE) {
     return (
-      <div className="min-h-[100dvh] w-full bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex flex-col items-center justify-center p-6 text-center select-none">
+      <div className="min-h-[100dvh] w-full bg-indigo-600 hover:bg-indigo-500 flex flex-col items-center justify-center p-6 text-center select-none">
         
         {/* Glow ambient background */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -266,7 +266,7 @@ export default function MobileCamera({ roomId }) {
         <div className="w-full max-w-sm flex flex-col items-center gap-6 relative z-10">
           
           {/* Header Badge */}
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-indigo-300 text-xs font-semibold uppercase tracking-wider">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-indigo-300 text-xs font-semibold ">
             <Sparkles className="w-4 h-4 text-indigo-400" />
             <span>CamTech Live Studio</span>
           </div>
@@ -275,17 +275,17 @@ export default function MobileCamera({ roomId }) {
             <h1 className="text-3xl font-extrabold text-white tracking-tight">
               Ready to Join?
             </h1>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-[var(--color-text-4)]">
               You are about to connect to room <span className="font-mono text-indigo-400 font-bold px-2 py-0.5 rounded bg-indigo-950/80 border border-indigo-500/30">{roomId}</span>
             </p>
           </div>
 
           {/* Camera Preview Card / Graphic */}
-          <div className="w-full aspect-[4/3] rounded-3xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col items-center justify-center relative overflow-hidden group">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 animate-pulse">
+          <div className="w-full aspect-[4/3] rounded-2xl bg-[var(--color-surface-2)]/80 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col items-center justify-center relative overflow-hidden group">
+            <div className="w-20 h-20 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 animate-pulse">
               <Video className="w-10 h-10" />
             </div>
-            <p className="mt-4 text-xs font-medium text-slate-400">
+            <p className="mt-4 text-xs font-medium text-[var(--color-text-4)]">
               HD 1080p WebRTC Streaming
             </p>
           </div>
@@ -301,10 +301,10 @@ export default function MobileCamera({ roomId }) {
           <button
             onClick={startSharing}
             disabled={isConnecting || supportState === STATE.BLOCKED_BY_SECURITY || supportState === STATE.UNSUPPORTED}
-            className={`w-full py-4 px-6 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-all shadow-xl text-base ${
+            className={`w-full py-4 px-6 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors shadow-xl text-base ${
               supportState === STATE.BLOCKED_BY_SECURITY || supportState === STATE.UNSUPPORTED 
-                ? 'bg-slate-800 opacity-50 cursor-not-allowed text-slate-500' 
-                : 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] shadow-indigo-500/25'
+                ? 'bg-[var(--color-surface-2)] opacity-50 cursor-not-allowed text-[var(--color-text-4)]' 
+                : 'bg-indigo-600 hover:bg-indigo-500 hover:opacity-95 hover: active:scale-[0.98] shadow-indigo-500/25'
             }`}
           >
             {isConnecting ? (
@@ -315,7 +315,7 @@ export default function MobileCamera({ roomId }) {
             <span>{isConnecting ? 'Accessing Camera...' : 'Join Room with Camera'}</span>
           </button>
 
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-[var(--color-text-4)]">
             Encrypted Peer-to-Peer • Instant Connect
           </p>
         </div>
@@ -335,7 +335,7 @@ export default function MobileCamera({ roomId }) {
         {/* Left: Live indicator & Room Tag */}
         <div className="flex items-center gap-2 pointer-events-auto">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-600/90 backdrop-blur-md text-white text-xs font-bold shadow-lg shadow-red-600/20">
-            <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+            <span className="w-2 h-2 rounded-full bg-[var(--color-surface-1)] animate-ping"></span>
             <span>LIVE</span>
           </div>
 
@@ -344,7 +344,7 @@ export default function MobileCamera({ roomId }) {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white/90 text-xs font-mono hover:bg-black/70 transition-colors shadow-lg"
           >
             <span>{roomId}</span>
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-[var(--color-text-4)]" />}
           </button>
         </div>
 
@@ -357,7 +357,7 @@ export default function MobileCamera({ roomId }) {
 
           <button
             onClick={flipCamera}
-            className="p-2.5 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-white/20 active:rotate-180 transition-all shadow-lg"
+            className="p-2.5 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-white/20 active:rotate-180 transition-colors shadow-lg"
             title="Flip Camera"
           >
             <RefreshCw className="w-4 h-4" />
@@ -379,7 +379,7 @@ export default function MobileCamera({ roomId }) {
               className={`w-full h-full object-cover transition-transform duration-500 ${facingMode === 'user' ? 'transform -scale-x-100' : ''}`}
             />
             {isVideoOff && (
-              <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center text-white/50">
+              <div className="absolute inset-0 bg-[var(--color-surface-2)] flex flex-col items-center justify-center text-white/50">
                 <div className="w-24 h-24 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-3xl font-bold mb-4">
                   You
                 </div>
@@ -395,7 +395,7 @@ export default function MobileCamera({ roomId }) {
             </div>
             
             {/* Local PIP (Picture-in-Picture) */}
-            <div className="absolute top-16 right-4 sm:right-6 w-28 sm:w-36 aspect-[3/4] rounded-2xl overflow-hidden bg-slate-900 shadow-2xl border-2 border-white/20 z-20 transition-all duration-200 ease-out hover:scale-105 active:scale-95 cursor-pointer will-change-transform">
+            <div className="absolute top-16 right-4 sm:right-6 w-28 sm:w-36 aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--color-surface-2)] shadow-2xl border-2 border-white/20 z-20 transition-colors duration-200 ease-out active:scale-95 cursor-pointer will-change-transform">
               <video
                 ref={localVideoRef}
                 autoPlay
@@ -404,7 +404,7 @@ export default function MobileCamera({ roomId }) {
                 className={`w-full h-full object-cover ${facingMode === 'user' ? 'transform -scale-x-100' : ''}`}
               />
               {isVideoOff && (
-                <div className="absolute inset-0 bg-slate-900 flex items-center justify-center">
+                <div className="absolute inset-0 bg-[var(--color-surface-2)] flex items-center justify-center">
                   <VideoOff className="w-8 h-8 text-white/30" />
                 </div>
               )}
@@ -413,7 +413,7 @@ export default function MobileCamera({ roomId }) {
         ) : (
           /* Grid View for 3+ Participants */
           <div className="w-full h-full p-2 grid gap-2 grid-cols-2 grid-rows-2 auto-rows-fr animate-fade-in">
-            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-lg">
+            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[var(--color-surface-2)] border border-white/10 shadow-lg">
               <video
                 ref={localVideoRef}
                 autoPlay
@@ -422,7 +422,7 @@ export default function MobileCamera({ roomId }) {
                 className={`w-full h-full object-cover ${facingMode === 'user' ? 'transform -scale-x-100' : ''}`}
               />
               {isVideoOff && (
-                <div className="absolute inset-0 bg-slate-900 flex items-center justify-center">
+                <div className="absolute inset-0 bg-[var(--color-surface-2)] flex items-center justify-center">
                   <VideoOff className="w-8 h-8 text-white/30" />
                 </div>
               )}
@@ -431,7 +431,7 @@ export default function MobileCamera({ roomId }) {
               </div>
             </div>
             {Array.from(streams.entries()).map(([id, stream]) => (
-              <div key={id} className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-lg">
+              <div key={id} className="relative w-full h-full rounded-2xl overflow-hidden bg-[var(--color-surface-2)] border border-white/10 shadow-lg">
                 <VideoPreview stream={stream} connectionState="connected" />
                 <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-lg text-white text-[10px] font-medium border border-white/10">
                   Guest
@@ -489,7 +489,7 @@ export default function MobileCamera({ roomId }) {
               <button
                 key={emoji}
                 onClick={() => sendReaction(emoji)}
-                className="w-8 h-8 flex items-center justify-center text-lg hover:scale-125 active:scale-95 transition-transform"
+                className="w-8 h-8 flex items-center justify-center text-lg active:scale-95 transition-transform"
               >
                 {emoji}
               </button>
@@ -521,7 +521,7 @@ export default function MobileCamera({ roomId }) {
           {/* Mic Button */}
           <button
             onClick={toggleAudio}
-            className={`p-3.5 rounded-full backdrop-blur-xl border transition-all shadow-xl ${
+            className={`p-3.5 rounded-full backdrop-blur-xl border transition-colors shadow-xl ${
               isAudioMuted 
                 ? 'bg-rose-600 text-white border-rose-500 shadow-rose-600/30' 
                 : 'bg-black/60 text-white border-white/15 hover:bg-white/20'
@@ -534,7 +534,7 @@ export default function MobileCamera({ roomId }) {
           {/* Video Toggle Button */}
           <button
             onClick={toggleVideo}
-            className={`p-3.5 rounded-full backdrop-blur-xl border transition-all shadow-xl ${
+            className={`p-3.5 rounded-full backdrop-blur-xl border transition-colors shadow-xl ${
               isVideoOff 
                 ? 'bg-rose-600 text-white border-rose-500 shadow-rose-600/30' 
                 : 'bg-black/60 text-white border-white/15 hover:bg-white/20'
@@ -547,9 +547,9 @@ export default function MobileCamera({ roomId }) {
           {/* Toggle Chat Visibility */}
           <button
             onClick={() => setShowChat(prev => !prev)}
-            className={`p-3.5 rounded-full backdrop-blur-xl border transition-all shadow-xl ${
+            className={`p-3.5 rounded-full backdrop-blur-xl border transition-colors shadow-xl ${
               !showChat 
-                ? 'bg-slate-800 text-slate-400 border-white/10' 
+                ? 'bg-[var(--color-surface-2)] text-[var(--color-text-4)] border-white/10' 
                 : 'bg-black/60 text-white border-white/15 hover:bg-white/20'
             }`}
             title={showChat ? "Hide Chat" : "Show Chat"}
@@ -560,7 +560,7 @@ export default function MobileCamera({ roomId }) {
           {/* End Call / Leave */}
           <button
             onClick={stopSharing}
-            className="p-3.5 rounded-full bg-gradient-to-r from-red-600 to-rose-700 text-white shadow-xl shadow-red-600/30 border border-red-500 hover:scale-105 active:scale-95 transition-all"
+            className="p-3.5 rounded-full bg-red-600 hover:bg-red-500 text-white shadow-xl shadow-red-600/30 border border-red-500 active:scale-95 transition-colors"
             title="Leave Room"
           >
             <PhoneOff className="w-5 h-5" />

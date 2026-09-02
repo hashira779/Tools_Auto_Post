@@ -57,26 +57,26 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
 
   return (
     <div className="w-full max-w-md mx-auto animate-fade-in">
-      <div className="relative bg-gradient-to-b from-[#0B1221]/95 to-[#050B14]/95 border border-cyan-500/30 rounded-3xl p-8 sm:p-10 shadow-[0_0_50px_rgba(6,182,212,0.15)] backdrop-blur-xl text-center">
+      <div className="relative bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-500)]/95 to-[#050B14]/95 border border-cyan-500/30 rounded-2xl p-8 sm:p-10 backdrop-blur-xl text-center">
         {/* Top Glare */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent"></div>
 
         {/* Key Icon */}
-        <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-400/40 flex items-center justify-center shadow-[0_0_25px_rgba(6,182,212,0.25)]">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-[var(--color-primary-600)] border border-cyan-400/40 flex items-center justify-center">
           <svg className="w-8 h-8 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
           </svg>
         </div>
 
-        <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-cyan-300 mb-2 tracking-tight">
+        <h3 className="text-2xl font-bold text-[var(--color-primary-600)] mb-2 tracking-tight">
           {title}
         </h3>
-        <p className="text-slate-400 text-sm leading-relaxed mb-8">
+        <p className="text-[var(--color-text-4)] text-sm leading-relaxed mb-8">
           {subtitle}
         </p>
 
         {success ? (
-          <div className="bg-cyan-500/15 border border-cyan-400/50 text-cyan-300 p-5 rounded-2xl flex items-center justify-center gap-3 animate-slide-up shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+          <div className="bg-cyan-500/15 border border-cyan-400/50 text-cyan-300 p-5 rounded-2xl flex items-center justify-center gap-3 animate-slide-up">
             <svg className="w-6 h-6 text-cyan-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -86,7 +86,7 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
             <div>
-              <label className="block text-[11px] font-bold text-cyan-400/80 uppercase tracking-widest mb-2 text-center">
+              <label className="block text-[11px] font-bold text-cyan-400/80 mb-2 text-center">
                 Access Token Key
               </label>
               <input
@@ -94,7 +94,7 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
                 placeholder="CAM-XXXX-XXXX"
                 value={token}
                 onChange={(e) => setToken(e.target.value.toUpperCase())}
-                className="w-full bg-[var(--color-surface-2)] border-2 border-cyan-500/40 focus:border-cyan-400 rounded-2xl px-4 py-3.5 text-[var(--color-text)] placeholder-[var(--color-text-4)] focus:outline-none focus:ring-2 focus:ring-cyan-400/30 transition-all duration-200"
+                className="w-full bg-[var(--color-surface-2)] border-2 border-cyan-500/40 focus:border-cyan-400 rounded-2xl px-4 py-3.5 text-[var(--color-text)] placeholder-[var(--color-text-4)] focus:outline-none focus:ring-2 focus:ring-cyan-400/30 transition-colors duration-200"
                 disabled={loading}
                 autoFocus
               />
@@ -109,7 +109,7 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
             <button
               type="submit"
               disabled={loading || !token.trim()}
-              className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer"
+              className="w-full bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-500)] disabled:from-slate-800 disabled:to-slate-800 disabled:text-[var(--color-text-4)] text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-colors duration-200 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -125,7 +125,7 @@ export default function VerificationOverlay({ onVerified, title = "Activate Acce
               <button
                 type="button"
                 onClick={logout}
-                className="text-xs text-slate-500 hover:text-red-400 font-medium transition-colors cursor-pointer"
+                className="text-xs text-[var(--color-text-4)] hover:text-red-400 font-medium transition-colors cursor-pointer"
               >
                 Sign out ({session?.user?.email})
               </button>

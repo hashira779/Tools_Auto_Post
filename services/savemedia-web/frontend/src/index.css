@@ -1,24 +1,26 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════
-   CAMTECH DESIGN SYSTEM — 2026 "Super Studio"
-   Glassmorphism · 3D · Ultra Fast · Dynamic
+   CAMTECH DESIGN SYSTEM
+   One accent hue · elevation over glow · motion only on intent
    ══════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ── Brand Colors (derived from logo blue/cyan) ─────────────── */
-  --color-primary-50:  #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #38bdf8; /* cyan */
-  --color-primary-500: #2563eb; /* electric blue */
-  --color-primary-600: #1d4ed8;
-  --color-primary-700: #1e40af;
-  --color-primary-800: #1e3a8a;
-  --color-primary-900: #0f172a; /* deep navy */
+  /* ── Brand ─────────────────────────────────────────────────── */
+  /* A single blue ramp. No competing cyan/purple accents: one hue,
+     used sparingly, is what separates a product from a template. */
+  --color-primary-50:  #eff4ff;
+  --color-primary-100: #dbe6fe;
+  --color-primary-200: #bfd3fe;
+  --color-primary-300: #93b4fd;
+  --color-primary-400: #6090fa;
+  --color-primary-500: #3b76f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #172554;
 
-  /* ── Neutral Palette (Dynamic Light/Dark) ──────────────────────── */
+  /* ── Surfaces / text / borders (theme-driven) ──────────────── */
   --color-surface:     var(--bg-surface);
   --color-surface-1:   var(--bg-surface-1);
   --color-surface-2:   var(--bg-surface-2);
@@ -38,61 +40,93 @@
 
 @layer base {
   :root {
-    --bg-surface:     #f8fafc; /* light grey app background */
-    --bg-surface-1:   #ffffff; /* crisp white cards */
-    --bg-surface-2:   #f1f5f9; /* subtle active states */
-    --bg-surface-3:   #e2e8f0;
-    --bg-surface-4:   #cbd5e1;
-    
-    --text-main:      #0f172a;
-    --text-2:         #334155;
-    --text-3:         #475569;
-    --text-4:         #64748b;
-    
-    --border-main:    #e2e8f0;
-    --border-2:       #cbd5e1;
-    --border-3:       #94a3b8;
-    --glass-border:   #e2e8f0;
+    /* Light — slightly cool off-white, never pure #fff on the body */
+    --bg-surface:     #fbfbfc;
+    --bg-surface-1:   #ffffff;
+    --bg-surface-2:   #f4f4f6;
+    --bg-surface-3:   #e8e8ec;
+    --bg-surface-4:   #d4d4da;
 
-    --navbar-bg:      rgba(255, 255, 255, 0.95);
-    
-    --shadow-color:   rgba(0, 0, 0, 0.04);
+    --text-main:      #09090b;
+    --text-2:         #3f3f46;
+    --text-3:         #56565e;
+    --text-4:         #8a8a93;
+
+    --border-main:    #e7e7eb;
+    --border-2:       #d9d9df;
+    --border-3:       #babac2;
+    --glass-border:   #e7e7eb;
+
+    --navbar-bg:      rgba(255, 255, 255, 0.82);
+
+    /* Layered, neutral, low-alpha. Shadows read as height, not as glow. */
+    --shadow-xs: 0 1px 2px rgba(9, 9, 11, 0.05);
+    --shadow-sm: 0 1px 2px rgba(9, 9, 11, 0.05), 0 2px 6px rgba(9, 9, 11, 0.04);
+    --shadow-md: 0 2px 4px rgba(9, 9, 11, 0.04), 0 6px 16px rgba(9, 9, 11, 0.07);
+    --shadow-lg: 0 4px 8px rgba(9, 9, 11, 0.04), 0 16px 32px rgba(9, 9, 11, 0.10);
+    --shadow-color: rgba(9, 9, 11, 0.06);
+
+    --ring-color: rgba(37, 99, 235, 0.35);
   }
 
   .dark {
-    --bg-surface:     #09090b;
-    --bg-surface-1:   #18181b66; /* 40% opacity */
-    --bg-surface-2:   #27272a80; /* 50% opacity */
-    --bg-surface-3:   #3f3f46;
-    --bg-surface-4:   #52525b;
-    
-    --text-main:      #ffffff;
-    --text-2:         #a1a1aa;
-    --text-3:         #71717a;
-    --text-4:         #52525b;
-    
-    --border-main:    rgba(255, 255, 255, 0.06);
-    --border-2:       rgba(255, 255, 255, 0.10);
-    --border-3:       rgba(255, 255, 255, 0.15);
-    --glass-border:   rgba(255, 255, 255, 0.1);
+    /* Dark — solid surfaces. Stacked translucency is the #1 cause of
+       muddy dark UIs, and every blurred layer costs a compositor pass. */
+    --bg-surface:     #0a0a0c;
+    --bg-surface-1:   #121216;
+    --bg-surface-2:   #1a1a1f;
+    --bg-surface-3:   #26262d;
+    --bg-surface-4:   #35353e;
 
-    --navbar-bg:      rgba(9, 9, 11, 0.5);
-    
-    --shadow-color:   rgba(0, 0, 0, 0.5);
+    --text-main:      #fafafa;
+    --text-2:         #a8a8b3;
+    --text-3:         #8b8b96;
+    --text-4:         #6a6a75;
+
+    --border-main:    rgba(255, 255, 255, 0.08);
+    --border-2:       rgba(255, 255, 255, 0.12);
+    --border-3:       rgba(255, 255, 255, 0.18);
+    --glass-border:   rgba(255, 255, 255, 0.08);
+
+    --navbar-bg:      rgba(10, 10, 12, 0.78);
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.35), 0 16px 32px rgba(0, 0, 0, 0.55);
+    --shadow-color: rgba(0, 0, 0, 0.45);
+
+    --ring-color: rgba(96, 144, 250, 0.45);
   }
 }
 
 @theme {
-  /* ── Semantic Colors ──────────────────────────────────────── */
-  --color-success:     #34D399;
-  --color-success-dim: rgba(52, 211, 153, 0.08);
-  --color-warning:     #FBBF24;
-  --color-warning-dim: rgba(251, 191, 36, 0.08);
-  --color-error:       #F87171;
-  --color-error-dim:   rgba(248, 113, 113, 0.08);
+  /* ── Semantic ─────────────────────────────────────────────── */
+  --color-success:     #10b981;
+  --color-success-dim: rgba(16, 185, 129, 0.10);
+  --color-warning:     #f59e0b;
+  --color-warning-dim: rgba(245, 158, 11, 0.10);
+  --color-error:       #ef4444;
+  --color-error-dim:   rgba(239, 68, 68, 0.10);
 
-  /* ── Font ──────────────────────────────────────────────────── */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ── Motion + radius scale ──────────────────────────────────────
+   One easing for everything that enters or responds to a pointer.
+   Shared curves are why a UI feels like one product instead of ten. */
+:root {
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fast: 110ms;
+  --dur: 170ms;
+  --dur-slow: 260ms;
+
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 10px;
+  --r-xl: 12px;
+  --r-2xl: 16px;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -102,6 +136,7 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   color-scheme: dark;
   scroll-behavior: smooth;
 }
@@ -116,195 +151,235 @@ body {
   letter-spacing: -0.011em;
 }
 
+/* Headings tighten as they grow — optical correction that reads as
+   "designed" rather than "default sans-serif at three sizes". */
+h1, h2, h3, h4 {
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+p { text-wrap: pretty; }
+
+::selection {
+  background: var(--color-primary-600);
+  color: #fff;
+}
+
 /* ══════════════════════════════════════════════════════════════
-   GLOBAL MESH GRADIENT (SUPER STUDIO BACKGROUND)
+   BACKGROUND
    ══════════════════════════════════════════════════════════════ */
 
+/* A single, barely-there wash. The previous three-radial mesh (blue +
+   cyan + purple) is the most recognizable "AI landing page" signature. */
 .mesh-bg {
   position: fixed;
   inset: 0;
   z-index: -10;
   background-color: var(--color-surface);
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
-  transition: background-color 0.3s ease;
-}
-
-.glow-card {
-  background: var(--color-surface-1);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px -10px var(--shadow-color);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.glow-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--color-primary-400);
-  box-shadow: 0 20px 40px -15px rgba(56, 189, 248, 0.2);
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 50%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background-image: radial-gradient(80rem 40rem at 50% -10%, rgba(37, 99, 235, 0.06), transparent 70%);
 }
 
 /* ══════════════════════════════════════════════════════════════
-   GLASSMORPHISM CARD SYSTEM
+   CARDS
    ══════════════════════════════════════════════════════════════ */
 
 .card {
   background: var(--color-surface-1);
   border: 1px solid var(--color-border);
-  border-radius: 12px; /* standard saas radius */
-  box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -4px var(--shadow-color);
-  border-color: var(--color-border-3);
+  border-color: var(--color-border-2);
+  box-shadow: var(--shadow-md);
 }
 
 .card-elevated {
   background: var(--color-surface-1);
   border: 1px solid var(--color-border);
-  border-radius: 16px;
-  box-shadow: 0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Reserved for cards that are genuinely a single click target.
+   Lifting every card on hover is noise; lifting the clickable one is a cue. */
+.glow-card {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-3);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Kept for compatibility, deliberately restrained: the accent as a
+   flat tint, not a three-stop rainbow wipe. */
+.gradient-text {
+  color: var(--color-primary-600);
+}
+
+.dark .gradient-text {
+  color: var(--color-primary-400);
 }
 
 /* ══════════════════════════════════════════════════════════════
-   3D BUTTON SYSTEM
+   BUTTONS
    ══════════════════════════════════════════════════════════════ */
 
-.btn-primary {
-  background: linear-gradient(180deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
-  color: #ffffff;
-  border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+.btn-primary,
+.btn-secondary,
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--r-lg);
+  font-weight: 550;
+  font-size: 14px;
+  letter-spacing: -0.006em;
   cursor: pointer;
   user-select: none;
-  border: none;
-  box-shadow: 
-    inset 0 1px 1px rgba(255, 255, 255, 0.3), /* Top highlight */
-    inset 0 -1px 1px rgba(0, 0, 0, 0.2),      /* Bottom shadow */
-    0 4px 12px -4px rgba(37, 99, 235, 0.5);   /* Glowing drop shadow */
+  white-space: nowrap;
+  /* Explicit properties, never `all` — `all` makes the compositor watch
+     every animatable property and is a real source of hover jank. */
+  transition: background-color var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease),
+              box-shadow var(--dur-fast) var(--ease),
+              transform var(--dur-fast) var(--ease),
+              opacity var(--dur-fast) var(--ease);
+}
+
+/* Flat, solid, one hairline of depth. No gradient fill, no inset
+   bevel, no colored drop-glow — that combination is skeuomorphic and
+   dates a UI instantly. */
+.btn-primary {
+  background: var(--color-primary-600);
+  color: #ffffff;
+  border: 1px solid var(--color-primary-700);
+  box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(255, 255, 255, 0.10);
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 
-    inset 0 1px 1px rgba(255, 255, 255, 0.4),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.2),
-    0 8px 16px -4px rgba(37, 99, 235, 0.6);
+  background: var(--color-primary-500);
+  border-color: var(--color-primary-600);
 }
 
+/* Press = settle down and in, ~1px. Buttons that jump 2px on hover and
+   3px on press read as a toy; real ones acknowledge and get out of the way. */
 .btn-primary:active:not(:disabled) {
-  transform: translateY(1px);
-  box-shadow: 
-    inset 0 1px 2px rgba(0, 0, 0, 0.2),
-    0 2px 4px -2px rgba(37, 99, 235, 0.4);
+  background: var(--color-primary-700);
+  transform: translateY(0.5px);
+  box-shadow: none;
 }
 
 .btn-primary:disabled {
   background: var(--color-surface-3);
   color: var(--color-text-4);
+  border-color: transparent;
   box-shadow: none;
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background: var(--color-surface-2);
-  backdrop-filter: blur(12px);
+  background: var(--color-surface-1);
   color: var(--color-text);
-  border: 1px solid var(--color-glass-border);
-  border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: pointer;
-  user-select: none;
-  box-shadow: 0 4px 12px -4px var(--shadow-color);
+  border: 1px solid var(--color-border-2);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--color-surface-3);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px -4px var(--shadow-color);
+  background: var(--color-surface-2);
+  border-color: var(--color-border-3);
 }
 
 .btn-secondary:active:not(:disabled) {
-  transform: translateY(1px);
-  box-shadow: 0 2px 4px -2px var(--shadow-color);
+  background: var(--color-surface-3);
+  transform: translateY(0.5px);
+  box-shadow: none;
+}
+
+.btn-secondary:disabled {
+  color: var(--color-text-4);
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .btn-ghost {
   background: transparent;
   color: var(--color-text-2);
-  border-radius: 10px;
-  font-weight: 600;
-  transition: all 0.15s ease;
-  cursor: pointer;
+  border: 1px solid transparent;
 }
 
-.btn-ghost:hover {
+.btn-ghost:hover:not(:disabled) {
   color: var(--color-text);
   background: var(--color-surface-2);
 }
 
+.btn-ghost:active:not(:disabled) {
+  background: var(--color-surface-3);
+}
+
 /* ══════════════════════════════════════════════════════════════
-   FLOATING COMPONENTS
+   CHROME (navbar / sidebar)
    ══════════════════════════════════════════════════════════════ */
 
+/* blur(40px) saturate(200%) on a fixed element repaints a full-viewport
+   blur on every scroll frame. 16px reads the same and composites cheaply. */
 .floating-navbar {
   background: var(--navbar-bg);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid var(--color-glass-border);
-  border-radius: 24px;
-  box-shadow: 0 12px 32px -12px var(--shadow-color);
-  margin: 16px;
-  padding: 0 16px;
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-sm);
+  margin: 12px 16px;
+  padding: 0 14px;
 }
 
 .floating-sidebar {
-  background: var(--navbar-bg);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid var(--color-glass-border);
-  border-radius: 24px;
-  box-shadow: 12px 0 32px -12px var(--shadow-color);
-  margin: 16px 0 16px 16px;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-lg);
+  margin: 12px 0 12px 12px;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   INPUT SYSTEM
+   INPUTS
    ══════════════════════════════════════════════════════════════ */
 
 .input-field {
   background: var(--color-surface-1);
   border: 1px solid var(--color-border-2);
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   color: var(--color-text);
-  transition: all 0.2s ease;
   outline: none;
-  box-shadow: inset 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
 }
 
+.input-field::placeholder { color: var(--color-text-4); }
+
+.input-field:hover:not(:focus) { border-color: var(--color-border-3); }
+
+/* One ring, same geometry as :focus-visible everywhere else. */
 .input-field:focus {
-  border-color: var(--color-primary-400);
-  background: var(--color-surface-2);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), inset 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--ring-color);
 }
 
 /* ══════════════════════════════════════════════════════════════
-   CHECKERBOARD
+   CHECKERBOARD (transparency preview)
    ══════════════════════════════════════════════════════════════ */
 
 .checkered-bg {
@@ -322,42 +397,68 @@ body {
    UTILITIES
    ══════════════════════════════════════════════════════════════ */
 
+/* Fades a horizontally-scrolling strip into the background at both ends,
+   so the marquee reads as continuous instead of being hard-cropped.
+   Referenced by Hero but never defined until now. */
+.mask-edges {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 8px;
+  padding: 3px 9px;
+  border-radius: var(--r-sm);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 550;
+  letter-spacing: 0;
   background: var(--color-surface-2);
-  color: var(--color-text);
+  color: var(--color-text-2);
   border: 1px solid var(--color-border);
-  box-shadow: 0 2px 4px -2px var(--shadow-color);
 }
 
-/* Animations */
-.animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.animate-marquee { animation: marquee 25s linear infinite; }
-.animate-scanline { animation: scanline 2.5s ease-in-out infinite; }
-.animate-float { animation: floatSlow 4s ease-in-out infinite; }
+/* ══════════════════════════════════════════════════════════════
+   MOTION
+   Entrances are transform + opacity only — the two properties the
+   compositor can animate without touching layout or paint.
+   ══════════════════════════════════════════════════════════════ */
+
+.animate-fade-in   { animation: fadeIn var(--dur-slow) var(--ease) both; }
+.animate-slide-up  { animation: slideUp 320ms var(--ease-soft) both; }
+.animate-marquee   { animation: marquee 40s linear infinite; }
+.animate-scanline  { animation: scanline 2.5s ease-in-out infinite; }
+.animate-float     { animation: floatSlow 4s ease-in-out infinite; }
 .animate-flow-dash { stroke-dasharray: 8, 8; animation: flowDash 1.2s linear infinite; }
 .animate-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
 
-@keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 8px, not 16px + a scale bounce. Restraint is the difference between
+   "polished" and "everything on this page is auditioning". */
+@keyframes slideUp {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
 
 @keyframes scanline {
-  0% { transform: translateY(0%); opacity: 0.8; }
-  50% { transform: translateY(100%); opacity: 1; }
-  100% { transform: translateY(0%); opacity: 0.8; }
+  0%   { transform: translate3d(0, 0, 0); opacity: 0.8; }
+  50%  { transform: translate3d(0, 100%, 0); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0); opacity: 0.8; }
 }
 
 @keyframes floatSlow {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(0.5deg); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -6px, 0); }
 }
 
 @keyframes flowDash {
@@ -365,24 +466,41 @@ body {
 }
 
 @keyframes pulseGlow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-surface-3); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-text-4); }
-
-.focus-ring:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.85; }
 }
 
 /* ══════════════════════════════════════════════════════════════
-   NO SCROLLBAR UTILITY
+   SCROLLBAR
    ══════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-4);
+  border-radius: 8px;
+  /* Inset via transparent border so the thumb reads as a slim pill */
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-4); background-clip: content-box; }
+
+/* ══════════════════════════════════════════════════════════════
+   FOCUS
+   One ring shape for the whole app, keyboard-only.
+   ══════════════════════════════════════════════════════════════ */
+
+.focus-ring:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-ghost:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: var(--r-md);
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
@@ -394,4 +512,18 @@ body {
   scrollbar-width: none !important;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   Honour the OS setting — ambient loops stop entirely, transitions
+   collapse to near-instant rather than disappearing.
+   ══════════════════════════════════════════════════════════════ */
 
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

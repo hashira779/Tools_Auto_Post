@@ -28,7 +28,7 @@ export default function StickerEmojiPicker({ selected, onSelect }) {
       <div className="space-y-3 mb-6">
         {EMOJI_CATEGORIES.map((cat) => (
           <div key={cat.name} className="card-elevated p-3 rounded-xl border border-[var(--color-border)]">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-4)] mb-2.5 px-1">
+            <div className="text-[10px] font-semibold text-[var(--color-text-4)] mb-2.5 px-1">
               {cat.name}
             </div>
             <div className="grid grid-cols-6 sm:grid-cols-12 gap-1.5">
@@ -38,7 +38,7 @@ export default function StickerEmojiPicker({ selected, onSelect }) {
                   <button
                     key={emoji}
                     onClick={() => onSelect(emoji)}
-                    className={`aspect-square rounded-lg text-lg sm:text-xl flex items-center justify-center transition-all duration-150 cursor-pointer select-none focus-ring ${
+                    className={`aspect-square rounded-lg text-lg sm:text-xl flex items-center justify-center transition-colors duration-150 cursor-pointer select-none focus-ring ${
                       isSelected
                         ? 'bg-[var(--color-primary-500)] scale-110 shadow-md ring-2 ring-[var(--color-surface)] z-10'
                         : 'bg-[var(--color-surface)] hover:bg-[var(--color-surface-3)] border border-[var(--color-border-2)]'
@@ -56,7 +56,7 @@ export default function StickerEmojiPicker({ selected, onSelect }) {
       {/* Selected & Continue */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 border-t border-[var(--color-border)]">
         <div className="flex items-center gap-3">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-4)]">Selected</span>
+          <span className="text-[11px] font-semibold text-[var(--color-text-4)]">Selected</span>
           <div className="w-10 h-10 bg-[var(--color-surface-2)] border border-[var(--color-border-2)] rounded-xl flex items-center justify-center text-2xl shadow-inner">
             {selected}
           </div>

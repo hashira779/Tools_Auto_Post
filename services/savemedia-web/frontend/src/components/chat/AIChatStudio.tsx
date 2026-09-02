@@ -84,7 +84,7 @@ export default function AIChatStudio() {
 
   if (authLoading) {
     return (
-      <div className="w-full h-[calc(100vh-64px)] bg-white flex items-center justify-center">
+      <div className="w-full h-[calc(100vh-64px)] bg-[var(--color-surface-1)] flex items-center justify-center">
         <svg className="w-10 h-10 animate-spin text-gray-300" viewBox="0 0 24 24" fill="none">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path className="opacity-75" fill="black" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -96,7 +96,7 @@ export default function AIChatStudio() {
   if (!user) {
     return (
       <div className="w-full h-[calc(100vh-64px)] bg-[var(--color-surface)] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-[var(--color-surface-1)] rounded-3xl shadow-xl p-8 sm:p-12 flex flex-col items-center text-center animate-slide-up border border-[var(--color-border)]">
+        <div className="max-w-md w-full bg-[var(--color-surface-1)] rounded-2xl shadow-xl p-8 sm:p-12 flex flex-col items-center text-center animate-slide-up border border-[var(--color-border)]">
           <div className="w-16 h-16 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center shadow-lg mb-6">
             <span className="text-3xl font-bold text-white">C</span>
           </div>
@@ -107,7 +107,7 @@ export default function AIChatStudio() {
           </p>
           <button 
             onClick={loginWithGoogle}
-            className="w-full flex items-center justify-center gap-3 bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:opacity-90 text-[var(--color-text)] font-semibold py-4 rounded-xl transition-all shadow-sm active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-3 bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:opacity-90 text-[var(--color-text)] font-semibold py-4 rounded-xl transition-colors shadow-sm active:scale-[0.98]"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -123,14 +123,14 @@ export default function AIChatStudio() {
   }
 
   return (
-    <div className="w-full h-[calc(100vh-64px)] bg-white font-sans relative flex">
+    <div className="w-full h-[calc(100vh-64px)] bg-[var(--color-surface-1)] font-sans relative flex">
       
       {/* Sidebar - Chat History */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 ease-in-out overflow-hidden bg-gray-50 border-r border-gray-200 flex flex-col hidden md:flex`}>
+      <div className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-colors duration-300 ease-in-out overflow-hidden bg-gray-50 border-r border-gray-200 flex flex-col hidden md:flex`}>
         <div className="p-4">
           <button 
             onClick={clearChat}
-            className="w-full flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 font-medium text-sm transition-colors"
+            className="w-full flex items-center gap-2 px-3 py-2 bg-[var(--color-surface-1)] border border-gray-200 rounded-lg hover:bg-gray-50 font-medium text-sm transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -141,7 +141,7 @@ export default function AIChatStudio() {
         
         <div className="flex-1 overflow-y-auto px-3 py-2 space-y-4 scrollbar-hide">
           <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">Your Conversations</h3>
+            <h3 className="text-xs font-semibold text-gray-400 mb-2 px-2">Your Conversations</h3>
             {conversations.length === 0 ? (
                <div className="text-sm text-gray-500 px-2 italic">No previous chats.</div>
             ) : (
@@ -155,7 +155,7 @@ export default function AIChatStudio() {
                    </button>
                    <button 
                      onClick={(e) => handleDeleteConversation(e, conv.id)}
-                     className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 rounded transition-all"
+                     className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
                      title="Delete Chat"
                    >
                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -169,7 +169,7 @@ export default function AIChatStudio() {
         </div>
         <div className="p-4 flex flex-col gap-2 border-t border-gray-200">
           <div className="flex items-center gap-3 px-2 py-2">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
+            <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-sm">
               {user.email?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 truncate">
@@ -251,7 +251,7 @@ export default function AIChatStudio() {
             ))
           )}
           {error && !messages.some(m => m.isError) && (
-             <div className="text-center text-red-600 text-sm mt-4 p-3 bg-red-50 rounded-xl">
+             <div className="text-center text-red-600 text-sm mt-4 p-3 bg-red-500/10 rounded-xl">
                {error}
              </div>
           )}
@@ -264,7 +264,7 @@ export default function AIChatStudio() {
         <div className="max-w-3xl mx-auto relative">
           {/* File Attachment Pill */}
           {attachedFile && (
-            <div className="absolute -top-12 left-2 flex items-center gap-2 bg-white border border-gray-200 shadow-sm px-3 py-1.5 rounded-full text-sm animate-fade-in">
+            <div className="absolute -top-12 left-2 flex items-center gap-2 bg-[var(--color-surface-1)] border border-gray-200 shadow-sm px-3 py-1.5 rounded-full text-sm animate-fade-in">
               {attachedFile.filename.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
                 <div className="w-5 h-5 rounded overflow-hidden flex items-center justify-center bg-gray-100">
                    <svg className="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -288,7 +288,7 @@ export default function AIChatStudio() {
             </div>
           )}
           {isUploading && (
-            <div className="absolute -top-12 left-2 flex items-center gap-2 bg-white border border-gray-200 shadow-sm px-3 py-1.5 rounded-full text-sm animate-fade-in">
+            <div className="absolute -top-12 left-2 flex items-center gap-2 bg-[var(--color-surface-1)] border border-gray-200 shadow-sm px-3 py-1.5 rounded-full text-sm animate-fade-in">
               <svg className="w-4 h-4 text-blue-500 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -297,7 +297,7 @@ export default function AIChatStudio() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="relative flex items-center bg-gray-50 border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow px-2">
+          <form onSubmit={handleSubmit} className="relative flex items-center bg-gray-50 border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow px-2">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -335,7 +335,7 @@ export default function AIChatStudio() {
             <button
               type="submit"
               disabled={!input.trim() || loading || isUploading}
-              className={`p-2 rounded-full flex items-center justify-center transition-all duration-200 z-10 mr-1
+              className={`p-2 rounded-full flex items-center justify-center transition-colors duration-200 z-10 mr-1
                 ${!input.trim() || loading || isUploading
                   ? 'bg-[var(--color-surface-3)] text-[var(--color-text-4)] cursor-not-allowed' 
                   : 'bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] shadow-sm active:scale-95'

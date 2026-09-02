@@ -10,7 +10,7 @@ export default function TtsHero() {
         <span className="font-medium text-[11px]">Text to Speech</span>
       </div>
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3 text-[var(--color-text)]">
-        Generate <span className="bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-300)] bg-clip-text text-transparent">AI Voiceovers</span>
+        Generate <span className="text-[var(--color-primary-600)]">AI Voiceovers</span>
       </h1>
       <p className="text-[14px] text-[var(--color-text-3)] max-w-sm mx-auto">
         Convert text to natural-sounding speech across 30+ languages.

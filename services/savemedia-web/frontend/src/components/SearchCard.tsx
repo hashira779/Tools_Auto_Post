@@ -34,10 +34,10 @@ export default function SearchCard({ url, onUrlChange, onFetch, loading, error }
   return (
     <div id="search-card" className="w-full max-w-3xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '80ms' }}>
       {/* Input Row */}
-      <div className={`relative flex items-center p-2 rounded-2xl bg-[var(--color-surface-1)] border shadow-xl transition-all duration-300 ${
+      <div className={`relative flex items-center p-2 rounded-xl bg-[var(--color-surface-1)] border shadow-[var(--shadow-md)] transition-[border-color,box-shadow] duration-150 ${
         detectedPlatform
-          ? 'border-[var(--color-primary-400)] shadow-[0_0_20px_rgba(56,189,248,0.25)]'
-          : 'border-[var(--color-border-2)] hover:border-[var(--color-primary-400)]/50 focus-within:border-[var(--color-primary-400)] focus-within:shadow-[0_0_25px_rgba(56,189,248,0.2)]'
+          ? 'border-[var(--color-primary-500)]'
+          : 'border-[var(--color-border-2)] hover:border-[var(--color-border-3)] focus-within:border-[var(--color-primary-500)] focus-within:shadow-[0_0_0_3px_var(--ring-color)]'
       }`}>
         <div className="flex-1 flex items-center relative">
           {/* Left Icon */}

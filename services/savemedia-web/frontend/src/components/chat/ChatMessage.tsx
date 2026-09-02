@@ -16,7 +16,7 @@ export default function ChatMessage({ message }) {
         <div 
           className={`text-[16px] leading-relaxed relative font-sans
             ${isUser 
-              ? 'px-5 py-3 rounded-3xl bg-[var(--color-surface-2)] text-[var(--color-text)]' 
+              ? 'px-5 py-3 rounded-2xl bg-[var(--color-surface-2)] text-[var(--color-text)]' 
               : message.isError
                 ? 'px-4 py-3 rounded-2xl bg-red-500/10 text-red-500'
                 : 'py-1 text-[var(--color-text)]'

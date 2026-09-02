@@ -184,7 +184,7 @@ export default function StickerStudio() {
   ]
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto pb-24 lg:pb-0 flex flex-col lg:flex-row min-h-[600px] lg:h-[calc(100vh-120px)] lg:max-h-[900px] lg:overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-2xl relative">
+    <div className="w-full max-w-[1400px] mx-auto pb-24 lg:pb-0 flex flex-col lg:flex-row min-h-[600px] lg:h-[calc(100vh-120px)] lg:max-h-[900px] lg:overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl relative">
       
       {/* ── Desktop Left Nav / Mobile Bottom Tab Bar ── */}
       <div className="fixed bottom-0 left-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-[var(--color-border)] z-50 lg:relative lg:w-[100px] lg:h-full lg:border-t-0 lg:border-r lg:bg-transparent lg:backdrop-blur-none flex lg:flex-col justify-around lg:justify-start gap-2 p-2 lg:p-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
@@ -194,7 +194,7 @@ export default function StickerStudio() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 lg:flex-none flex flex-col items-center justify-center gap-1.5 p-2 lg:py-5 rounded-2xl transition-all duration-200 cursor-pointer ${
+              className={`flex-1 lg:flex-none flex flex-col items-center justify-center gap-1.5 p-2 lg:py-5 rounded-2xl transition-colors duration-200 cursor-pointer ${
                 isActive 
                   ? 'bg-[var(--color-primary-500)] text-white shadow-lg lg:shadow-[0_10px_30px_rgba(134,59,255,0.4)] scale-105' 
                   : 'text-[var(--color-text-3)] hover:text-[var(--color-primary-500)] hover:bg-[rgba(134,59,255,0.1)]'
@@ -243,7 +243,7 @@ export default function StickerStudio() {
                       removeBg ? 'bg-[var(--color-primary-500)]' : 'bg-[var(--color-surface-4)]'
                     } ${processingStyle ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${removeBg ? 'translate-x-5' : 'translate-x-0'}`} />
+                    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--color-surface-1)] shadow ring-0 transition duration-200 ease-in-out ${removeBg ? 'translate-x-5' : 'translate-x-0'}`} />
                   </button>
                 </div>
                 <p className="text-[11px] text-[var(--color-text-3)] leading-relaxed">Runs completely offline via WebAssembly. No data leaves your device.</p>

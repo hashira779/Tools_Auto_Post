@@ -138,7 +138,7 @@ export default function StickerTelegramPublish({ emoji, onPublish, onDownloadPNG
       <div className="pt-4 border-t border-[var(--color-border)]">
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-[11px] font-semibold text-[var(--color-text-4)] hover:text-[var(--color-text-2)] uppercase tracking-wider flex items-center gap-1.5 cursor-pointer select-none transition-colors"
+          className="text-[11px] font-semibold text-[var(--color-text-4)] hover:text-[var(--color-text-2)] flex items-center gap-1.5 cursor-pointer select-none transition-colors"
         >
           <span>Telegram Settings</span>
           <svg className={`w-3 h-3 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -149,7 +149,7 @@ export default function StickerTelegramPublish({ emoji, onPublish, onDownloadPNG
         {showAdvanced && (
           <div className="mt-4 space-y-4 p-4 card-elevated rounded-xl animate-slide-up border border-[var(--color-border-2)]">
             <div>
-              <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-semibold text-[var(--color-text-4)] mb-1.5">
                 Telegram User ID (Optional)
               </label>
               <input
@@ -162,7 +162,7 @@ export default function StickerTelegramPublish({ emoji, onPublish, onDownloadPNG
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-semibold text-[var(--color-text-4)] mb-1.5">
                 Pack Short Name (Optional)
               </label>
               <input
@@ -175,7 +175,7 @@ export default function StickerTelegramPublish({ emoji, onPublish, onDownloadPNG
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-semibold text-[var(--color-text-4)] mb-1.5">
                 Display Title (Optional)
               </label>
               <input

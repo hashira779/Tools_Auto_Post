@@ -30,7 +30,7 @@ function VoiceAvatar({ name, gender, isSelected, onClick, colorIdx }) {
       }`}
     >
       <div className={`relative w-9 h-9 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-semibold text-xs transition-transform duration-150 ${
-        isSelected ? 'scale-105' : 'group-hover:scale-105'
+        isSelected ? 'scale-105' : 'group-'
       }`}>
         {initials}
         {isSelected && (
@@ -62,7 +62,7 @@ function WaveformVisualizer({ isPlaying }) {
         return (
           <div
             key={i}
-            className={`w-[2px] rounded-full transition-all duration-200 ${
+            className={`w-[2px] rounded-full transition-colors duration-200 ${
               isPlaying ? 'bg-[var(--color-primary-400)]/80' : 'bg-[var(--color-border-3)]'
             }`}
             style={{
@@ -211,7 +211,7 @@ export default function TtsStudio() {
         {/* ── Local Engine Status ────────────────────────── */}
         <div className="card flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-             <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${engineStatus === 'ready' ? 'bg-[var(--color-success)] shadow-[0_0_8px_rgba(52,211,153,0.6)]' : (engineStatus === 'checking' || engineStatus === 'starting') ? 'bg-[var(--color-warning)] animate-pulse' : 'bg-[var(--color-text-4)]'}`}></div>
+             <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${engineStatus === 'ready' ? 'bg-[var(--color-success)]' : (engineStatus === 'checking' || engineStatus === 'starting') ? 'bg-[var(--color-warning)] animate-pulse' : 'bg-[var(--color-text-4)]'}`}></div>
              <div>
                <h3 className="text-[13px] font-semibold text-[var(--color-text)]">Local GPU Engine</h3>
                <p className="text-[11px] text-[var(--color-text-4)] mt-0.5">{engineStatus === 'ready' ? 'VoxCPM2-Khmer connected and ready.' : engineStatus === 'starting' ? 'Connected. Loading model...' : 'Offline engine not running.'}</p>
@@ -234,7 +234,7 @@ export default function TtsStudio() {
         <div className="card overflow-hidden">
           {/* Toolbar */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface-2)]/30">
-            <span className="text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider">Script</span>
+            <span className="text-[10px] font-semibold text-[var(--color-text-4)] ">Script</span>
             <div className="flex items-center gap-2.5 text-[11px] text-[var(--color-text-4)]">
               <span>{wordCount} words</span>
               <span className="w-px h-3 bg-[var(--color-border-2)]" />
@@ -273,7 +273,7 @@ export default function TtsStudio() {
         {/* ── Language Tabs ───────────────────────── */}
         <div className="card overflow-hidden">
           <div className="px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-surface-2)]/30">
-            <span className="text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider">Language</span>
+            <span className="text-[10px] font-semibold text-[var(--color-text-4)] ">Language</span>
           </div>
           <div className="flex flex-wrap gap-1 px-3 py-2.5">
             {Object.keys(languages).map(lang => (
@@ -299,7 +299,7 @@ export default function TtsStudio() {
         {/* ── Voice Selector ─────────────────────── */}
         <div className="card overflow-hidden">
           <div className="px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-surface-2)]/30 flex items-center justify-between">
-            <span className="text-[10px] font-semibold text-[var(--color-text-4)] uppercase tracking-wider">Voice</span>
+            <span className="text-[10px] font-semibold text-[var(--color-text-4)] ">Voice</span>
             <span className="text-[10px] text-[var(--color-text-4)]">{filteredVoices.length} available</span>
           </div>
           <div className="flex gap-1 px-3 py-2.5 overflow-x-auto">
@@ -323,7 +323,7 @@ export default function TtsStudio() {
         <div className="flex flex-col sm:flex-row items-stretch gap-3">
           {/* Speed */}
           <div className="flex-1 card px-3 py-2.5 flex flex-col">
-            <label className="text-[10px] text-[var(--color-text-4)] uppercase tracking-wider font-semibold block mb-2 px-1">Speed</label>
+            <label className="text-[10px] text-[var(--color-text-4)] font-semibold block mb-2 px-1">Speed</label>
             <div className="flex gap-1 flex-1">
               {[
                 { label: '0.75×', value: '-25%' },
@@ -348,7 +348,7 @@ export default function TtsStudio() {
 
           {/* Pitch */}
           <div className="flex-1 card px-3 py-2.5 flex flex-col">
-            <label className="text-[10px] text-[var(--color-text-4)] uppercase tracking-wider font-semibold block mb-2 px-1">Pitch</label>
+            <label className="text-[10px] text-[var(--color-text-4)] font-semibold block mb-2 px-1">Pitch</label>
             <div className="flex gap-1 flex-1">
               {[
                 { label: 'Deep', value: '-15Hz' },

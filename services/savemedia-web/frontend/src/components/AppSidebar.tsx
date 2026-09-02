@@ -60,7 +60,7 @@ export default function AppSidebar({ isOpen, onClose, activeTool, onSelectTool }
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 custom-scrollbar">
           {/* Tools */}
           <div>
-            <div className="text-[10px] font-bold text-[var(--color-text-4)] uppercase tracking-wider mb-2 px-2">
+            <div className="text-[10px] font-bold text-[var(--color-text-4)] mb-2 px-2">
               Tools
             </div>
             <div className="space-y-1">
@@ -70,7 +70,7 @@ export default function AppSidebar({ isOpen, onClose, activeTool, onSelectTool }
                   <button
                     key={tool.id}
                     onClick={() => handleSelect(tool.id)}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200 cursor-pointer focus-ring ${
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-colors duration-200 cursor-pointer focus-ring ${
                       isActive
                         ? 'bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-glass-border)] shadow-sm'
                         : 'text-[var(--color-text-3)] hover:text-[var(--color-text-2)] hover:bg-[var(--color-surface-1)] border border-transparent'
@@ -85,7 +85,7 @@ export default function AppSidebar({ isOpen, onClose, activeTool, onSelectTool }
 
           {/* Telegram Bots */}
           <div>
-            <div className="text-[10px] font-bold text-[var(--color-text-4)] uppercase tracking-wider mb-2 px-2">
+            <div className="text-[10px] font-bold text-[var(--color-text-4)] mb-2 px-2">
               Telegram Bots
             </div>
             <div className="space-y-1">
