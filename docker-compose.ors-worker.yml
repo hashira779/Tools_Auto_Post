@@ -6,7 +6,7 @@
 #    - Ollama (Local LLM)
 #
 #  It connects to the MAIN server's PostgreSQL over the network.
-#  Deploy this on ORS worker servers (10.2.7.251, 10.2.7.252).
+#  Deploy this on ORS worker server (10.2.7.252).
 #
 #  Usage:
 #    docker compose -f docker-compose.ors-worker.yml up -d --build

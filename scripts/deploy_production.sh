@@ -165,7 +165,6 @@ ORS_PASS="${CAMTECH_ORS_PASS:-$SUDO_PASS}"
 
 # Workers defined as "IP|USERNAME"
 ORS_WORKERS=(
-    "10.2.7.251|ors-server1"
     "10.2.7.252|ors-server2"
 )
 

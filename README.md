@@ -95,7 +95,7 @@ Runs the Database, Redis, Nginx, Frontend, and all core APIs.
 - **Port 5432**: PostgreSQL (exposed to LAN for workers).
 - **Port 6379**: Redis (exposed to LAN for workers).
 
-### 2. ORS Worker Nodes (10.2.7.251, 10.2.7.252)
+### 2. ORS Worker Node (10.2.7.252)
 Offload heavy AI tasks (Whisper, NLLB, Qwen, Ollama).
 - Runs `docker-compose.ors-worker.yml`.
 - Connects to Main Server for DB and Task Queue.

@@ -11,7 +11,7 @@ Environment variables (or ~/.camtech_env with KEY=VALUE lines):
     CAMTECH_USER        SSH username          (e.g. ubuntu-server)
     CAMTECH_PASS        SSH/sudo password     (or use CAMTECH_KEY)
     CAMTECH_KEY         Path to SSH private key (preferred over password)
-    CAMTECH_ORS_HOSTS   Comma-separated worker IPs (e.g. 10.2.7.251,10.2.7.252)
+    CAMTECH_ORS_HOSTS   Comma-separated worker IPs (e.g. 10.2.7.252)
 
 Usage:
     python3 scripts/camtech.py status            # docker ps + disk + memory
@@ -21,7 +21,7 @@ Usage:
     python3 scripts/camtech.py health            # hit /health on all services
     python3 scripts/camtech.py deploy            # trigger production deploy
     python3 scripts/camtech.py exec "<command>"  # run arbitrary command
-    python3 scripts/camtech.py --host 10.2.7.251 status   # target a worker
+    python3 scripts/camtech.py --host 10.2.7.252 status   # target a worker
 """
 
 import argparse

@@ -12,7 +12,7 @@ Exits non-zero if any required step fails, so CI reports a broken worker
 instead of printing a success banner over the top of it.
 
 Usage:
-  python deploy_ors_worker.py --host 10.2.7.251 --user ors-user --password 'mypass'
+  python deploy_ors_worker.py --host 10.2.7.252 --user ors-user --password 'mypass'
 """
 
 import paramiko
@@ -73,7 +73,7 @@ def finish(host, ok_message):
 
 def main():
     parser = argparse.ArgumentParser(description="Deploy CamTech AI Worker to ORS Server")
-    parser.add_argument("--host", required=True, help="ORS server IP (e.g., 10.2.7.251)")
+    parser.add_argument("--host", required=True, help="ORS server IP (e.g., 10.2.7.252)")
     parser.add_argument("--user", required=True, help="SSH username")
     parser.add_argument("--password", required=True, help="SSH password")
     parser.add_argument("--sudo-password", default=None, help="Sudo password (defaults to SSH password)")
