@@ -175,14 +175,31 @@ if ! python3 -c "import paramiko" &> /dev/null; then
     echo "$SUDO_PASS" | sudo -S apt-get update && echo "$SUDO_PASS" | sudo -S apt-get install -y python3-paramiko || pip3 install --user paramiko
 fi
 
+FAILED_WORKERS=()
+
 for WORKER_INFO in "${ORS_WORKERS[@]}"; do
     WORKER_IP="${WORKER_INFO%%|*}"
     WORKER_USER="${WORKER_INFO##*|}"
-    
+
     echo "🔄 Pushing update to ORS Worker: $WORKER_IP (User: $WORKER_USER)..."
-    python3 -u scripts/deploy_ors_worker.py --host "$WORKER_IP" --user "$WORKER_USER" --password "$ORS_PASS" || echo "  ⚠️ Failed to deploy to $WORKER_IP"
+    # Carry on to the next worker if one fails, so a single bad host does not
+    # block the other, but record it. This used to be `|| echo`, which threw
+    # the exit code away -- a worker could fail every step and the pipeline
+    # still reported success, so it sat on stale code unnoticed.
+    if ! python3 -u scripts/deploy_ors_worker.py --host "$WORKER_IP" --user "$WORKER_USER" --password "$ORS_PASS"; then
+        echo "  ⚠️ Failed to deploy to $WORKER_IP"
+        FAILED_WORKERS+=("$WORKER_IP")
+    fi
 done
 
 echo "===================================================="
+if [ ${#FAILED_WORKERS[@]} -gt 0 ]; then
+    echo "  ❌ Main site deployed OK, but ORS worker(s) FAILED:"
+    for W in "${FAILED_WORKERS[@]}"; do
+        echo "     - $W  (still running old code)"
+    done
+    echo "===================================================="
+    exit 1
+fi
 echo "  ✅ CI/CD Pipeline Fully Complete!"
 echo "===================================================="

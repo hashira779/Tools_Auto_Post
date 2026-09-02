@@ -8,6 +8,9 @@ Remotely sets up an ORS worker server via SSH:
   3. Starts AI Orchestrator + Ollama
   4. Pulls the LLM models
 
+Exits non-zero if any required step fails, so CI reports a broken worker
+instead of printing a success banner over the top of it.
+
 Usage:
   python deploy_ors_worker.py --host 10.2.7.251 --user ors-user --password 'mypass'
 """
@@ -17,12 +20,24 @@ import argparse
 import sys
 import time
 
-def run_ssh(client, cmd, desc=""):
-    """Execute a command via SSH and print output line by line."""
+# Docker image builds need real headroom. Below this the build, the git pull
+# and the .env write all fail — usually in ways that point somewhere else.
+MIN_FREE_MB = 2048
+
+# Steps that failed but did not stop the run outright.
+FAILURES = []
+
+
+def run_ssh(client, cmd, desc="", check=False):
+    """Execute a command via SSH and print output line by line.
+
+    Set check=True for steps the deploy cannot succeed without; those get
+    recorded in FAILURES and turn into a non-zero exit at the end.
+    """
     if desc:
         print(f"\n  ⏳ {desc}...")
     stdin, stdout, stderr = client.exec_command(cmd, timeout=600)
-    
+
     # Stream stdout line by line
     out_lines = []
     for line in iter(stdout.readline, ""):
@@ -30,14 +45,31 @@ def run_ssh(client, cmd, desc=""):
         if line:
             print(f"     {line}")
             out_lines.append(line)
-            
+
     out = "\n".join(out_lines)
     err = stderr.read().decode().strip()
     exit_code = stdout.channel.recv_exit_status()
-    
+
     if exit_code != 0 and err:
         print(f"  ⚠️  stderr: {err[:500]}")
+    if exit_code != 0 and check:
+        print(f"  ❌ FAILED ({exit_code}): {desc or cmd}")
+        FAILURES.append(desc or cmd)
     return exit_code, out
+
+
+def finish(host, ok_message):
+    """Print the outcome and exit with a status that reflects reality."""
+    print(f"\n{'='*60}")
+    if FAILURES:
+        print(f"  ❌ ORS Worker deploy FAILED on {host}")
+        for f in FAILURES:
+            print(f"     - {f}")
+        print(f"{'='*60}\n")
+        sys.exit(1)
+    print(ok_message)
+    print(f"{'='*60}\n")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Deploy CamTech AI Worker to ORS Server")
@@ -63,6 +95,25 @@ def main():
         print(f"  ❌ Connection failed: {e}")
         sys.exit(1)
 
+    # 0. Disk space — check before anything writes.
+    # A full disk previously showed up as "POSTGRES_PASSWORD must be set",
+    # because git pull and the .env write both failed silently first.
+    code, out = run_ssh(client, "df -Pk / | awk 'NR==2 {print $4}'", "Checking free disk space")
+    free_mb = int(out.strip()) // 1024 if code == 0 and out.strip().isdigit() else None
+    if free_mb is None:
+        print("  ⚠️  Could not determine free disk space; continuing.")
+    else:
+        print(f"     {free_mb} MB free on /")
+        if free_mb < MIN_FREE_MB:
+            print(f"  ❌ Only {free_mb} MB free, need at least {MIN_FREE_MB} MB.")
+            print(f"     Free it up with:")
+            print(f"       ssh {args.user}@{args.host} 'cd ~/CamTech && bash scripts/cleanup_disk.sh'")
+            FAILURES.append(f"insufficient disk space ({free_mb} MB free)")
+            client.close()
+            # Everything below writes to disk, so stop rather than emit a
+            # cascade of misleading errors.
+            finish(args.host, "")
+
     # 1. Check if Docker is installed
     code, out = run_ssh(client, "docker --version 2>/dev/null", "Checking Docker")
     if code != 0:
@@ -79,7 +130,7 @@ def main():
             f"echo '{sudo_pass}' | sudo -S usermod -aG docker {args.user}",
         ]
         for cmd in install_cmds:
-            run_ssh(client, cmd, "Installing Docker")
+            run_ssh(client, cmd, "Installing Docker", check=True)
         print("  ✅ Docker installed!")
     else:
         print(f"  ✅ {out}")
@@ -87,15 +138,16 @@ def main():
     # 2. Check if git is installed
     code, _ = run_ssh(client, "git --version 2>/dev/null", "Checking git")
     if code != 0:
-        run_ssh(client, f"echo '{sudo_pass}' | sudo -S apt-get install -y git", "Installing git")
+        run_ssh(client, f"echo '{sudo_pass}' | sudo -S apt-get install -y git", "Installing git", check=True)
 
     # 3. Clone or update repo
     app_dir = f"/home/{args.user}/CamTech"
-    code, _ = run_ssh(client, f"test -d {app_dir} && echo 'exists'", "Checking CamTech repo")
-    if "exists" in _:
-        run_ssh(client, f"cd {app_dir} && git pull origin main", "Updating CamTech repo")
+    code, repo_check = run_ssh(client, f"test -d {app_dir} && echo 'exists'", "Checking CamTech repo")
+    if "exists" in repo_check:
+        run_ssh(client, f"cd {app_dir} && git pull origin main", "Updating CamTech repo", check=True)
     else:
-        run_ssh(client, f"git clone https://github.com/hashira779/Tools_Auto_Post.git {app_dir}", "Cloning CamTech repo")
+        run_ssh(client, f"git clone https://github.com/hashira779/Tools_Auto_Post.git {app_dir}",
+                "Cloning CamTech repo", check=True)
 
     # 4. Copy local .env file
     try:
@@ -104,27 +156,35 @@ def main():
     except FileNotFoundError:
         print("  ⚠️ .env file not found locally! ORS worker might fail to authenticate Supabase.")
         env_content = ""
-        
-    run_ssh(client, f"cat > {app_dir}/.env << 'ENVEOF'\n{env_content}\nENVEOF", "Creating .env file")
+
+    run_ssh(client, f"cat > {app_dir}/.env << 'ENVEOF'\n{env_content}\nENVEOF",
+            "Creating .env file", check=True)
+
+    # Confirm the file actually landed. A truncated write here is what turned
+    # a full disk into a confusing "POSTGRES_PASSWORD must be set" further down.
+    if "POSTGRES_PASSWORD=" in env_content:
+        _, verify = run_ssh(client, f"grep -q '^POSTGRES_PASSWORD=' {app_dir}/.env && echo ok",
+                            "Verifying .env was written")
+        if "ok" not in verify:
+            print("  ❌ .env is missing POSTGRES_PASSWORD — the write did not complete.")
+            FAILURES.append(".env write incomplete")
 
     # 5. Build and start containers
-    run_ssh(client, 
+    run_ssh(client,
         f"cd {app_dir} && echo '{sudo_pass}' | sudo -S docker compose -f docker-compose.ors-worker.yml up -d --build",
-        "Building and starting AI services (this takes a few minutes)")
+        "Building and starting AI services (this takes a few minutes)", check=True)
 
-
-
-    # 7. Verify
+    # 6. Verify (informational)
     run_ssh(client,
         f"echo '{sudo_pass}' | sudo -S docker ps --format '  - {{{{.Names}}}} ({{{{.Status}}}})'",
         "Verifying containers")
 
-    print(f"\n{'='*60}")
-    print(f"  🎉 ORS Worker deployed successfully to {args.host}!")
-    print(f"  AI API available at: http://{args.host}:8100")
-    print(f"{'='*60}\n")
-
     client.close()
+
+    finish(args.host,
+           f"  🎉 ORS Worker deployed successfully to {args.host}!\n"
+           f"  AI API available at: http://{args.host}:8100")
+
 
 if __name__ == "__main__":
     main()
