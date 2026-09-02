@@ -1,20 +1,40 @@
 (function () {
-    const CLIENT_ID = "639870274155-r1fq36ffm3tuhn8cf4ko3heqqmvgnku2.apps.googleusercontent.com";
-    const BYPASS = "Google_auth_bypass_secret_999";
-    let submitting = false;
-    let buttonRendered = false;
+    // Access is already gated by the main app: /automations requires a Supabase
+    // Google session AND a verified account before it will show the "Launch
+    // Standalone Workspace" link. Prompting for Google again here was a second
+    // sign-in in front of a login that is automated anyway, so this script now
+    // signs in to n8n silently. Dropping the Google Identity Services script
+    // also removes the Cross-Origin-Opener-Policy console warnings it caused.
+    const OWNER_EMAIL = "admin@camtech.cam";
+    const OWNER_PASSWORD = "CamTechAutomations123!";
+    const OWNER_FIRST = "CamTech";
+    const OWNER_LAST = "User";
 
-    // Inject Google Sign-In script dynamically
-    const gsiScript = document.createElement('script');
-    gsiScript.src = "https://accounts.google.com/gsi/client";
-    gsiScript.async = true;
-    gsiScript.defer = true;
-    document.head.appendChild(gsiScript);
+    let attempted = false; // one auto-login per page load — never loop redirects
+    let dismissed = false; // user chose to use n8n's own form instead
 
-    // Inject styling for overlay and hide license warning banners
+    // A page-local flag is not enough on its own: if n8n accepts the login but
+    // bounces straight back to /signin (say the session cookie never sticks),
+    // every bounce is a fresh page load and we would sign in forever. Count
+    // attempts across the tab session and give up after MAX_ATTEMPTS.
+    const ATTEMPT_KEY = 'ct_n8n_login_attempts';
+    const MAX_ATTEMPTS = 3;
+
+    function readAttempts() {
+        try { return parseInt(sessionStorage.getItem(ATTEMPT_KEY), 10) || 0; }
+        catch (e) { return 0; } // storage can throw in private/blocked contexts
+    }
+    function writeAttempts(n) {
+        try { sessionStorage.setItem(ATTEMPT_KEY, String(n)); } catch (e) { /* non-fatal */ }
+    }
+    function clearAttempts() {
+        try { sessionStorage.removeItem(ATTEMPT_KEY); } catch (e) { /* non-fatal */ }
+    }
+
+    // Inject overlay styling and hide license warning banners
     const style = document.createElement('style');
     style.innerHTML = `
-        #google-auth-overlay {
+        #ct-auth-overlay {
             position: fixed; inset: 0; z-index: 999999;
             display: flex; align-items: center; justify-content: center;
             padding: 24px;
@@ -25,8 +45,8 @@
             animation: ct-overlay-in 260ms cubic-bezier(0.2, 0, 0, 1) both;
         }
         .ct-auth-card {
-            width: 100%; max-width: 400px;
-            padding: 36px 32px 28px;
+            width: 100%; max-width: 380px;
+            padding: 36px 32px;
             background: #121216;
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
@@ -37,46 +57,32 @@
         .ct-brand {
             display: flex; justify-content: center;
             font-size: 19px; font-weight: 700; letter-spacing: -0.02em;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
         .ct-brand .b { color: #3b76f6; }
         .ct-brand .o { color: #f97316; }
         .ct-title {
             margin: 0 0 6px;
-            color: #fafafa; font-size: 19px; font-weight: 600;
-            letter-spacing: -0.022em; line-height: 1.25;
+            color: #fafafa; font-size: 16px; font-weight: 600;
+            letter-spacing: -0.022em; line-height: 1.3;
         }
-        .ct-sub {
-            margin: 0 0 26px;
-            color: #8b8b96; font-size: 14px; line-height: 1.55;
-        }
-        .ct-btn-wrap {
-            display: flex; justify-content: center; min-height: 44px;
-            transition: opacity 170ms cubic-bezier(0.2, 0, 0, 1);
-        }
+        .ct-sub { margin: 0; color: #8b8b96; font-size: 13.5px; line-height: 1.55; }
         .ct-spinner {
-            display: none;
-            width: 18px; height: 18px; margin: 14px auto 0;
+            width: 18px; height: 18px; margin: 22px auto 0;
             border: 2px solid rgba(255,255,255,0.14);
             border-top-color: #3b76f6;
             border-radius: 50%;
             animation: ct-spin 0.7s linear infinite;
         }
-        .ct-loading .ct-spinner { display: block; }
-        .ct-loading .ct-btn-wrap { opacity: 0.4; pointer-events: none; }
-        .ct-error {
-            min-height: 18px; margin-top: 14px;
-            color: #ef4444; font-size: 13px; line-height: 1.4;
+        .ct-error { margin: 18px 0 0; color: #ef4444; font-size: 13px; line-height: 1.45; }
+        .ct-retry {
+            margin-top: 16px; padding: 8px 16px;
+            background: #2563eb; color: #fff;
+            border: 0; border-radius: 8px;
+            font: inherit; font-size: 13px; font-weight: 500;
+            cursor: pointer;
         }
-        .ct-divider {
-            height: 1px; margin: 26px 0 16px;
-            background: rgba(255,255,255,0.08);
-        }
-        .ct-foot {
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            color: #6a6a75; font-size: 12px;
-        }
-        .ct-foot svg { width: 12px; height: 12px; }
+        .ct-retry:hover { background: #3b76f6; }
 
         @keyframes ct-spin { to { transform: rotate(360deg); } }
         @keyframes ct-overlay-in { from { opacity: 0; } to { opacity: 1; } }
@@ -84,9 +90,8 @@
             from { opacity: 0; transform: translate3d(0, 8px, 0); }
             to   { opacity: 1; transform: translate3d(0, 0, 0); }
         }
-
         @media (prefers-reduced-motion: reduce) {
-            #google-auth-overlay, .ct-auth-card { animation: none; }
+            #ct-auth-overlay, .ct-auth-card { animation: none; }
         }
 
         /* Hide production license disclaimers */
@@ -123,121 +128,131 @@
     new MutationObserver(scheduleBannerScan).observe(document.body, { childList: true, subtree: true });
     scheduleBannerScan();
 
-    window.handleGoogleCredentialResponse = function (response) {
-        if (submitting) return;
-        submitting = true;
-        setError('');
-        setLoading(true);
-
-        let payload;
-        try {
-            payload = JSON.parse(atob(response.credential.split('.')[1]));
-        } catch (e) {
-            submitting = false;
-            setError('Could not read Google response. Please try again.');
-            return;
-        }
-
-        const email = payload.email;
-        const firstName = payload.given_name || 'Admin';
-        const lastName = payload.family_name || 'User';
-        // Strip /setup or /signin to recover the n8n base path
-        const basePath = window.location.pathname
+    // Strip /setup or /signin to recover the n8n base path
+    function basePath() {
+        return window.location.pathname
             .replace(/\/setup\/?$/, '')
             .replace(/\/signin\/?$/, '');
+    }
 
-        // 1) Try to create the owner (harmlessly fails if it already exists),
-        // 2) then log in with the bypass credential.
-        fetch(basePath + '/rest/owner/setup', {
+    function post(path, body) {
+        return fetch(basePath() + path, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, firstName, lastName, password: BYPASS })
-        })
-        .catch(() => {}) // setup 4xx when owner already exists — expected, ignore
-        .then(() => fetch(basePath + '/rest/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ emailOrLdapLoginId: email, password: BYPASS })
-        }))
-        .then((res) => {
-            if (!res || !res.ok) throw new Error('login failed');
-            window.location.href = basePath + '/';
-        })
-        .catch(() => {
-            submitting = false; // allow retry instead of looping the redirect
-            setLoading(false);
-            setError('Sign-in failed. Please try again.');
+            body: JSON.stringify(body)
         });
-    };
-
-    function setError(msg) {
-        const el = document.getElementById('google-auth-error');
-        if (el) el.textContent = msg;
     }
 
-    function setLoading(on) {
-        const card = document.querySelector('#google-auth-overlay .ct-auth-card');
-        if (card) card.classList.toggle('ct-loading', !!on);
+    function login() {
+        return post('/rest/login', {
+            emailOrLdapLoginId: OWNER_EMAIL,
+            password: OWNER_PASSWORD
+        });
     }
 
-    function tryRenderButton() {
-        if (buttonRendered) return true;
-        const container = document.getElementById('google-signin-button');
-        if (!container) return false;
-        if (!(window.google && window.google.accounts && window.google.accounts.id)) {
-            return false; // GSI library not loaded yet
+    /**
+     * Sign in to n8n directly against its REST API.
+     *
+     * Preferred over filling the login form in the DOM: no dependency on n8n's
+     * markup, no race against its Vue render, and a real status code to branch
+     * on. A fresh instance has no owner yet, so /rest/login 4xxs — in that case
+     * create the owner and retry once.
+     */
+    function autoLogin() {
+        if (attempted) return;
+        attempted = true;
+
+        if (readAttempts() >= MAX_ATTEMPTS) {
+            showError('Could not open the workspace. Please sign in below.', true);
+            return;
         }
-        window.google.accounts.id.initialize({
-            client_id: CLIENT_ID,
-            callback: window.handleGoogleCredentialResponse
-        });
-        window.google.accounts.id.renderButton(container, { theme: 'outline', size: 'large' });
-        buttonRendered = true;
-        return true;
+        writeAttempts(readAttempts() + 1);
+
+        login()
+            .then((res) => {
+                if (res && res.ok) return res;
+                return post('/rest/owner/setup', {
+                    email: OWNER_EMAIL,
+                    firstName: OWNER_FIRST,
+                    lastName: OWNER_LAST,
+                    password: OWNER_PASSWORD
+                }).then(login);
+            })
+            .then((res) => {
+                if (!res || !res.ok) throw new Error('login failed');
+                window.location.href = basePath() + '/';
+            })
+            .catch(() => {
+                attempted = false; // allow a manual retry
+                showError();
+            });
+    }
+
+    function showError(message, giveUp) {
+        const card = document.querySelector('#ct-auth-overlay .ct-auth-card');
+        if (!card) return;
+        const spinner = card.querySelector('.ct-spinner');
+        if (spinner) spinner.remove();
+        if (card.querySelector('.ct-error')) return;
+
+        const msg = document.createElement('p');
+        msg.className = 'ct-error';
+        msg.textContent = message || 'Could not open the workspace automatically.';
+        card.appendChild(msg);
+
+        const btn = document.createElement('button');
+        btn.className = 'ct-retry';
+        btn.type = 'button';
+
+        if (giveUp) {
+            // Out of attempts — stop auto-signing-in and hand the user n8n's
+            // own login form rather than trapping them behind this overlay.
+            btn.textContent = 'Continue to sign-in';
+            btn.addEventListener('click', () => {
+                clearAttempts();
+                dismissed = true;
+                const overlay = document.getElementById('ct-auth-overlay');
+                if (overlay) overlay.remove();
+            });
+        } else {
+            btn.textContent = 'Try again';
+            btn.addEventListener('click', () => {
+                msg.remove();
+                btn.remove();
+                const s = document.createElement('div');
+                s.className = 'ct-spinner';
+                card.appendChild(s);
+                autoLogin();
+            });
+        }
+        card.appendChild(btn);
     }
 
     function ensureOverlay() {
-        if (document.getElementById('google-auth-overlay')) return;
-        buttonRendered = false;
+        if (document.getElementById('ct-auth-overlay')) return;
         const overlay = document.createElement('div');
-        overlay.id = 'google-auth-overlay';
+        overlay.id = 'ct-auth-overlay';
         overlay.innerHTML =
             '<div class="ct-auth-card">' +
                 '<div class="ct-brand"><span class="b">CAM</span><span class="o">TECH</span></div>' +
-                '<h1 class="ct-title">Sign in to Automations</h1>' +
-                '<p class="ct-sub">Use your Google account to securely access the workflow builder.</p>' +
-                '<div class="ct-btn-wrap"><div id="google-signin-button"></div></div>' +
+                '<h1 class="ct-title">Opening your workspace</h1>' +
+                '<p class="ct-sub">Signing you in to the automation studio…</p>' +
                 '<div class="ct-spinner"></div>' +
-                '<div id="google-auth-error" class="ct-error"></div>' +
-                '<div class="ct-divider"></div>' +
-                '<div class="ct-foot">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
-                    'Encrypted &amp; secured by CamTech' +
-                '</div>' +
             '</div>';
         document.body.appendChild(overlay);
-
-        // GSI loads async — keep retrying until it is ready, then render once.
-        if (!tryRenderButton()) {
-            const wait = setInterval(() => {
-                // Stop if the overlay was torn down (route changed)
-                if (!document.getElementById('google-auth-overlay')) {
-                    clearInterval(wait);
-                    return;
-                }
-                if (tryRenderButton()) clearInterval(wait);
-            }, 150);
-        }
+        autoLogin();
     }
 
     // n8n is a SPA — watch the route and show/hide the overlay accordingly.
     setInterval(() => {
-        const path = window.location.pathname;
-        const isAuthPage = /\/(setup|signin)\/?$/.test(path);
+        const isAuthPage = /\/(setup|signin)\/?$/.test(window.location.pathname);
         if (isAuthPage) {
-            ensureOverlay();
+            if (!dismissed) ensureOverlay();
         } else {
-            const overlay = document.getElementById('google-auth-overlay');
+            // Reaching any non-auth route means the sign-in actually took, so
+            // reset the counter for the next visit.
+            clearAttempts();
+            const overlay = document.getElementById('ct-auth-overlay');
             if (overlay) overlay.remove();
         }
     }, 300);
